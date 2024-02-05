@@ -2,16 +2,14 @@ package com.example.clocklike_portal.security;
 
 import java.security.Key;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.UserDetailsAdapter;
 import com.example.clocklike_portal.appUser.UserRole;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -30,30 +28,18 @@ public class JwtService {
     @Value("${token.expirationms}")
     Long jwtExpirationMs;
 
-    AuthenticationResponse createAuthenticationResponse(AppUserEntity appUser) {
-        String jwt = generateToken(new UserDetailsAdapter(appUser));
-        List<String> roles = appUser.getUserRoles().stream()
-                .map(UserRole::getRoleName)
-                .toList();
-        Date expiration = extractExpiration(jwt);
-        return AuthenticationResponse.builder()
-                .userId(appUser.getAppUserId())
-                .userEmail(appUser.getUserEmail())
-                .firstName(appUser.getFirstName())
-                .lastName(appUser.getLastName())
-                .userRoles(roles)
-                .jwtToken(jwt)
-                .jwtExpiresAt(expiration.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().toString())
-                .jwtExpiresAtTimestamp(expiration.getTime())
-                .build();
-    }
-
     String extractUserName(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+    String generateToken(AppUserEntity appUser) {
+        UserDetailsAdapter userDetails = new UserDetailsAdapter(appUser);
+        Long appUserId = appUser.getAppUserId();
+        List<String> authorities = appUser.getUserRoles().stream().map(UserRole::getRoleName).toList();
+        return generateToken(Map.of(
+                "roles", authorities,
+                "userId", appUserId),
+                userDetails);
     }
 
     boolean isTokenValid(String token, UserDetails userDetails) {
@@ -67,12 +53,17 @@ public class JwtService {
     }
 
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        TimeZone timeZone = TimeZone.getDefault();
+        int timezoneOffsetInMinutes = timeZone.getOffset(new Date().getTime()) / (60 * 1000);
+        long timezoneOffsetInMilliseconds = timezoneOffsetInMinutes * 60 * 1000;
+        System.out.println(timezoneOffsetInMilliseconds);
+        System.out.println(jwtExpirationMs);
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .setIssuedAt(new Date(System.currentTimeMillis() +timezoneOffsetInMilliseconds ))
+                .setExpiration(new Date(System.currentTimeMillis() + timezoneOffsetInMilliseconds + jwtExpirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -3,6 +3,7 @@ package com.example.clocklike_portal.security;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.appUser.AppUserService;
+import com.example.clocklike_portal.appUser.UserDetailsAdapter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,10 +48,8 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         AppUserEntity appUserEntity = userRepository.findByUserEmailIgnoreCase(googlePrincipal.getEmail())
                 .orElseGet(() -> appUserService.registerNewUser(googlePrincipal));
 
-        AuthenticationResponse authenticationResponse = jwtService.createAuthenticationResponse(appUserEntity);
-
-        loginService.appendAuthCookie(authenticationResponse, response);
-        uri = loginService.createAuthenticatedUri(authenticationResponse);
+        String jwtToken = jwtService.generateToken(appUserEntity);
+        uri = loginService.createAuthenticatedUri(jwtToken);
         getRedirectStrategy().sendRedirect(request, response, uri);
     }
 
