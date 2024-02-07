@@ -16,7 +16,8 @@ public class AppUserService {
 
     public AppUserEntity registerNewUser(GooglePrincipal googlePrincipal) {
         AppUserEntity userFromGooglePrincipal = AppUserEntity.createUserFromGooglePrincipal(googlePrincipal);
-        UserRole userRole = userRoleRepository.findByRoleNameIgnoreCase("user").orElseThrow(() -> new NoSuchElementException("No user role found"));
+        UserRole userRole = userRoleRepository.findByRoleNameIgnoreCase("user")
+                .orElseThrow(() -> new NoSuchElementException("No user role found"));
         userFromGooglePrincipal.setUserRoles(List.of(userRole));
         return appUserRepository.save(userFromGooglePrincipal);
     }

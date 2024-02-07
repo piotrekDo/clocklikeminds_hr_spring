@@ -13,10 +13,12 @@ import java.util.Optional;
 @Component
 @Slf4j
 public class GoogleOauth2LoginService {
+    private static final String AUTH_COOKIE_NAME = "token";
 
-    String createAuthenticatedUri(String jwt) {
-        return String.format("http://localhost:5173/oauth2/redirect?token=%s", jwt
-        );
+    void appendAuthCookie(HttpServletResponse response, String jwt) {
+        Cookie authCookie = new Cookie(AUTH_COOKIE_NAME, jwt);
+        authCookie.setPath("/");
+        response.addCookie(authCookie);
     }
 
     Optional<GooglePrincipal> extractGooglePrincipalData(Authentication authentication) {
@@ -52,3 +54,4 @@ public class GoogleOauth2LoginService {
         }
     }
 }
+

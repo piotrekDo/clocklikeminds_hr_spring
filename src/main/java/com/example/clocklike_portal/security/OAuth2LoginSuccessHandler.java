@@ -3,8 +3,6 @@ package com.example.clocklike_portal.security;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.appUser.AppUserService;
-import com.example.clocklike_portal.appUser.UserDetailsAdapter;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,21 +24,21 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
     private final JwtService jwtService;
     private final GoogleOauth2LoginService loginService;
     private static final String FAILURE_REDIRECTION = "http://localhost:5173/login-failure";
+    private static final String AUTHENTICATED_REDIRECTION = "http://localhost:5173/oauth2/redirect";
 
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         loginService.clearCookies(request, response);
-        String uri = FAILURE_REDIRECTION;
         Optional<GooglePrincipal> principalData = loginService.extractGooglePrincipalData(authentication);
         if (principalData.isEmpty()) {
-            getRedirectStrategy().sendRedirect(request, response, uri);
+            getRedirectStrategy().sendRedirect(request, response, FAILURE_REDIRECTION);
             log.warn("Unsuccessful google principal extraction");
             return;
         }
         GooglePrincipal googlePrincipal = principalData.get();
         if (googlePrincipal.getHd() == null || !googlePrincipal.getHd().equals("clocklikeminds.com")) {
-            getRedirectStrategy().sendRedirect(request, response, uri);
+            getRedirectStrategy().sendRedirect(request, response, FAILURE_REDIRECTION);
             log.error("Unauthorized login attempt from " + googlePrincipal.getEmail());
             return;
         }
@@ -49,8 +47,8 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
                 .orElseGet(() -> appUserService.registerNewUser(googlePrincipal));
 
         String jwtToken = jwtService.generateToken(appUserEntity);
-        uri = loginService.createAuthenticatedUri(jwtToken);
-        getRedirectStrategy().sendRedirect(request, response, uri);
+        loginService.appendAuthCookie(response, jwtToken);
+        getRedirectStrategy().sendRedirect(request, response, AUTHENTICATED_REDIRECTION);
     }
 
 }
