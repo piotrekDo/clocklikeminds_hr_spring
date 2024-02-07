@@ -1,23 +1,23 @@
 package com.example.clocklike_portal.security;
 
-import java.security.Key;
-import java.time.ZoneId;
-import java.util.*;
-import java.util.function.Function;
-
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.UserDetailsAdapter;
 import com.example.clocklike_portal.appUser.UserRole;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.security.Key;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.function.Function;
 
 @Service
 public class JwtService {
@@ -37,8 +37,8 @@ public class JwtService {
         Long appUserId = appUser.getAppUserId();
         List<String> authorities = appUser.getUserRoles().stream().map(UserRole::getRoleName).toList();
         return generateToken(Map.of(
-                "roles", authorities,
-                "userId", appUserId),
+                        "roles", authorities,
+                        "userId", appUserId),
                 userDetails);
     }
 
@@ -56,13 +56,11 @@ public class JwtService {
         TimeZone timeZone = TimeZone.getDefault();
         int timezoneOffsetInMinutes = timeZone.getOffset(new Date().getTime()) / (60 * 1000);
         long timezoneOffsetInMilliseconds = timezoneOffsetInMinutes * 60 * 1000;
-        System.out.println(timezoneOffsetInMilliseconds);
-        System.out.println(jwtExpirationMs);
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis() +timezoneOffsetInMilliseconds ))
+                .setIssuedAt(new Date(System.currentTimeMillis() + timezoneOffsetInMilliseconds))
                 .setExpiration(new Date(System.currentTimeMillis() + timezoneOffsetInMilliseconds + jwtExpirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
@@ -75,7 +73,6 @@ public class JwtService {
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-
 
     private Claims extractAllClaims(String token) {
         return Jwts
