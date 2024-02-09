@@ -1,5 +1,7 @@
 package com.example.clocklike_portal.appUser;
 
+import com.example.clocklike_portal.job_position.PositionEntity;
+import com.example.clocklike_portal.job_position.PositionHistory;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,8 +9,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -25,6 +29,39 @@ public class AppUserEntity {
     private String userEmail;
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<UserRole> userRoles = new LinkedHashSet<>();
+    private boolean isActive;
+    private boolean isStillHired;
+    @ManyToOne()
+    @JoinColumn(name = "positionId")
+    private PositionEntity position;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<PositionHistory> positionHistory = new LinkedHashSet<>();
+    private LocalDate hireStart;
+    private LocalDate hireEnd;
+    private int ptoDaysFromLastYear;
+    private int ptoDaysTotal;
+    private int ptoDaysTaken;
+
+    public static AppUserEntity createTestAppUser(String firstName, String lastName, String userEmail) {
+        return new AppUserEntity(
+                null,
+                firstName,
+                lastName,
+                userEmail,
+                null,
+                false,
+                true,
+                null,
+                new LinkedHashSet<>(),
+                null,
+                null,
+                0,
+                0,
+                0
+
+        );
+    }
+
 
     public static AppUserEntity createUserFromGooglePrincipal(GooglePrincipal googlePrincipal) {
         return new AppUserEntity(
@@ -32,7 +69,16 @@ public class AppUserEntity {
                 googlePrincipal.getFirstName(),
                 googlePrincipal.getLastName(),
                 googlePrincipal.getEmail(),
-                null
+                null,
+                false,
+                true,
+                null,
+                new LinkedHashSet<>(),
+                null,
+                null,
+                0,
+                0,
+                0
         );
     }
 }

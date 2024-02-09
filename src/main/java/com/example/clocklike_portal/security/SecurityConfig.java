@@ -16,6 +16,10 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -35,7 +39,17 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .cors(AbstractHttpConfigurer::disable)
+                .cors(c -> {
+                    CorsConfigurationSource cs = request -> {
+                        CorsConfiguration cc = new CorsConfiguration();
+                        cc.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
+                        cc.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+                        cc.setAllowedHeaders(List.of("Origin", "Content-Type", "X-Auth-Token", "Access-Control-Expose-Header",
+                                "Authorization"));
+                        return cc;
+                    };
+                    c.configurationSource(cs);
+                })
                 .csrf(AbstractHttpConfigurer::disable)
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -45,6 +59,8 @@ public class SecurityConfig {
                         .requestMatchers(("/api/v1/test/anon")).permitAll()
                         .requestMatchers(("/api/v1/test/users")).hasAuthority(USER_AUTHORITY)
                         .requestMatchers(("/api/v1/test/admins")).hasAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers("/api/v1/users/**").hasAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers("/api/v1/positions/**").hasAuthority(ADMIN_AUTHORITY)
                         .anyRequest().denyAll()
                 )
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
