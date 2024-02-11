@@ -108,6 +108,7 @@ class PtoRepositoryTest {
         testEntityManager.persist(pto6);
 
         List<PtoEntity> result = ptoRepository.findAllByApplierAndPtoStartLessThanEqualAndPtoEndGreaterThanEqualAndDecisionDateTimeIsNotNullAndWasAcceptedIsTrue(testAppUser, testingEnd, testingStart);
+        result.forEach(System.out::println);
         assertEquals(List.of(pto1, pto2), result);
     }
 }

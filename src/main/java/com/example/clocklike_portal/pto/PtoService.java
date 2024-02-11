@@ -9,9 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -51,7 +53,7 @@ public class PtoService {
         LocalDate startDate = LocalDate.parse(dto.getPtoStart(), dateFormatter);
         LocalDate toDate = LocalDate.parse(dto.getPtoEnd(), dateFormatter);
         boolean isPtoRangeValid = dateChecker.checkIfDatesRangeIsValid(startDate, toDate);
-        if(!isPtoRangeValid) {
+        if (!isPtoRangeValid) {
             throw new IllegalOperationException("End date cannot be before start date");
         }
 
@@ -66,7 +68,7 @@ public class PtoService {
         int ptoDaysCurrentYear = applier.getPtoDaysCurrentYear();
         int ptoDaysTaken = applier.getPtoDaysTaken();
 
-        if((ptoDaysCurrentYear + ptoDaysFromLastYear) < businessDays) {
+        if ((ptoDaysCurrentYear + ptoDaysFromLastYear) < businessDays) {
             throw new IllegalOperationException("Insufficient pto days left");
         }
 
@@ -87,7 +89,32 @@ public class PtoService {
     }
 
     PtoDto resolveRequest(ResolvePtoRequest dto) {
-        return null;
+        PtoEntity ptoRequest = ptoRequestsRepository.findById(dto.getPtoRequestId())
+                .orElseThrow(() -> new NoSuchElementException("No such PTO request found"));
+
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        AppUserEntity applier = ptoRequest.getApplier();
+        AppUserEntity acceptor = ptoRequest.getAcceptor();
+
+        if (!acceptor.getUserEmail().equalsIgnoreCase(currentUserEmail)) {
+            throw new IllegalOperationException("You are not authorized to resolve this PTO request!");
+        }
+
+        Boolean isRequestAccepted = dto.getIsAccepted();
+        if (!isRequestAccepted) {
+            ptoRequest.setDeclineReason(dto.getDeclineReason());
+            int requestBusinessDays = ptoRequest.getBusinessDays();
+            int includingLastYearPool = ptoRequest.getIncludingLastYearPool();
+            applier.setPtoDaysFromLastYear(applier.getPtoDaysFromLastYear() + includingLastYearPool);
+            applier.setPtoDaysCurrentYear(applier.getPtoDaysCurrentYear() + (requestBusinessDays - includingLastYearPool));
+            applier.setPtoDaysTaken(applier.getPtoDaysTaken() - requestBusinessDays);
+        }
+
+        ptoRequest.setWasAccepted(isRequestAccepted);
+        ptoRequest.setDecisionDateTime(LocalDateTime.now());
+        PtoEntity updatedPtoRequest = ptoRequestsRepository.save(ptoRequest);
+
+        return ptoTransformer.ptoEntityToDto(updatedPtoRequest);
     }
 
     List<PtoDto> findAllRequestsToAcceptByAcceptId(long id) {

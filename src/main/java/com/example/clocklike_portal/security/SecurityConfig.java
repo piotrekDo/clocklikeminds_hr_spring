@@ -63,6 +63,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/positions/**").hasAuthority(ADMIN_AUTHORITY)
                         .requestMatchers("/api/v1/pto/request-new").hasAuthority(USER_AUTHORITY)
                         .requestMatchers("/api/v1/pto/byId").hasAuthority(USER_AUTHORITY)
+                        .requestMatchers("/api/v1/pto/requests-to-accept").hasAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers("/api/v1/pto/resolve-request").hasAuthority(ADMIN_AUTHORITY)
                         .anyRequest().denyAll()
                 )
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
