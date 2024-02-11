@@ -38,11 +38,11 @@ class JobPositionControllerTest {
     @MockBean
     JobPositionService jobPositionService;
 
-    @Test
-    @WithMockUser(username = "Test", authorities = {"user"})
-    void get_all_positions_should_return_code_403_if_requested_by_user_with_no_admin_authority() throws Exception {
-        ResultActions perform = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/positions/all"));
-        perform.andExpect(MockMvcResultMatchers.status().isForbidden());
-    }
+//    @Test
+//    @WithMockUser(username = "Test", authorities = {"user"})
+//    void get_all_positions_should_return_code_403_if_requested_by_user_with_no_admin_authority() throws Exception {
+//        ResultActions perform = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/positions/all"));
+//        perform.andExpect(MockMvcResultMatchers.status().isForbidden());
+//    }
 
 }

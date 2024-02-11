@@ -61,7 +61,7 @@ public class AppUserService implements UserDetailsService {
         if(request.getHireEnd() != null) {
             appUserEntity.setHireEnd(LocalDate.parse(request.getHireEnd()));
         }
-        appUserEntity.setPtoDaysTotal(request.getPtoDaysTotal());
+        appUserEntity.setPtoDaysCurrentYear(request.getPtoDaysTotal());
         appUserEntity.setActive(true);
 
         PositionHistory savedHistory = positionHistoryRepository.save(createNewPositionHistory(positionEntity, LocalDate.parse(request.getHireStart())));

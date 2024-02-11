@@ -47,7 +47,7 @@ public class AppUserDto {
                 entity.getHireEnd(),
                 seniority,
                 entity.getPtoDaysFromLastYear(),
-                entity.getPtoDaysTotal(),
+                entity.getPtoDaysCurrentYear(),
                 entity.getPtoDaysTaken()
         );
     }

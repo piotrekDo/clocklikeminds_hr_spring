@@ -1,0 +1,104 @@
+package com.example.clocklike_portal.pto;
+
+import com.example.clocklike_portal.appUser.AppUserEntity;
+import com.example.clocklike_portal.appUser.AppUserRepository;
+import com.example.clocklike_portal.dates_calculations.DateChecker;
+import com.example.clocklike_portal.dates_calculations.HolidayService;
+import com.example.clocklike_portal.error.IllegalOperationException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+@Component
+@RequiredArgsConstructor
+public class PtoService {
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private final PtoRepository ptoRequestsRepository;
+    private final AppUserRepository appUserRepository;
+    private final PtoTransformer ptoTransformer;
+    private final HolidayService holidayService;
+    private final DateChecker dateChecker;
+
+    Page<PtoDto> getPtoRequests(Long userId, Integer page, Integer size) {
+        page = page == null || page < 0 ? 0 : page;
+        size = size == null || size < 1 ? 1000 : size;
+
+        Page<PtoEntity> result = ptoRequestsRepository.findAllByApplier_AppUserId(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestDateTime")));
+        return result == null ? Page.empty() : result.map(ptoTransformer::ptoEntityToDto);
+    }
+
+    PtoDto requestPto(NewPtoRequest dto) {
+        AppUserEntity applier = appUserRepository.findById(dto.getApplierId())
+                .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + dto.getApplierId()));
+
+        AppUserEntity acceptor = appUserRepository.findById(dto.getAcceptorId())
+                .orElseThrow(() -> new NoSuchElementException("No user found for acceptor with ID: " + dto.getAcceptorId()));
+
+        boolean isAcceptorAdmin = acceptor.getUserRoles().stream().filter(r -> r.getRoleName().equals("admin")).toList().size() == 1;
+
+        if (!isAcceptorAdmin) {
+            throw new IllegalOperationException("Selected acceptor has no authorities to accept pto requests");
+        }
+
+        LocalDate startDate = LocalDate.parse(dto.getPtoStart(), dateFormatter);
+        LocalDate toDate = LocalDate.parse(dto.getPtoEnd(), dateFormatter);
+        boolean isPtoRangeValid = dateChecker.checkIfDatesRangeIsValid(startDate, toDate);
+        if(!isPtoRangeValid) {
+            throw new IllegalOperationException("End date cannot be before start date");
+        }
+
+        List<PtoEntity> collidingRequests = ptoRequestsRepository
+                .findAllByApplierAndPtoStartLessThanEqualAndPtoEndGreaterThanEqualAndDecisionDateTimeIsNotNullAndWasAcceptedIsTrue(applier, toDate, startDate);
+        if (collidingRequests.size() > 0) {
+            throw new IllegalOperationException("Request colliding with other pto request");
+        }
+
+        int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
+        int ptoDaysFromLastYear = applier.getPtoDaysFromLastYear();
+        int ptoDaysCurrentYear = applier.getPtoDaysCurrentYear();
+        int ptoDaysTaken = applier.getPtoDaysTaken();
+
+        if((ptoDaysCurrentYear + ptoDaysFromLastYear) < businessDays) {
+            throw new IllegalOperationException("Insufficient pto days left");
+        }
+
+        int subtractedFromLastYearPool = ptoDaysFromLastYear == 0 ? 0 : Math.min(ptoDaysFromLastYear, businessDays);
+        int subtractedFromCurrentYearPool = (businessDays - subtractedFromLastYearPool);
+
+
+        PtoEntity ptoEntity = ptoRequestsRepository
+                .save(ptoTransformer.ptoEntityFromNewRequest(startDate, toDate, applier, acceptor, businessDays, subtractedFromLastYearPool));
+        applier.setPtoDaysFromLastYear(ptoDaysFromLastYear - subtractedFromLastYearPool);
+        applier.setPtoDaysCurrentYear(ptoDaysCurrentYear - subtractedFromCurrentYearPool);
+        applier.setPtoDaysTaken(ptoDaysTaken + businessDays);
+        applier.getPtoRequests().add(ptoEntity);
+        acceptor.getPtoAcceptor().add(ptoEntity);
+        appUserRepository.saveAll(List.of(applier, acceptor));
+
+        return ptoTransformer.ptoEntityToDto(ptoEntity);
+    }
+
+    PtoDto resolveRequest(ResolvePtoRequest dto) {
+        return null;
+    }
+
+    List<PtoDto> findAllRequestsToAcceptByAcceptId(long id) {
+        return ptoRequestsRepository.findAllByDecisionDateTimeIsNullAndAcceptor_appUserId(id).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    public List<PtoDto> getRequestsForYear(Integer year) {
+        return ptoRequestsRepository.findRequestsForYear(year).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+}
