@@ -8,9 +8,10 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class PtoSummary {
-    private int ptoDaysFromLastYear;
-    private int ptoDaysCurrentYear;
+    private int ptoDaysAccruedLastYear;
+    private int ptoDaysAccruedCurrentYear;
+    private int ptoDaysLeftFromLastYear;
+    private int ptoDaysLeftCurrentYear;
     private int ptoDaysTaken;
-    private int ptoDaysPending;
-    private List<PtoDto> ptoRequests;
+    private List<PtoDto> lastRequests;
 }

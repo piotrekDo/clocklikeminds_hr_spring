@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -15,20 +16,15 @@ public class PtoTransformer {
 
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    PtoSummary createPtoSummary(AppUserEntity appUserEntity) {
-        final List<PtoDto> ptoRequests = appUserEntity.getPtoRequests().stream()
-                .map(this::ptoEntityToDto)
-                .toList();
-        Integer daysPending = ptoRequests.stream()
-                .filter(PtoDto::isPending)
-                .map(PtoDto::getBusinessDays)
-                .reduce(0, Integer::sum);
+    PtoSummary createPtoSummary(AppUserEntity appUserEntity, List<PtoEntity> lastRequests) {
+        final List<PtoDto> ptoRequests = lastRequests.stream().map(this::ptoEntityToDto).collect(Collectors.toList());
 
         return new PtoSummary(
+                appUserEntity.getPtoDaysAccruedLastYear(),
+                appUserEntity.getPtoDaysAccruedCurrentYear(),
                 appUserEntity.getPtoDaysLeftFromLastYear(),
                 appUserEntity.getPtoDaysLeftCurrentYear(),
                 appUserEntity.getPtoDaysTaken(),
-                daysPending,
                 ptoRequests
         );
 

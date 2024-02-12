@@ -29,5 +29,15 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
             "OR (MONTH(p.ptoStart) = 1 AND YEAR(p.ptoStart) = :year + 1)")
     List<PtoEntity> findRequestsForYear(@Param("year") int year);
 
+    @Query("SELECT p FROM pto_requests p WHERE (p.wasAccepted = true OR p.decisionDateTime IS NULL) " +
+            "AND (p.applier.appUserId = :userId) " +
+            "AND (YEAR(p.ptoStart) = :year OR YEAR(p.ptoEnd) = :year) " +
+            "OR (MONTH(p.ptoStart) = 12 AND YEAR(p.ptoStart) = :year -1) " +
+            "OR (MONTH(p.ptoEnd) = 12 AND YEAR(p.ptoEnd) = :year -1)" +
+            "OR (MONTH(p.ptoEnd) = 1 AND YEAR(p.ptoEnd) = :year + 1)" +
+            "OR (MONTH(p.ptoStart) = 1 AND YEAR(p.ptoStart) = :year + 1)")
+    List<PtoEntity> findRequestsForYear(@Param("year") int year, @Param("userId") Long userId);
+
+
     List<PtoEntity> findAllByApplierAndPtoStartLessThanEqualAndPtoEndGreaterThanEqualAndDecisionDateTimeIsNotNullAndWasAcceptedIsTrue(AppUserEntity applier, LocalDate ptoEnd, LocalDate ptoStart);
 }

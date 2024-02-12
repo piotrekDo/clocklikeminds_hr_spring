@@ -40,8 +40,9 @@ public class PtoService {
     PtoSummary getUserPtoSummary(long userId) {
         AppUserEntity user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + userId));
+        Page<PtoEntity> result = ptoRequestsRepository.findAllByApplier_AppUserId(userId, PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "requestDateTime")));
 
-        return ptoTransformer.createPtoSummary(user);
+        return ptoTransformer.createPtoSummary(user, result.getContent());
     }
 
     PtoDto requestPto(NewPtoRequest dto) {
@@ -134,7 +135,13 @@ public class PtoService {
                 .toList();
     }
 
-    public List<PtoDto> getRequestsForYear(Integer year) {
+    public List<PtoDto> getRequestsForUserForYear(Integer year, Long userId) {
+        return ptoRequestsRepository.findRequestsForYear(year, userId).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    public List<PtoDto> getRequestsForYearForAllUsers(Integer year) {
         return ptoRequestsRepository.findRequestsForYear(year).stream()
                 .map(ptoTransformer::ptoEntityToDto)
                 .toList();
