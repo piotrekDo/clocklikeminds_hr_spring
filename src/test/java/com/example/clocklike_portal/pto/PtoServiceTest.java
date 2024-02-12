@@ -57,8 +57,8 @@ class PtoServiceTest {
     void pto_request_should_set_correct_values_on_requestor_entity() {
         NewPtoRequest request = new NewPtoRequest("2024-02-12", "2024-02-16", 2L, 1L);
         AppUserEntity applier = AppUserEntity.createTestAppUser("applier", "applier", "applier@test.com");
-        applier.setPtoDaysFromLastYear(2);
-        applier.setPtoDaysCurrentYear(20);
+        applier.setPtoDaysLeftFromLastYear(2);
+        applier.setPtoDaysLeftCurrentYear(20);
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");
         acceptor.setUserRoles(List.of(new UserRole(1L, "admin")));
         PtoEntity ptoEntity = new PtoEntity(1L, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2, null);
@@ -72,8 +72,8 @@ class PtoServiceTest {
 
         PtoDto result = ptoService.requestPto(request);
 
-        assertEquals(17, applier.getPtoDaysCurrentYear());
-        assertEquals(0, applier.getPtoDaysFromLastYear());
+        assertEquals(17, applier.getPtoDaysLeftCurrentYear());
+        assertEquals(0, applier.getPtoDaysLeftFromLastYear());
         assertEquals(5, applier.getPtoDaysTaken());
         assertEquals(1, applier.getPtoRequests().size());
         assertEquals(1, acceptor.getPtoAcceptor().size());
@@ -97,8 +97,8 @@ class PtoServiceTest {
         ResolvePtoRequest resolveRequest = new ResolvePtoRequest(99L, false, "just because");
         AppUserEntity applier = AppUserEntity.createTestAppUser("applier", "applier", "applier@test.com");
         applier.setPtoDaysTaken(2);
-        applier.setPtoDaysCurrentYear(10);
-        applier.setPtoDaysFromLastYear(0);
+        applier.setPtoDaysLeftCurrentYear(10);
+        applier.setPtoDaysLeftFromLastYear(0);
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");
         PtoEntity ptoEntityFound = new PtoEntity(99L, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 2), applier, acceptor, false, null, 2, 1, null);
         PtoEntity ptoEntityUpdated = new PtoEntity(99L, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 2), applier, acceptor, false, LocalDateTime.now(), 2, 1, "just because");
@@ -108,8 +108,8 @@ class PtoServiceTest {
         ptoService.resolveRequest(resolveRequest);
 
         assertEquals(0, applier.getPtoDaysTaken());
-        assertEquals(11, applier.getPtoDaysCurrentYear());
-        assertEquals(1, applier.getPtoDaysFromLastYear());
+        assertEquals(11, applier.getPtoDaysLeftCurrentYear());
+        assertEquals(1, applier.getPtoDaysLeftFromLastYear());
         assertEquals(ptoEntityUpdated.getDeclineReason(), ptoEntityFound.getDeclineReason());
     }
 

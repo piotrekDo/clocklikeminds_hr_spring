@@ -37,9 +37,20 @@ public class PtoService {
         return result == null ? Page.empty() : result.map(ptoTransformer::ptoEntityToDto);
     }
 
+    PtoSummary getUserPtoSummary(long userId) {
+        AppUserEntity user = appUserRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + userId));
+
+        return ptoTransformer.createPtoSummary(user);
+    }
+
     PtoDto requestPto(NewPtoRequest dto) {
         AppUserEntity applier = appUserRepository.findById(dto.getApplierId())
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + dto.getApplierId()));
+
+        if (!applier.isActive()) {
+            throw new IllegalOperationException("User account is not active!");
+        }
 
         AppUserEntity acceptor = appUserRepository.findById(dto.getAcceptorId())
                 .orElseThrow(() -> new NoSuchElementException("No user found for acceptor with ID: " + dto.getAcceptorId()));
@@ -64,8 +75,8 @@ public class PtoService {
         }
 
         int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
-        int ptoDaysFromLastYear = applier.getPtoDaysFromLastYear();
-        int ptoDaysCurrentYear = applier.getPtoDaysCurrentYear();
+        int ptoDaysFromLastYear = applier.getPtoDaysLeftFromLastYear();
+        int ptoDaysCurrentYear = applier.getPtoDaysLeftCurrentYear();
         int ptoDaysTaken = applier.getPtoDaysTaken();
 
         if ((ptoDaysCurrentYear + ptoDaysFromLastYear) < businessDays) {
@@ -78,8 +89,8 @@ public class PtoService {
 
         PtoEntity ptoEntity = ptoRequestsRepository
                 .save(ptoTransformer.ptoEntityFromNewRequest(startDate, toDate, applier, acceptor, businessDays, subtractedFromLastYearPool));
-        applier.setPtoDaysFromLastYear(ptoDaysFromLastYear - subtractedFromLastYearPool);
-        applier.setPtoDaysCurrentYear(ptoDaysCurrentYear - subtractedFromCurrentYearPool);
+        applier.setPtoDaysLeftFromLastYear(ptoDaysFromLastYear - subtractedFromLastYearPool);
+        applier.setPtoDaysLeftCurrentYear(ptoDaysCurrentYear - subtractedFromCurrentYearPool);
         applier.setPtoDaysTaken(ptoDaysTaken + businessDays);
         applier.getPtoRequests().add(ptoEntity);
         acceptor.getPtoAcceptor().add(ptoEntity);
@@ -105,8 +116,8 @@ public class PtoService {
             ptoRequest.setDeclineReason(dto.getDeclineReason());
             int requestBusinessDays = ptoRequest.getBusinessDays();
             int includingLastYearPool = ptoRequest.getIncludingLastYearPool();
-            applier.setPtoDaysFromLastYear(applier.getPtoDaysFromLastYear() + includingLastYearPool);
-            applier.setPtoDaysCurrentYear(applier.getPtoDaysCurrentYear() + (requestBusinessDays - includingLastYearPool));
+            applier.setPtoDaysLeftFromLastYear(applier.getPtoDaysLeftFromLastYear() + includingLastYearPool);
+            applier.setPtoDaysLeftCurrentYear(applier.getPtoDaysLeftCurrentYear() + (requestBusinessDays - includingLastYearPool));
             applier.setPtoDaysTaken(applier.getPtoDaysTaken() - requestBusinessDays);
         }
 

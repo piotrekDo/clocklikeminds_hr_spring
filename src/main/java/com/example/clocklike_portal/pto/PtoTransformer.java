@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -13,6 +14,25 @@ import static java.time.temporal.ChronoUnit.DAYS;
 public class PtoTransformer {
 
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    PtoSummary createPtoSummary(AppUserEntity appUserEntity) {
+        final List<PtoDto> ptoRequests = appUserEntity.getPtoRequests().stream()
+                .map(this::ptoEntityToDto)
+                .toList();
+        Integer daysPending = ptoRequests.stream()
+                .filter(PtoDto::isPending)
+                .map(PtoDto::getBusinessDays)
+                .reduce(0, Integer::sum);
+
+        return new PtoSummary(
+                appUserEntity.getPtoDaysLeftFromLastYear(),
+                appUserEntity.getPtoDaysLeftCurrentYear(),
+                appUserEntity.getPtoDaysTaken(),
+                daysPending,
+                ptoRequests
+        );
+
+    }
 
     PtoEntity ptoEntityFromNewRequest(LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         return new PtoEntity(
@@ -46,7 +66,7 @@ public class PtoTransformer {
                 applier.getFirstName(),
                 applier.getLastName(),
                 applier.getUserEmail(),
-                applier.getPtoDaysCurrentYear(),
+                applier.getPtoDaysLeftCurrentYear() + applier.getPtoDaysLeftFromLastYear(),
                 applier.getPtoDaysTaken(),
                 acceptor.getAppUserId(),
                 acceptor.getFirstName(),

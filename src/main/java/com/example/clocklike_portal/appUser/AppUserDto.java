@@ -26,8 +26,10 @@ public class AppUserDto {
     private LocalDate hireStart;
     private LocalDate hireEnd;
     private long seniorityInMonths;
-    private int ptoDaysFromLastYear;
-    private int ptoDaysTotal;
+    private int ptoDaysAccruedLastYear;
+    private int ptoDaysAccruedCurrentYear;
+    private int ptoDaysLeftFromLastYear;
+    private int ptoDaysLeftTotal;
     private int ptoDaysTaken;
 
     public static AppUserDto appUserEntityToDto(AppUserEntity entity) {
@@ -46,8 +48,10 @@ public class AppUserDto {
                 entity.getHireStart(),
                 entity.getHireEnd(),
                 seniority,
-                entity.getPtoDaysFromLastYear(),
-                entity.getPtoDaysCurrentYear(),
+                entity.getPtoDaysAccruedLastYear(),
+                entity.getPtoDaysAccruedCurrentYear(),
+                entity.getPtoDaysLeftFromLastYear(),
+                entity.getPtoDaysLeftCurrentYear(),
                 entity.getPtoDaysTaken()
         );
     }

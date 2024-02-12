@@ -39,8 +39,10 @@ public class AppUserEntity {
     private Set<PositionHistory> positionHistory = new LinkedHashSet<>();
     private LocalDate hireStart;
     private LocalDate hireEnd;
-    private int ptoDaysFromLastYear;
-    private int ptoDaysCurrentYear;
+    private int ptoDaysAccruedLastYear;
+    private int ptoDaysAccruedCurrentYear;
+    private int ptoDaysLeftFromLastYear;
+    private int ptoDaysLeftCurrentYear;
     private int ptoDaysTaken;
     @OneToMany(mappedBy = "ptoRequestId", fetch = FetchType.LAZY)
     private Set<PtoEntity> ptoRequests = new LinkedHashSet<>();
@@ -63,6 +65,8 @@ public class AppUserEntity {
                 0,
                 0,
                 0,
+                0,
+                0,
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>()
         );
@@ -82,6 +86,8 @@ public class AppUserEntity {
                 new LinkedHashSet<>(),
                 null,
                 null,
+                0,
+                0,
                 0,
                 0,
                 0,

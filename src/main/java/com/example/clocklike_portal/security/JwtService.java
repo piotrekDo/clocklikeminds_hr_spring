@@ -38,7 +38,8 @@ public class JwtService {
         List<String> authorities = appUser.getUserRoles().stream().map(UserRole::getRoleName).toList();
         return generateToken(Map.of(
                         "roles", authorities,
-                        "userId", appUserId),
+                        "userId", appUserId,
+                        "active", appUser.isActive()),
                 userDetails);
     }
 

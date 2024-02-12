@@ -39,8 +39,8 @@ public class Initializer {
 
         AppUserEntity piotrek = createTestAppUser("Piotr", "Domagalski", "piotr.domagalski@clocklikeminds.com");
         piotrek.setUserRoles(List.of(userRole, adminRole));
-        piotrek.setPtoDaysFromLastYear(2);
-        piotrek.setPtoDaysCurrentYear(26);
+        piotrek.setPtoDaysLeftFromLastYear(2);
+        piotrek.setPtoDaysLeftCurrentYear(26);
         appUserRepository.save(piotrek);
 
         AppUserEntity user1 = createTestAppUser("User", "Userski", "user.userski@clocklikeminds.com");

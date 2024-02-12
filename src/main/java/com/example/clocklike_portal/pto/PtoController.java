@@ -35,4 +35,9 @@ public class PtoController {
     PtoDto resolveRequest(@RequestBody ResolvePtoRequest resolveRequestDto) {
         return ptoService.resolveRequest(resolveRequestDto);
     }
+
+    @GetMapping("/summary")
+    PtoSummary getUserSummary(@RequestParam Long id) {
+        return ptoService.getUserPtoSummary(id);
+    }
 }
