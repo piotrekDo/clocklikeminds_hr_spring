@@ -28,6 +28,13 @@ public class Initializer {
         UserRole adminRole = userRoleRepository.save(new UserRole("admin"));
 
         PositionEntity ceoPosition = positionRepository.save(new PositionEntity("ceo", "CEO"));
+        PositionEntity boardMemberPosition = positionRepository.save(new PositionEntity("board_member", "Board Member"));
+        PositionEntity projectManagerPosition = positionRepository.save(new PositionEntity("project_manager", "Project Manager"));
+        PositionEntity pegaCertBusinessArchPosition = positionRepository.save(new PositionEntity("pega_cert_business_architect", "Pega Certified Business Architect"));
+        PositionEntity pegaLeadArchPosition = positionRepository.save(new PositionEntity("pega_cert_lead_architect", "Pega Certified Lead System Architect"));
+        PositionEntity pegaCertSeniorPosition = positionRepository.save(new PositionEntity("pega_cert_senior_architect", "Pega Certified Senior System Architect"));
+        PositionEntity pegaSeniorArchPosition = positionRepository.save(new PositionEntity("pega_senior_architect", "Pega Senior System Architect"));
+        PositionEntity pegaCertArchitect = positionRepository.save(new PositionEntity("pega_cert_architect", "Pega Certified System Architect"));
         PositionEntity juniorJavaDeveloperPosition = positionRepository.save(new PositionEntity("junior_java_dev", "Junior Java Developer"));
         PositionEntity javaDeveloperPosition = positionRepository.save(new PositionEntity("java_dev", "Java Developer"));
 
@@ -39,8 +46,11 @@ public class Initializer {
 
         AppUserEntity piotrek = createTestAppUser("Piotr", "Domagalski", "piotr.domagalski@clocklikeminds.com");
         piotrek.setUserRoles(List.of(userRole, adminRole));
+        piotrek.setPtoDaysAccruedLastYear(2);
+        piotrek.setPtoDaysAccruedCurrentYear(26);
         piotrek.setPtoDaysLeftFromLastYear(2);
         piotrek.setPtoDaysLeftCurrentYear(26);
+        piotrek.setActive(true);
         appUserRepository.save(piotrek);
 
         AppUserEntity user1 = createTestAppUser("User", "Userski", "user.userski@clocklikeminds.com");

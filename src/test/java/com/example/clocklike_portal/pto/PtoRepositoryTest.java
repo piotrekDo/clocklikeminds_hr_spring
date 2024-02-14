@@ -88,8 +88,6 @@ class PtoRepositoryTest {
                 .applier(testAppUser)
                 .ptoStart(LocalDate.of(2024, 1, 1))
                 .ptoEnd(LocalDate.of(2024, 1, 3))
-                .wasAccepted(false)
-                .decisionDateTime(LocalDateTime.now())
                 .build();
         PtoEntity pto6 = PtoEntity.builder()
                 .applier(testAppUser2)
@@ -107,8 +105,8 @@ class PtoRepositoryTest {
         testEntityManager.persist(pto5);
         testEntityManager.persist(pto6);
 
-        List<PtoEntity> result = ptoRepository.findAllByApplierAndPtoStartLessThanEqualAndPtoEndGreaterThanEqualAndDecisionDateTimeIsNotNullAndWasAcceptedIsTrue(testAppUser, testingEnd, testingStart);
+        List<PtoEntity> result = ptoRepository.findAllOverlappingRequests(testAppUser, testingEnd, testingStart);
         result.forEach(System.out::println);
-        assertEquals(List.of(pto1, pto2), result);
+        assertEquals(List.of(pto1, pto2, pto5), result);
     }
 }

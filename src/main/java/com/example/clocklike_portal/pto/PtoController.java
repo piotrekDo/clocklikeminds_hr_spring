@@ -40,4 +40,9 @@ public class PtoController {
     PtoSummary getUserSummary(@RequestParam Long id) {
         return ptoService.getUserPtoSummary(id);
     }
+
+    @GetMapping("/requests-for-year")
+    List<PtoDto> getRequestsForSelectedYear(@RequestParam Long userId, @RequestParam Integer year) {
+        return ptoService.getRequestsForUserForYear(year, userId);
+    }
 }

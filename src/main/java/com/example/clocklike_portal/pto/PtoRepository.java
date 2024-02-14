@@ -39,5 +39,14 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
     List<PtoEntity> findRequestsForYear(@Param("year") int year, @Param("userId") Long userId);
 
 
-    List<PtoEntity> findAllByApplierAndPtoStartLessThanEqualAndPtoEndGreaterThanEqualAndDecisionDateTimeIsNotNullAndWasAcceptedIsTrue(AppUserEntity applier, LocalDate ptoEnd, LocalDate ptoStart);
+    @Query("SELECT p FROM pto_requests p " +
+            "WHERE p.applier = :applier " +
+            "AND (p.decisionDateTime IS NULL OR p.wasAccepted = true) " +
+            "AND p.ptoStart <= :ptoEnd " +
+            "AND p.ptoEnd >= :ptoStart")
+    List<PtoEntity> findAllOverlappingRequests(
+            @Param("applier") AppUserEntity applier,
+            @Param("ptoEnd") LocalDate ptoEnd,
+            @Param("ptoStart") LocalDate ptoStart
+    );
 }

@@ -14,6 +14,7 @@ public class NewJobPositionRequest {
     private String positionKey;
     @NotBlank(groups = {AddPosition.class}, message = "Job position name cannot be blank")
     private String displayName;
+
 }
 
 interface AddPosition {

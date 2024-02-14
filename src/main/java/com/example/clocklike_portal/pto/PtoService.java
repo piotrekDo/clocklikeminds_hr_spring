@@ -70,7 +70,7 @@ public class PtoService {
         }
 
         List<PtoEntity> collidingRequests = ptoRequestsRepository
-                .findAllByApplierAndPtoStartLessThanEqualAndPtoEndGreaterThanEqualAndDecisionDateTimeIsNotNullAndWasAcceptedIsTrue(applier, toDate, startDate);
+                .findAllOverlappingRequests(applier, toDate, startDate);
         if (collidingRequests.size() > 0) {
             throw new IllegalOperationException("Request colliding with other pto request");
         }
