@@ -57,6 +57,7 @@ class PtoServiceTest {
     void pto_request_should_set_correct_values_on_requestor_entity() {
         NewPtoRequest request = new NewPtoRequest("2024-02-12", "2024-02-16", 2L, 1L);
         AppUserEntity applier = AppUserEntity.createTestAppUser("applier", "applier", "applier@test.com");
+        applier.setActive(true);
         applier.setPtoDaysLeftFromLastYear(2);
         applier.setPtoDaysLeftCurrentYear(20);
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");

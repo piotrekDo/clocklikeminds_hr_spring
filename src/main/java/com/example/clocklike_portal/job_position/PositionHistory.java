@@ -17,7 +17,7 @@ public class PositionHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long positionHistoryId;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "positionId")
     private PositionEntity position;
     private LocalDate startDate;

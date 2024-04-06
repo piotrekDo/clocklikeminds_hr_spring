@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 import static com.example.clocklike_portal.job_position.PositionHistory.createNewPositionHistory;
 import static org.springframework.data.domain.Sort.Direction.DESC;
@@ -45,7 +46,7 @@ public class AppUserService implements UserDetailsService {
         return appUserRepository.save(userFromGooglePrincipal);
     }
 
-    AppUserDto finishRegistration(RegistrationFinishRequest request) {
+    AppUserDto finishRegistration(FinishRegistrationRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
 
@@ -53,20 +54,28 @@ public class AppUserService implements UserDetailsService {
             throw new IllegalOperationException(String.format("User %s already active", appUserEntity.getUserEmail()));
         }
 
+        if (request.getHireStart() == null) {
+            throw new IllegalOperationException("No hire start date specified");
+        }
+
         PositionEntity positionEntity = jobPositionRepository.findByPositionKeyIgnoreCase(request.getPositionKey())
                 .orElseThrow(() -> new NoSuchElementException("No job position found with key: " + request.getPositionKey()));
 
         appUserEntity.setPosition(positionEntity);
-        appUserEntity.setHireStart(LocalDate.parse(request.getHireStart()));
-        if(request.getHireEnd() != null) {
-            appUserEntity.setHireEnd(LocalDate.parse(request.getHireEnd()));
+        LocalDate hireStartLocalDate = LocalDate.parse(request.getHireStart());
+        appUserEntity.setHireStart(hireStartLocalDate);
+        if (request.getHireEnd() != null) {
+            LocalDate hireEndLocalDate = LocalDate.parse(request.getHireEnd());
+            if (hireStartLocalDate.isAfter(hireEndLocalDate)) {
+                throw new IllegalOperationException("Hire start cannot be less than hire end date");
+            }
+            appUserEntity.setHireEnd(hireEndLocalDate);
         }
         appUserEntity.setPtoDaysAccruedCurrentYear(request.getPtoDaysTotal());
         appUserEntity.setPtoDaysLeftCurrentYear(request.getPtoDaysTotal());
         appUserEntity.setActive(true);
 
-        PositionHistory savedHistory = positionHistoryRepository.save(createNewPositionHistory(positionEntity, LocalDate.parse(request.getHireStart())));
-        appUserEntity.getPositionHistory().add(savedHistory);
+        updatePositionHistory(positionEntity, appUserEntity, hireStartLocalDate);
 
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
@@ -84,5 +93,54 @@ public class AppUserService implements UserDetailsService {
                 appUserRepository.findById(id)
                         .orElseThrow(() -> new NoSuchElementException("No user found with id " + id))
         );
+    }
+
+    AppUserDto updateHireData(UpdateHireDataRequest request) {
+        System.out.println(request);
+        AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
+                .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
+
+        if (!appUserEntity.isActive()) {
+            throw new IllegalOperationException(String.format("User %s is not active, finish registration first", appUserEntity.getUserEmail()));
+        }
+
+        LocalDate hireStart = null;
+        LocalDate hireEnd = null;
+        LocalDate positionChangeDate = request.getPositionChangeDate() != null ? LocalDate.parse(request.getPositionChangeDate()) : LocalDate.now();
+
+        if (request.getPositionKey() != null && (appUserEntity.getPosition() == null || !Objects.equals(appUserEntity.getPosition().getPositionKey(), request.getPositionKey()))) {
+            PositionEntity positionEntity = jobPositionRepository.findByPositionKeyIgnoreCase(request.getPositionKey())
+                    .orElseThrow(() -> new NoSuchElementException("No job position found with key: " + request.getPositionKey()));
+            appUserEntity.setPosition(positionEntity);
+            updatePositionHistory(positionEntity, appUserEntity, positionChangeDate);
+        }
+
+        if (request.getWorkStartDate() != null) {
+            hireStart = LocalDate.parse(request.getWorkStartDate());
+        } else {
+            hireStart = appUserEntity.getHireStart();
+        }
+
+        if (request.getWorkEndDate() != null) {
+            hireEnd = LocalDate.parse(request.getWorkEndDate());
+        } else {
+            hireEnd = appUserEntity.getHireEnd();
+        }
+
+        if (hireEnd != null && hireStart != null) {
+            if (hireStart.isAfter(hireEnd)) {
+                throw new IllegalOperationException("Hire start cannot be less than hire end date");
+            }
+        }
+
+        appUserEntity.setHireStart(hireStart);
+        appUserEntity.setHireEnd(hireEnd);
+
+        return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
+    }
+
+    private void updatePositionHistory(PositionEntity positionEntity, AppUserEntity appUserEntity, LocalDate start) {
+        PositionHistory savedHistory = positionHistoryRepository.save(createNewPositionHistory(positionEntity, start));
+        appUserEntity.getPositionHistory().add(savedHistory);
     }
 }

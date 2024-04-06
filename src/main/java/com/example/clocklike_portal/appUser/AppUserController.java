@@ -12,18 +12,23 @@ public class AppUserController {
     private final AppUserService appUserService;
 
     @PostMapping("/finish-register")
-    AppUserDto finishUserRegister(@RequestBody RegistrationFinishRequest request) {
+    AppUserDto finishUserRegister(@RequestBody FinishRegistrationRequest request) {
         return appUserService.finishRegistration(request);
     }
 
     @GetMapping("/all-users")
     Page<AppUserBasicDto> getAllAppUsersPage(@RequestParam(required = false) Integer page,
-                                        @RequestParam(required = false) Integer size) {
+                                             @RequestParam(required = false) Integer size) {
         return appUserService.findAllUsers(page, size);
     }
 
     @GetMapping("/{id}")
-    AppUserDto getAppUserById(@PathVariable Long id){
+    AppUserDto getAppUserById(@PathVariable Long id) {
         return appUserService.getAppUserById(id);
+    }
+
+    @PostMapping("/update")
+    AppUserDto updateHireData(@RequestBody UpdateHireDataRequest request) {
+        return appUserService.updateHireData(request);
     }
 }

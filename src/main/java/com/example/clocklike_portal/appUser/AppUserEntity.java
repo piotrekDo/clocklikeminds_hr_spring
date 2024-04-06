@@ -55,7 +55,7 @@ public class AppUserEntity {
                 firstName,
                 lastName,
                 userEmail,
-                null,
+                new LinkedHashSet<>(),
                 false,
                 true,
                 null,

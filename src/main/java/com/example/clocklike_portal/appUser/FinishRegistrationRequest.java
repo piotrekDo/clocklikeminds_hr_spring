@@ -8,10 +8,12 @@ import lombok.ToString;
 @AllArgsConstructor
 @Data
 @ToString
-public class RegistrationFinishRequest {
+public class FinishRegistrationRequest {
     private Long appUserId;
     private String positionKey;
     private String hireStart;
     private String hireEnd;
     private Integer ptoDaysTotal;
+
+    private Boolean isStillHired;
 }
