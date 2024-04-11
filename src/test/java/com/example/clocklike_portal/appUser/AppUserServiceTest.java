@@ -6,6 +6,9 @@ import com.example.clocklike_portal.job_position.PositionHistoryRepository;
 import com.example.clocklike_portal.job_position.PositionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -17,6 +20,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;
+import static java.lang.Integer.parseInt;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -64,4 +68,33 @@ class AppUserServiceTest {
         assertEquals(appUserEntity.getPosition().getDisplayName(), positionEntity.getDisplayName());
         assertEquals(1, appUserEntity.getPositionHistory().size());
     }
+
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "30, 5, 21, 5, 10, 20, 0",
+            "21, 0, 0, 0, 20, 1, 0",
+            "20, 10, 20, 0, 2, 10, 8"
+    })
+    void updateHolidayDataShouldSetCorrectValuesForDaysLeft(String totalDaysNewReqVal, String lastYearReqVal, String userCurrYearVal,
+                                                            String userLastYearVal, String daysTaken, String userCurrYearDaysLeft, String userLastYearDaysLeft) {
+        UpdateEmployeeHolidayDataRequest request = new UpdateEmployeeHolidayDataRequest(1L, parseInt(totalDaysNewReqVal), parseInt(lastYearReqVal));
+        AppUserEntity testAppUser = createTestAppUser("first", "last", "mail@mail.com");
+        testAppUser.setAppUserId(1L);
+        testAppUser.setActive(true);
+        testAppUser.setPtoDaysAccruedCurrentYear(parseInt(userCurrYearVal));
+        testAppUser.setPtoDaysAccruedLastYear(parseInt(userLastYearVal));
+        testAppUser.setPtoDaysTaken(parseInt(daysTaken));
+
+        AppUserDto dto = new AppUserDto(1L, "first", "last", "mail@mail.com", null, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken));
+
+        Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
+        Mockito.when(appUserRepository.save(Mockito.any())).thenReturn(testAppUser);
+
+        appUserService.updateHolidayData(request);
+
+        assertEquals(parseInt(userCurrYearDaysLeft), testAppUser.getPtoDaysLeftCurrentYear());
+        assertEquals(parseInt(userLastYearDaysLeft), testAppUser.getPtoDaysLeftFromLastYear());
+    }
+
 }

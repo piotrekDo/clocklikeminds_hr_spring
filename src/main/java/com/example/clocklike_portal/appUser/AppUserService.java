@@ -96,7 +96,6 @@ public class AppUserService implements UserDetailsService {
     }
 
     AppUserDto updateHireData(UpdateHireDataRequest request) {
-        System.out.println(request);
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
 
@@ -142,5 +141,36 @@ public class AppUserService implements UserDetailsService {
     private void updatePositionHistory(PositionEntity positionEntity, AppUserEntity appUserEntity, LocalDate start) {
         PositionHistory savedHistory = positionHistoryRepository.save(createNewPositionHistory(positionEntity, start));
         appUserEntity.getPositionHistory().add(savedHistory);
+    }
+
+    public AppUserDto updateHolidayData(UpdateEmployeeHolidayDataRequest request) {
+        AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
+                .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
+
+        if (!appUserEntity.isActive()) {
+            throw new IllegalOperationException(String.format("User %s is not active, finish registration first", appUserEntity.getUserEmail()));
+        }
+
+        if (request.getPtoTotalDaysNewValue() != null) {
+            appUserEntity.setPtoDaysAccruedCurrentYear(request.getPtoTotalDaysNewValue());
+        }
+
+        if (request.getPtoDaysAcquiredLastYearNewValue() != null) {
+            appUserEntity.setPtoDaysAccruedCurrentYear(appUserEntity.getPtoDaysAccruedCurrentYear() - request.getPtoDaysAcquiredLastYearNewValue());
+            appUserEntity.setPtoDaysAccruedLastYear(request.getPtoDaysAcquiredLastYearNewValue());
+        }
+
+        int accruedCurrentYear = appUserEntity.getPtoDaysAccruedCurrentYear();
+        int accruedLastYear = appUserEntity.getPtoDaysAccruedLastYear();
+        int daysTaken = appUserEntity.getPtoDaysTaken();
+
+        int subtractedLastYear = Math.min(accruedLastYear, daysTaken);
+
+
+        appUserEntity.setPtoDaysLeftFromLastYear(Math.max(0, accruedLastYear - subtractedLastYear));
+        appUserEntity.setPtoDaysLeftCurrentYear(Math.max(0, (accruedCurrentYear - (daysTaken - subtractedLastYear))));
+
+
+        return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
 }

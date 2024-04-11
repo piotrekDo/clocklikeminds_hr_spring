@@ -27,8 +27,14 @@ public class AppUserController {
         return appUserService.getAppUserById(id);
     }
 
-    @PostMapping("/update")
+    @PostMapping("/update-hire-data")
     AppUserDto updateHireData(@RequestBody UpdateHireDataRequest request) {
         return appUserService.updateHireData(request);
     }
+
+    @PostMapping("/update-holiday-data")
+    AppUserDto updateHolidayData(@RequestBody UpdateEmployeeHolidayDataRequest request){
+        return appUserService.updateHolidayData(request);
+    }
+
 }
