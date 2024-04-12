@@ -16,9 +16,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.clocklike_portal.job_position.PositionHistory.createNewPositionHistory;
 import static org.springframework.data.domain.Sort.Direction.DESC;
@@ -31,6 +30,11 @@ public class AppUserService implements UserDetailsService {
     private final UserRoleRepository userRoleRepository;
     private final PositionRepository jobPositionRepository;
     private final PositionHistoryRepository positionHistoryRepository;
+
+    private void updatePositionHistory(PositionEntity positionEntity, AppUserEntity appUserEntity, LocalDate start) {
+        PositionHistory savedHistory = positionHistoryRepository.save(createNewPositionHistory(positionEntity, start));
+        appUserEntity.getPositionHistory().add(savedHistory);
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -138,10 +142,6 @@ public class AppUserService implements UserDetailsService {
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
 
-    private void updatePositionHistory(PositionEntity positionEntity, AppUserEntity appUserEntity, LocalDate start) {
-        PositionHistory savedHistory = positionHistoryRepository.save(createNewPositionHistory(positionEntity, start));
-        appUserEntity.getPositionHistory().add(savedHistory);
-    }
 
     public AppUserDto updateHolidayData(UpdateEmployeeHolidayDataRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
@@ -173,4 +173,41 @@ public class AppUserService implements UserDetailsService {
 
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
+
+    AppUserDto updatePositionHistoryData(List<UpdatePositionHistoryRequest> requests, Long employeeId) {
+        AppUserEntity appUserEntity = appUserRepository.findById(employeeId)
+                .orElseThrow(() -> new NoSuchElementException("No user found with id: " + employeeId));
+
+        if (!appUserEntity.isActive()) {
+            throw new IllegalOperationException(String.format("User %s is not active, finish registration first", appUserEntity.getUserEmail()));
+        }
+
+
+        Set<PositionHistory> currentPositionHistory = appUserEntity.getPositionHistory();
+        Set<PositionHistory> updatedPositionHistory = new LinkedHashSet<>(currentPositionHistory);
+
+        requests.forEach(req -> {
+            Long positionHistoryId = req.getPositionHistoryId();
+            Optional<PositionHistory> historyOptional = currentPositionHistory.stream().filter(pos -> Objects.equals(pos.getPositionHistoryId(), positionHistoryId)).findFirst();
+            PositionHistory positionHistory = historyOptional.orElseThrow(() -> new IllegalOperationException("No such position found at user's history"));
+
+            if (req.getStartDate() == null) {
+                if (appUserEntity.getPosition().getPositionKey().equals(positionHistory.getPosition().getPositionKey())) {
+                    throw new IllegalOperationException("Cannot remove current position");
+                }
+                    updatedPositionHistory.remove(positionHistory);
+            } else {
+                LocalDate newDate = LocalDate.parse(req.getStartDate());
+                positionHistory.setStartDate(newDate);
+                updatedPositionHistory.add(positionHistory);
+            }
+        });
+
+        appUserEntity.setPositionHistory(updatedPositionHistory);
+
+
+
+        return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
+    }
+
 }

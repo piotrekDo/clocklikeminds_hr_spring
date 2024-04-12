@@ -17,7 +17,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;
 import static java.lang.Integer.parseInt;
@@ -97,4 +99,77 @@ class AppUserServiceTest {
         assertEquals(parseInt(userLastYearDaysLeft), testAppUser.getPtoDaysLeftFromLastYear());
     }
 
+    @Test
+    void updatePositionHistoryDataShouldRemoveOneHistoryRecord() {
+        AppUserEntity testAppUser = createTestAppUser("first", "last", "mail@mail.com");
+        testAppUser.setAppUserId(1L);
+        testAppUser.setActive(true);
+        PositionEntity testPosition = new PositionEntity(10L, "test_pos", "Test Position");
+        PositionHistory positionHistory1 = new PositionHistory(21L, testPosition, LocalDate.of(2023, 4, 1));
+        PositionEntity testPositionToRemove = new PositionEntity(11L, "pos_to_remove", "Position to remove");
+        PositionHistory positionHistory2 = new PositionHistory(22L, testPositionToRemove, LocalDate.of(2023, 5, 1));
+        testAppUser.setPositionHistory(Set.of(positionHistory1, positionHistory2));
+        testAppUser.setPosition(testPosition);
+
+        UpdatePositionHistoryRequest positionHistory1Update = new UpdatePositionHistoryRequest(21L, "2023-04-01");
+        UpdatePositionHistoryRequest positionHistory2Update = new UpdatePositionHistoryRequest(22L, null);
+        List<UpdatePositionHistoryRequest> requests = List.of(positionHistory1Update, positionHistory2Update);
+
+        Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
+        Mockito.when(appUserRepository.save(Mockito.any())).thenReturn(testAppUser);
+
+        appUserService.updatePositionHistoryData(requests, 1L);
+
+        assertEquals(1, testAppUser.getPositionHistory().size());
+    }
+
+    @Test
+    void updatePositionHistoryDataShouldUpdateRecordDate() {
+        AppUserEntity testAppUser = createTestAppUser("first", "last", "mail@mail.com");
+        testAppUser.setAppUserId(1L);
+        testAppUser.setActive(true);
+        PositionEntity testPosition = new PositionEntity(10L, "test_pos", "Test Position");
+        PositionEntity testPosition2 = new PositionEntity(11L, "another_test_pos", "Another Test Position");
+        PositionHistory positionHistory1 = new PositionHistory(21L, testPosition, LocalDate.of(2023, 4, 1));
+        PositionHistory positionHistory2 = new PositionHistory(22L, testPosition2, LocalDate.of(2023, 6, 1));
+        testAppUser.setPositionHistory(Set.of(positionHistory1, positionHistory2));
+        testAppUser.setPosition(testPosition2);
+
+        UpdatePositionHistoryRequest positionHistory2Update = new UpdatePositionHistoryRequest(22L, "2023-05-01");
+        List<UpdatePositionHistoryRequest> requests = List.of(positionHistory2Update);
+
+        Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
+        Mockito.when(appUserRepository.save(Mockito.any())).thenReturn(testAppUser);
+
+        appUserService.updatePositionHistoryData(requests, 1L);
+
+        assertEquals(2, testAppUser.getPositionHistory().size());
+        assertEquals(LocalDate.of(2023, 5, 1), testAppUser.getPositionHistory().stream().filter(p -> p.getPositionHistoryId() == 22L).findFirst().get().getStartDate());
+
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

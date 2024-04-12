@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/users")
 @AllArgsConstructor
@@ -35,6 +37,11 @@ public class AppUserController {
     @PostMapping("/update-holiday-data")
     AppUserDto updateHolidayData(@RequestBody UpdateEmployeeHolidayDataRequest request){
         return appUserService.updateHolidayData(request);
+    }
+
+    @PostMapping("/{id}/update-position-history")
+    AppUserDto updatePositionHistory(@RequestBody List<UpdatePositionHistoryRequest> requests, @PathVariable Long id) {
+        return appUserService.updatePositionHistoryData(requests, id);
     }
 
 }

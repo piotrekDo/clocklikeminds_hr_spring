@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 
 @AllArgsConstructor
@@ -44,7 +45,7 @@ public class AppUserDto {
                 entity.isActive(),
                 entity.isStillHired(),
                 entity.getPosition(),
-                entity.getPositionHistory().stream().toList(),
+                entity.getPositionHistory().stream().sorted(Comparator.comparing(PositionHistory::getStartDate).reversed()).toList(),
                 entity.getHireStart(),
                 entity.getHireEnd(),
                 seniority,
