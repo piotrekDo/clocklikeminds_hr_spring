@@ -35,7 +35,7 @@ public class AppUserController {
     }
 
     @PostMapping("/update-holiday-data")
-    AppUserDto updateHolidayData(@RequestBody UpdateEmployeeHolidayDataRequest request){
+    AppUserDto updateHolidayData(@RequestBody UpdateEmployeeHolidayDataRequest request) {
         return appUserService.updateHolidayData(request);
     }
 

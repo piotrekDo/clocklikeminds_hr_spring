@@ -195,7 +195,7 @@ public class AppUserService implements UserDetailsService {
                 if (appUserEntity.getPosition().getPositionKey().equals(positionHistory.getPosition().getPositionKey())) {
                     throw new IllegalOperationException("Cannot remove current position");
                 }
-                    updatedPositionHistory.remove(positionHistory);
+                updatedPositionHistory.remove(positionHistory);
             } else {
                 LocalDate newDate = LocalDate.parse(req.getStartDate());
                 positionHistory.setStartDate(newDate);
@@ -204,7 +204,6 @@ public class AppUserService implements UserDetailsService {
         });
 
         appUserEntity.setPositionHistory(updatedPositionHistory);
-
 
 
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));

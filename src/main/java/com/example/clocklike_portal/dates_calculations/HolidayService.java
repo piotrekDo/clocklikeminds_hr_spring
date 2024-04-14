@@ -70,7 +70,6 @@ public class HolidayService {
         holidays.put(LocalDate.of(year, 11, 11), "Narodowe Święto Niepodległości");
         holidays.put(LocalDate.of(year, 12, 25), "Boże Narodzenie 1-szy dzień");
         holidays.put(LocalDate.of(year, 12, 26), "Boże Narodzenie 2-gi dzień");
-        System.out.println(holidays);
         return holidays;
     }
 
