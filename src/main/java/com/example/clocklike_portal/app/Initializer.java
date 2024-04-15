@@ -59,7 +59,7 @@ public class Initializer {
         appUserRepository.save(user1);
 
         AppUserEntity user2 = createTestAppUser("Userdrugi", "UserskiDrugi", "user2.userski2@clocklikeminds.com");
-        user1.setUserRoles(List.of(userRole));
+        user2.setUserRoles(List.of(userRole));
         appUserRepository.save(user2);
 
     }
