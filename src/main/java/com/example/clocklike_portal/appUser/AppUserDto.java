@@ -20,6 +20,7 @@ public class AppUserDto {
     private String lastName;
     private String userEmail;
     private List<UserRole> userRoles;
+    private boolean isRegistrationFinished;
     private boolean isActive;
     private boolean isStillHired;
     private PositionEntity position;
@@ -42,6 +43,7 @@ public class AppUserDto {
                 entity.getLastName(),
                 entity.getUserEmail(),
                 entity.getUserRoles().stream().toList(),
+                entity.isRegistrationFinished(),
                 entity.isActive(),
                 entity.isStillHired(),
                 entity.getPosition(),

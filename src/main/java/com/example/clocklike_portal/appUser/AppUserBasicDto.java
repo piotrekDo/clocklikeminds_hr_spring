@@ -16,6 +16,7 @@ public class AppUserBasicDto {
     private String firstName;
     private String lastName;
     private String userEmail;
+    private boolean isRegistrationFinished;
     private boolean isActive;
     private boolean isStillHired;
     private PositionEntity position;
@@ -29,6 +30,7 @@ public class AppUserBasicDto {
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getUserEmail(),
+                entity.isRegistrationFinished(),
                 entity.isActive(),
                 entity.isStillHired(),
                 entity.getPosition(),

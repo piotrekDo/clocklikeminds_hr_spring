@@ -30,6 +30,7 @@ public class AppUserEntity {
     private String userEmail;
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<UserRole> userRoles = new LinkedHashSet<>();
+    private boolean isRegistrationFinished;
     private boolean isActive;
     private boolean isStillHired;
     @ManyToOne()
@@ -57,6 +58,7 @@ public class AppUserEntity {
                 userEmail,
                 new LinkedHashSet<>(),
                 false,
+                false,
                 true,
                 null,
                 new LinkedHashSet<>(),
@@ -80,6 +82,7 @@ public class AppUserEntity {
                 googlePrincipal.getLastName(),
                 googlePrincipal.getEmail(),
                 null,
+                false,
                 false,
                 true,
                 null,

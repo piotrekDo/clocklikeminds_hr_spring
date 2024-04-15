@@ -54,8 +54,8 @@ public class AppUserService implements UserDetailsService {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
 
-        if (appUserEntity.isActive()) {
-            throw new IllegalOperationException(String.format("User %s already active", appUserEntity.getUserEmail()));
+        if (appUserEntity.isRegistrationFinished()) {
+            throw new IllegalOperationException(String.format("User %s registration is already finished", appUserEntity.getUserEmail()));
         }
 
         if (request.getHireStart() == null) {
@@ -77,6 +77,7 @@ public class AppUserService implements UserDetailsService {
         }
         appUserEntity.setPtoDaysAccruedCurrentYear(request.getPtoDaysTotal());
         appUserEntity.setPtoDaysLeftCurrentYear(request.getPtoDaysTotal());
+        appUserEntity.setRegistrationFinished(true);
         appUserEntity.setActive(true);
 
         updatePositionHistory(positionEntity, appUserEntity, hireStartLocalDate);
@@ -103,7 +104,7 @@ public class AppUserService implements UserDetailsService {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
 
-        if (!appUserEntity.isActive()) {
+        if (!appUserEntity.isRegistrationFinished()) {
             throw new IllegalOperationException(String.format("User %s is not active, finish registration first", appUserEntity.getUserEmail()));
         }
 
@@ -147,7 +148,7 @@ public class AppUserService implements UserDetailsService {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
 
-        if (!appUserEntity.isActive()) {
+        if (!appUserEntity.isRegistrationFinished()) {
             throw new IllegalOperationException(String.format("User %s is not active, finish registration first", appUserEntity.getUserEmail()));
         }
 
@@ -178,7 +179,7 @@ public class AppUserService implements UserDetailsService {
         AppUserEntity appUserEntity = appUserRepository.findById(employeeId)
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + employeeId));
 
-        if (!appUserEntity.isActive()) {
+        if (!appUserEntity.isRegistrationFinished()) {
             throw new IllegalOperationException(String.format("User %s is not active, finish registration first", appUserEntity.getUserEmail()));
         }
 
@@ -212,6 +213,11 @@ public class AppUserService implements UserDetailsService {
     public AppUserDto updateUserPermission(UpdateUserPermissionRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
+
+        if (!appUserEntity.isRegistrationFinished()) {
+            throw new IllegalOperationException(String.format("User %s is not active, finish registration first", appUserEntity.getUserEmail()));
+        }
+
         Collection<UserRole> userRoles = null;
         boolean hasHanged = false;
 

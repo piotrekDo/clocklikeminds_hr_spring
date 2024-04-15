@@ -50,6 +50,7 @@ public class Initializer {
         piotrek.setPtoDaysAccruedCurrentYear(26);
         piotrek.setPtoDaysLeftFromLastYear(2);
         piotrek.setPtoDaysLeftCurrentYear(26);
+        piotrek.setRegistrationFinished(true);
         piotrek.setActive(true);
         appUserRepository.save(piotrek);
 

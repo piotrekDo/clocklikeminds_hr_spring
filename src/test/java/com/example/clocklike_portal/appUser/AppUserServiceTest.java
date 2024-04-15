@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -56,7 +55,7 @@ class AppUserServiceTest {
         UpdateHireDataRequest request = new UpdateHireDataRequest(1L, "java_dev", null, null, null);
         PositionEntity juniorJavaDevPos = new PositionEntity("junior_java_dev", "Junior Java Developer");
         AppUserEntity appUserEntity = createTestAppUser("firstName", "lastName", "test@mail.com");
-        appUserEntity.setActive(true);
+        appUserEntity.setRegistrationFinished(true);
         appUserEntity.setPosition(juniorJavaDevPos);
         Mockito.when(appUserRepository.findById(request.getAppUserId())).thenReturn(Optional.of(appUserEntity));
         PositionEntity positionEntity = new PositionEntity("java_dev", "Java Developer");
@@ -83,12 +82,12 @@ class AppUserServiceTest {
         UpdateEmployeeHolidayDataRequest request = new UpdateEmployeeHolidayDataRequest(1L, parseInt(totalDaysNewReqVal), parseInt(lastYearReqVal));
         AppUserEntity testAppUser = createTestAppUser("first", "last", "mail@mail.com");
         testAppUser.setAppUserId(1L);
-        testAppUser.setActive(true);
+        testAppUser.setRegistrationFinished(true);
         testAppUser.setPtoDaysAccruedCurrentYear(parseInt(userCurrYearVal));
         testAppUser.setPtoDaysAccruedLastYear(parseInt(userLastYearVal));
         testAppUser.setPtoDaysTaken(parseInt(daysTaken));
 
-        AppUserDto dto = new AppUserDto(1L, "first", "last", "mail@mail.com", null, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken));
+        AppUserDto dto = new AppUserDto(1L, "first", "last", "mail@mail.com", null, true, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken));
 
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
         Mockito.when(appUserRepository.save(Mockito.any())).thenReturn(testAppUser);
@@ -103,7 +102,7 @@ class AppUserServiceTest {
     void updatePositionHistoryDataShouldRemoveOneHistoryRecord() {
         AppUserEntity testAppUser = createTestAppUser("first", "last", "mail@mail.com");
         testAppUser.setAppUserId(1L);
-        testAppUser.setActive(true);
+        testAppUser.setRegistrationFinished(true);
         PositionEntity testPosition = new PositionEntity(10L, "test_pos", "Test Position");
         PositionHistory positionHistory1 = new PositionHistory(21L, testPosition, LocalDate.of(2023, 4, 1));
         PositionEntity testPositionToRemove = new PositionEntity(11L, "pos_to_remove", "Position to remove");
@@ -127,7 +126,7 @@ class AppUserServiceTest {
     void updatePositionHistoryDataShouldUpdateRecordDate() {
         AppUserEntity testAppUser = createTestAppUser("first", "last", "mail@mail.com");
         testAppUser.setAppUserId(1L);
-        testAppUser.setActive(true);
+        testAppUser.setRegistrationFinished(true);
         PositionEntity testPosition = new PositionEntity(10L, "test_pos", "Test Position");
         PositionEntity testPosition2 = new PositionEntity(11L, "another_test_pos", "Another Test Position");
         PositionHistory positionHistory1 = new PositionHistory(21L, testPosition, LocalDate.of(2023, 4, 1));
