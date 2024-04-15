@@ -209,4 +209,38 @@ public class AppUserService implements UserDetailsService {
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
 
+    public AppUserDto updateUserPermission(UpdateUserPermissionRequest request) {
+        AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
+                .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
+        Collection<UserRole> userRoles = null;
+        boolean hasHanged = false;
+
+        if (request.getIsActive() != null) {
+            appUserEntity.setActive(request.getIsActive());
+            hasHanged = true;
+        }
+
+        if (request.getHasAdminPermission() != null) {
+            UserRole adminRole = userRoleRepository.findByRoleNameIgnoreCase("admin")
+                    .orElseThrow(() -> new NoSuchElementException("user role not found"));
+            userRoles = appUserEntity.getUserRoles();
+
+            if (request.getHasAdminPermission()) {
+                userRoles.add(adminRole);
+            } else {
+                userRoles.remove(adminRole);
+            }
+            hasHanged = true;
+        }
+
+        if (userRoles != null) {
+            appUserEntity.setUserRoles(userRoles);
+        }
+
+        if (hasHanged) {
+            appUserEntity = appUserRepository.save(appUserEntity);
+        }
+
+        return AppUserDto.appUserEntityToDto(appUserEntity);
+    }
 }

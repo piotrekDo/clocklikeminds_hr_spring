@@ -44,4 +44,9 @@ public class AppUserController {
         return appUserService.updatePositionHistoryData(requests, id);
     }
 
+    @PostMapping("/update-permission")
+    AppUserDto updateUserPermission(@RequestBody UpdateUserPermissionRequest request) {
+        return appUserService.updateUserPermission(request);
+    }
+
 }
