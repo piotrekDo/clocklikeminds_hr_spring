@@ -11,4 +11,5 @@ public class UpdateHireDataRequest {
     private String positionChangeDate;
     private String workStartDate;
     private String workEndDate;
+    private Long supervisorId;
 }

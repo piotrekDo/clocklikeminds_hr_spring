@@ -8,6 +8,7 @@ import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class Initializer {
     public void run() {
         UserRole userRole = userRoleRepository.save(new UserRole("user"));
         UserRole adminRole = userRoleRepository.save(new UserRole("admin"));
+        UserRole supervisorRole = userRoleRepository.save(new UserRole("supervisor"));
 
         PositionEntity ceoPosition = positionRepository.save(new PositionEntity("ceo", "CEO"));
         PositionEntity boardMemberPosition = positionRepository.save(new PositionEntity("board_member", "Board Member"));
@@ -40,12 +42,18 @@ public class Initializer {
 
 
         AppUserEntity admin = createTestAppUser("Admin", "Adminowski", "admin.adminowski@clocklikeminds.com");
-        admin.setUserRoles(List.of(userRole, adminRole));
+        admin.setUserRoles(List.of(userRole, adminRole, supervisorRole));
+        admin.setPtoDaysAccruedLastYear(2);
+        admin.setPtoDaysAccruedCurrentYear(26);
+        admin.setPtoDaysLeftFromLastYear(2);
+        admin.setPtoDaysLeftCurrentYear(26);
+        admin.setRegistrationFinished(true);
+        admin.setActive(true);
         admin.setPosition(ceoPosition);
         appUserRepository.save(admin);
 
         AppUserEntity piotrek = createTestAppUser("Piotr", "Domagalski", "piotr.domagalski@clocklikeminds.com");
-        piotrek.setUserRoles(List.of(userRole, adminRole));
+        piotrek.setUserRoles(List.of(userRole, adminRole, supervisorRole));
         piotrek.setPtoDaysAccruedLastYear(2);
         piotrek.setPtoDaysAccruedCurrentYear(26);
         piotrek.setPtoDaysLeftFromLastYear(2);

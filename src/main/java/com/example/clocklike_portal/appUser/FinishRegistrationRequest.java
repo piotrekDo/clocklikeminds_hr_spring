@@ -14,6 +14,6 @@ public class FinishRegistrationRequest {
     private String hireStart;
     private String hireEnd;
     private Integer ptoDaysTotal;
-
     private Boolean isStillHired;
+    private Long supervisorId;
 }

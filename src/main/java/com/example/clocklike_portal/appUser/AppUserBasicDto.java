@@ -21,7 +21,6 @@ public class AppUserBasicDto {
     private boolean isStillHired;
     private PositionEntity position;
     private long seniorityInMonths;
-
     private int status;
 
     public static AppUserBasicDto appUserEntityToBasicDto(AppUserEntity entity) {

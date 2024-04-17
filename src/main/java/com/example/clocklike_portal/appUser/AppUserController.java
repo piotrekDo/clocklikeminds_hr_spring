@@ -29,6 +29,11 @@ public class AppUserController {
         return appUserService.getAppUserById(id);
     }
 
+    @GetMapping("/supervisors")
+    List<AppUserBasicDto> getAllSupervisors() {
+        return appUserService.getAllSupervisors();
+    };
+
     @PostMapping("/update-hire-data")
     AppUserDto updateHireData(@RequestBody UpdateHireDataRequest request) {
         return appUserService.updateHireData(request);

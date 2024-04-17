@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
     Optional<AppUserEntity> findByUserEmailIgnoreCase(String userEmail);
 
+    List<AppUserEntity> findAllByUserRolesContaining(UserRole role);
+
 }

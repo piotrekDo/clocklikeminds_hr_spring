@@ -13,6 +13,7 @@ import lombok.ToString;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -45,6 +46,10 @@ public class AppUserEntity {
     private int ptoDaysLeftFromLastYear;
     private int ptoDaysLeftCurrentYear;
     private int ptoDaysTaken;
+    @ManyToOne
+    private AppUserEntity supervisor;
+    @OneToMany(mappedBy = "supervisor")
+    private Set<AppUserEntity> subordinates;
     @OneToMany(mappedBy = "ptoRequestId", fetch = FetchType.LAZY)
     private Set<PtoEntity> ptoRequests = new LinkedHashSet<>();
     @OneToMany(mappedBy = "acceptor")
@@ -69,6 +74,8 @@ public class AppUserEntity {
                 0,
                 0,
                 0,
+                null,
+                new LinkedHashSet<>(),
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>()
         );
@@ -94,8 +101,23 @@ public class AppUserEntity {
                 0,
                 0,
                 0,
+                null,
+                new LinkedHashSet<>(),
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>()
         );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AppUserEntity that = (AppUserEntity) o;
+        return Objects.equals(appUserId, that.appUserId) && Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(userEmail, that.userEmail);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(appUserId, firstName, lastName, userEmail);
     }
 }

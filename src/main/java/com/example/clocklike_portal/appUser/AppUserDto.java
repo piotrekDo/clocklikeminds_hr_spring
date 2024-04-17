@@ -8,8 +8,10 @@ import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @Data
@@ -33,9 +35,31 @@ public class AppUserDto {
     private int ptoDaysLeftFromLastYear;
     private int ptoDaysLeftTotal;
     private int ptoDaysTaken;
+    private long supervisorId;
+    private String supervisorFirstName;
+    private String supervisorLastName;
+    private List<AppUserBasicDto> subordinates;
 
     public static AppUserDto appUserEntityToDto(AppUserEntity entity) {
         long seniority = entity.getHireStart() != null ? ChronoUnit.MONTHS.between(entity.getHireStart(), LocalDate.now()) : 0;
+
+        AppUserEntity supervisor = entity.getSupervisor();
+        long supervisorId = 0;
+        String supervisorFirstName = "";
+        String supervisorLastName = "";
+        if (supervisor != null) {
+            supervisorId = supervisor.getAppUserId();
+            supervisorFirstName = supervisor.getFirstName();
+            supervisorLastName = supervisor.getLastName();
+        }
+
+        Set<AppUserEntity> subordinatesEntities = entity.getSubordinates();
+        ArrayList<AppUserBasicDto> subordinates = new ArrayList<>();
+        subordinatesEntities.forEach(subordinateEntity -> {
+            subordinates.add(AppUserBasicDto.appUserEntityToBasicDto(subordinateEntity));
+        });
+
+
 
         return new AppUserDto(
                 entity.getAppUserId(),
@@ -55,7 +79,11 @@ public class AppUserDto {
                 entity.getPtoDaysAccruedCurrentYear(),
                 entity.getPtoDaysLeftFromLastYear(),
                 entity.getPtoDaysLeftCurrentYear(),
-                entity.getPtoDaysTaken()
+                entity.getPtoDaysTaken(),
+                supervisorId,
+                supervisorFirstName,
+                supervisorLastName,
+                subordinates
         );
     }
 }

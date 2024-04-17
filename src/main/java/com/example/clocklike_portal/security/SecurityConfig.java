@@ -34,6 +34,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final static String USER_AUTHORITY = "user";
     private final static String ADMIN_AUTHORITY = "admin";
+    private final static String SUPERVISOR_AUTHORITY = "supervisor";
 
 
     @Bean
@@ -65,8 +66,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/pto/requests-for-year").hasAuthority(USER_AUTHORITY)
                         .requestMatchers("/api/v1/pto/request-new").hasAuthority(USER_AUTHORITY)
                         .requestMatchers("/api/v1/pto/byId").hasAuthority(USER_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/requests-to-accept").hasAuthority(ADMIN_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/resolve-request").hasAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers("/api/v1/pto/requests-to-accept").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                        .requestMatchers("/api/v1/pto/resolve-request").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .anyRequest().denyAll()
                 )
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -87,7 +87,7 @@ class AppUserServiceTest {
         testAppUser.setPtoDaysAccruedLastYear(parseInt(userLastYearVal));
         testAppUser.setPtoDaysTaken(parseInt(daysTaken));
 
-        AppUserDto dto = new AppUserDto(1L, "first", "last", "mail@mail.com", null, true, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken));
+        AppUserDto dto = new AppUserDto(1L, "first", "last", "mail@mail.com", null, true, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken), 0, null, null, null);
 
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
         Mockito.when(appUserRepository.save(Mockito.any())).thenReturn(testAppUser);
@@ -144,7 +144,31 @@ class AppUserServiceTest {
 
         assertEquals(2, testAppUser.getPositionHistory().size());
         assertEquals(LocalDate.of(2023, 5, 1), testAppUser.getPositionHistory().stream().filter(p -> p.getPositionHistoryId() == 22L).findFirst().get().getStartDate());
+    }
 
+    @Test
+    void updateUserPermissionShouldRemoveSupervisorRoleAndDeclinePendingPtoAndRemoveSubordinates() {
+        UpdateUserPermissionRequest updateRequest = new UpdateUserPermissionRequest(1L, null, false, null);
+        UserRole supervisorRole = new UserRole("supervisor");
+        AppUserEntity subordinate1 = createTestAppUser("Subordinate1", "Subordinate1", "mail@mail.com");
+        AppUserEntity subordinate2 = createTestAppUser("Subordinate2", "Subordinate2", "mail@mail.com");
+        AppUserEntity testAppUser = createTestAppUser("TestFirstName", "TestLastName", "TestEmail@mail.com");
+        testAppUser.setRegistrationFinished(true);
+        testAppUser.setActive(true);
+        testAppUser.getUserRoles().add(supervisorRole);
+        subordinate1.setSupervisor(testAppUser);
+        subordinate2.setSupervisor(testAppUser);
+        testAppUser.getSubordinates().addAll(List.of(subordinate1, subordinate2));
+
+        Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
+        Mockito.when(userRoleRepository.findByRoleNameIgnoreCase("supervisor")).thenReturn(Optional.of(supervisorRole));
+        Mockito.when(appUserRepository.save(Mockito.any())).thenReturn(testAppUser);
+        appUserService.updateUserPermission(updateRequest);
+
+        assertNull(subordinate1.getSupervisor());
+        assertNull(subordinate2.getSupervisor());
+        assertEquals(0, testAppUser.getUserRoles().size());
+        assertEquals(0, testAppUser.getSubordinates().size());
     }
 
 }

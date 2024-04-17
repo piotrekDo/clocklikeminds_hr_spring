@@ -5,8 +5,11 @@ import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionHistory;
 import com.example.clocklike_portal.job_position.PositionHistoryRepository;
 import com.example.clocklike_portal.job_position.PositionRepository;
+import com.example.clocklike_portal.pto.PtoEntity;
 import com.example.clocklike_portal.security.GooglePrincipal;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -16,6 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,13 +27,20 @@ import static com.example.clocklike_portal.job_position.PositionHistory.createNe
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Service
-@AllArgsConstructor
 public class AppUserService implements UserDetailsService {
 
     private final AppUserRepository appUserRepository;
     private final UserRoleRepository userRoleRepository;
     private final PositionRepository jobPositionRepository;
     private final PositionHistoryRepository positionHistoryRepository;
+    private UserRole supervisorRole = null;
+
+    public AppUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository jobPositionRepository, PositionHistoryRepository positionHistoryRepository) {
+        this.appUserRepository = appUserRepository;
+        this.userRoleRepository = userRoleRepository;
+        this.jobPositionRepository = jobPositionRepository;
+        this.positionHistoryRepository = positionHistoryRepository;
+    }
 
     private void updatePositionHistory(PositionEntity positionEntity, AppUserEntity appUserEntity, LocalDate start) {
         PositionHistory savedHistory = positionHistoryRepository.save(createNewPositionHistory(positionEntity, start));
@@ -61,6 +72,19 @@ public class AppUserService implements UserDetailsService {
         if (request.getHireStart() == null) {
             throw new IllegalOperationException("No hire start date specified");
         }
+
+        if (request.getSupervisorId() == null) {
+            throw new IllegalOperationException("No supervisor specified");
+        }
+
+        if (request.getPositionKey() == null || request.getPositionKey().isBlank() || request.getPositionKey().isEmpty()) {
+            throw new IllegalOperationException("No employee position specified");
+        }
+
+        AppUserEntity supervisorEntity = appUserRepository.findById(request.getSupervisorId())
+                .orElseThrow(() -> new NoSuchElementException("No such supervisor found"));
+        appUserEntity.setSupervisor(supervisorEntity);
+        supervisorEntity.getSubordinates().add(appUserEntity);
 
         PositionEntity positionEntity = jobPositionRepository.findByPositionKeyIgnoreCase(request.getPositionKey())
                 .orElseThrow(() -> new NoSuchElementException("No job position found with key: " + request.getPositionKey()));
@@ -128,12 +152,32 @@ public class AppUserService implements UserDetailsService {
         if (request.getWorkEndDate() != null) {
             hireEnd = LocalDate.parse(request.getWorkEndDate());
         } else {
-            hireEnd = appUserEntity.getHireEnd();
+            hireEnd = null;
         }
 
         if (hireEnd != null && hireStart != null) {
             if (hireStart.isAfter(hireEnd)) {
                 throw new IllegalOperationException("Hire start cannot be less than hire end date");
+            }
+        }
+
+        if (request.getSupervisorId() != null) {
+            if (appUserEntity.getSupervisor() != null && !request.getSupervisorId().equals(appUserEntity.getSupervisor().getAppUserId())) {
+                AppUserEntity newSupervisorEntity = appUserRepository.findById(request.getSupervisorId())
+                        .orElseThrow(() -> new NoSuchElementException("No such supervisor found"));
+                AppUserEntity previousSupervisor = appUserRepository.findById(appUserEntity.getSupervisor().getAppUserId())
+                        .orElseThrow(() -> new NoSuchElementException("No such supervisor found"));
+                Set<PtoEntity> previousSupervisorPtoAcceptor = previousSupervisor.getPtoAcceptor();
+                Set<PtoEntity> newSupervisorPtoAcceptor = newSupervisorEntity.getPtoAcceptor();
+                List<PtoEntity> userPtosToTransfer = previousSupervisorPtoAcceptor.stream()
+                        .filter(pto -> pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId()))
+                        .toList();
+
+                previousSupervisor.setPtoAcceptor(previousSupervisorPtoAcceptor.stream().filter(pto -> !pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId())).collect(Collectors.toSet()));
+                userPtosToTransfer.forEach(ptoEntity -> ptoEntity.setAcceptor(newSupervisorEntity));
+                newSupervisorPtoAcceptor.addAll(userPtosToTransfer);
+                newSupervisorEntity.setPtoAcceptor(newSupervisorPtoAcceptor);
+                appUserEntity.setSupervisor(newSupervisorEntity);
             }
         }
 
@@ -218,7 +262,7 @@ public class AppUserService implements UserDetailsService {
             throw new IllegalOperationException(String.format("User %s is not active, finish registration first", appUserEntity.getUserEmail()));
         }
 
-        Collection<UserRole> userRoles = null;
+        Collection<UserRole> userRoles = appUserEntity.getUserRoles();
         boolean hasHanged = false;
 
         if (request.getIsActive() != null) {
@@ -226,14 +270,43 @@ public class AppUserService implements UserDetailsService {
             hasHanged = true;
         }
 
+        if (request.getHasSupervisorRole() != null) {
+            UserRole supervisorRole = userRoleRepository.findByRoleNameIgnoreCase("supervisor")
+                    .orElseThrow(() -> new NoSuchElementException("user role not found"));
+            if (request.getHasSupervisorRole() && !userRoles.contains(supervisorRole)) {
+                userRoles.add(supervisorRole);
+            } else if (!request.getHasSupervisorRole()) {
+                Set<PtoEntity> ptoAsAcceptor = appUserEntity.getPtoAcceptor();
+                ptoAsAcceptor.forEach(ptoEntity -> {
+                    if (!ptoEntity.isWasAccepted() && ptoEntity.getDecisionDateTime() == null) {
+
+                        int requestBusinessDays = ptoEntity.getBusinessDays();
+                        int includingLastYearPool = ptoEntity.getIncludingLastYearPool();
+                        AppUserEntity applier = ptoEntity.getApplier();
+                        applier.setPtoDaysLeftFromLastYear(applier.getPtoDaysLeftFromLastYear() + includingLastYearPool);
+                        applier.setPtoDaysLeftCurrentYear(applier.getPtoDaysLeftCurrentYear() + (requestBusinessDays - includingLastYearPool));
+                        applier.setPtoDaysTaken(applier.getPtoDaysTaken() - requestBusinessDays);
+
+                        ptoEntity.setWasAccepted(false);
+                        ptoEntity.setDecisionDateTime(LocalDateTime.now());
+                        ptoEntity.setDeclineReason("Wskazany przełożony utracił możliwość rozpatrywania wniosków.");
+                    }
+                });
+                userRoles.remove(supervisorRole);
+                Set<AppUserEntity> currentSubordinates = appUserEntity.getSubordinates();
+                currentSubordinates.forEach(employeeEntity -> employeeEntity.setSupervisor(null));
+                appUserEntity.setSubordinates(new LinkedHashSet<>());
+            }
+            hasHanged = true;
+        }
+
         if (request.getHasAdminPermission() != null) {
             UserRole adminRole = userRoleRepository.findByRoleNameIgnoreCase("admin")
                     .orElseThrow(() -> new NoSuchElementException("user role not found"));
-            userRoles = appUserEntity.getUserRoles();
 
-            if (request.getHasAdminPermission()) {
+            if (request.getHasAdminPermission() && !userRoles.contains(adminRole)) {
                 userRoles.add(adminRole);
-            } else {
+            } else if (!request.getHasAdminPermission()) {
                 userRoles.remove(adminRole);
             }
             hasHanged = true;
@@ -248,5 +321,18 @@ public class AppUserService implements UserDetailsService {
         }
 
         return AppUserDto.appUserEntityToDto(appUserEntity);
+    }
+
+    public List<AppUserBasicDto> getAllSupervisors() {
+        if (supervisorRole == null) {
+            supervisorRole = userRoleRepository.findByRoleNameIgnoreCase("supervisor")
+                    .orElseThrow(() -> new NoSuchElementException("No supervisor role found"));
+        }
+
+        List<AppUserEntity> supervisorEntities = appUserRepository.findAllByUserRolesContaining(supervisorRole);
+
+        return supervisorEntities.stream()
+                .map(AppUserBasicDto::appUserEntityToBasicDto)
+                .collect(Collectors.toList());
     }
 }
