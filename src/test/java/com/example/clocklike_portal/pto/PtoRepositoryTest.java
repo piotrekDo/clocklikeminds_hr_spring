@@ -106,7 +106,6 @@ class PtoRepositoryTest {
         testEntityManager.persist(pto6);
 
         List<PtoEntity> result = ptoRepository.findAllOverlappingRequests(testAppUser, testingEnd, testingStart);
-        result.forEach(System.out::println);
         assertEquals(List.of(pto1, pto2, pto5), result);
     }
 }

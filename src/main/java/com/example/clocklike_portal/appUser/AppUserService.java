@@ -42,6 +42,13 @@ public class AppUserService implements UserDetailsService {
         this.positionHistoryRepository = positionHistoryRepository;
     }
 
+    private void getSupervisorRole() {
+        if (supervisorRole == null) {
+            this.supervisorRole = userRoleRepository.findByRoleNameIgnoreCase("supervisor")
+                    .orElseThrow(() -> new NoSuchElementException("No supervisor role found"));
+        }
+    }
+
     private void updatePositionHistory(PositionEntity positionEntity, AppUserEntity appUserEntity, LocalDate start) {
         PositionHistory savedHistory = positionHistoryRepository.save(createNewPositionHistory(positionEntity, start));
         appUserEntity.getPositionHistory().add(savedHistory);
@@ -165,19 +172,27 @@ public class AppUserService implements UserDetailsService {
             if (appUserEntity.getSupervisor() != null && !request.getSupervisorId().equals(appUserEntity.getSupervisor().getAppUserId())) {
                 AppUserEntity newSupervisorEntity = appUserRepository.findById(request.getSupervisorId())
                         .orElseThrow(() -> new NoSuchElementException("No such supervisor found"));
+                getSupervisorRole();
+                if (!newSupervisorEntity.getUserRoles().contains(supervisorRole)) {
+                    throw new IllegalOperationException("Selected new supervisor doesn't have supervisor role");
+                }
                 AppUserEntity previousSupervisor = appUserRepository.findById(appUserEntity.getSupervisor().getAppUserId())
                         .orElseThrow(() -> new NoSuchElementException("No such supervisor found"));
                 Set<PtoEntity> previousSupervisorPtoAcceptor = previousSupervisor.getPtoAcceptor();
                 Set<PtoEntity> newSupervisorPtoAcceptor = newSupervisorEntity.getPtoAcceptor();
                 List<PtoEntity> userPtosToTransfer = previousSupervisorPtoAcceptor.stream()
-                        .filter(pto -> pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId()))
+                        .filter(pto -> pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId()) && pto.getDecisionDateTime() == null)
                         .toList();
 
-                previousSupervisor.setPtoAcceptor(previousSupervisorPtoAcceptor.stream().filter(pto -> !pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId())).collect(Collectors.toSet()));
+                previousSupervisor.setPtoAcceptor(previousSupervisorPtoAcceptor.stream()
+                        .filter(pto -> !pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId()) || pto.getDecisionDateTime() != null)
+                        .collect(Collectors.toSet()));
                 userPtosToTransfer.forEach(ptoEntity -> ptoEntity.setAcceptor(newSupervisorEntity));
                 newSupervisorPtoAcceptor.addAll(userPtosToTransfer);
                 newSupervisorEntity.setPtoAcceptor(newSupervisorPtoAcceptor);
                 appUserEntity.setSupervisor(newSupervisorEntity);
+                previousSupervisor.getSubordinates().remove(appUserEntity);
+                newSupervisorEntity.getSubordinates().add(appUserEntity);
             }
         }
 
@@ -186,7 +201,6 @@ public class AppUserService implements UserDetailsService {
 
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
-
 
     public AppUserDto updateHolidayData(UpdateEmployeeHolidayDataRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
@@ -211,10 +225,8 @@ public class AppUserService implements UserDetailsService {
 
         int subtractedLastYear = Math.min(accruedLastYear, daysTaken);
 
-
         appUserEntity.setPtoDaysLeftFromLastYear(Math.max(0, accruedLastYear - subtractedLastYear));
         appUserEntity.setPtoDaysLeftCurrentYear(Math.max(0, (accruedCurrentYear - (daysTaken - subtractedLastYear))));
-
 
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
@@ -233,8 +245,11 @@ public class AppUserService implements UserDetailsService {
 
         requests.forEach(req -> {
             Long positionHistoryId = req.getPositionHistoryId();
-            Optional<PositionHistory> historyOptional = currentPositionHistory.stream().filter(pos -> Objects.equals(pos.getPositionHistoryId(), positionHistoryId)).findFirst();
-            PositionHistory positionHistory = historyOptional.orElseThrow(() -> new IllegalOperationException("No such position found at user's history"));
+            Optional<PositionHistory> historyOptional = currentPositionHistory.stream()
+                    .filter(pos -> Objects.equals(pos.getPositionHistoryId(), positionHistoryId))
+                    .findFirst();
+            PositionHistory positionHistory = historyOptional.
+                    orElseThrow(() -> new IllegalOperationException("No such position found at user's history"));
 
             if (req.getStartDate() == null) {
                 if (appUserEntity.getPosition().getPositionKey().equals(positionHistory.getPosition().getPositionKey())) {
@@ -324,11 +339,7 @@ public class AppUserService implements UserDetailsService {
     }
 
     public List<AppUserBasicDto> getAllSupervisors() {
-        if (supervisorRole == null) {
-            supervisorRole = userRoleRepository.findByRoleNameIgnoreCase("supervisor")
-                    .orElseThrow(() -> new NoSuchElementException("No supervisor role found"));
-        }
-
+        getSupervisorRole();
         List<AppUserEntity> supervisorEntities = appUserRepository.findAllByUserRolesContaining(supervisorRole);
 
         return supervisorEntities.stream()

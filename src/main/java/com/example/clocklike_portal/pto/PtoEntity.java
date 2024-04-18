@@ -48,11 +48,41 @@ public class PtoEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PtoEntity ptoEntity = (PtoEntity) o;
-        return wasAccepted == ptoEntity.wasAccepted && businessDays == ptoEntity.businessDays && includingLastYearPool == ptoEntity.includingLastYearPool && Objects.equals(ptoRequestId, ptoEntity.ptoRequestId) && Objects.equals(requestDateTime, ptoEntity.requestDateTime) && Objects.equals(ptoStart, ptoEntity.ptoStart) && Objects.equals(ptoEnd, ptoEntity.ptoEnd) && Objects.equals(applier.getAppUserId(), ptoEntity.applier.getAppUserId()) && Objects.equals(acceptor.getAppUserId(), ptoEntity.acceptor.getAppUserId()) && Objects.equals(decisionDateTime, ptoEntity.decisionDateTime) && Objects.equals(declineReason, ptoEntity.declineReason);
+        return Objects.equals(ptoRequestId, ptoEntity.ptoRequestId) && Objects.equals(requestDateTime, ptoEntity.requestDateTime);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ptoRequestId, requestDateTime, ptoStart, ptoEnd, applier.getAppUserId(), acceptor.getAppUserId(), wasAccepted, decisionDateTime, businessDays, includingLastYearPool, declineReason);
+        return Objects.hash(ptoRequestId, requestDateTime);
     }
+
+    @Override
+    public String toString() {
+        return "PtoEntity{" +
+                "ptoRequestId=" + ptoRequestId +
+                ", requestDateTime=" + requestDateTime +
+                ", ptoStart=" + ptoStart +
+                ", ptoEnd=" + ptoEnd +
+                ", applier=" + applier.getAppUserId() +
+                ", acceptor=" + acceptor.getAppUserId() +
+                ", wasAccepted=" + wasAccepted +
+                ", decisionDateTime=" + decisionDateTime +
+                ", businessDays=" + businessDays +
+                ", includingLastYearPool=" + includingLastYearPool +
+                ", declineReason='" + declineReason + '\'' +
+                '}';
+    }
+
+    //    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        PtoEntity ptoEntity = (PtoEntity) o;
+//        return wasAccepted == ptoEntity.wasAccepted && businessDays == ptoEntity.businessDays && includingLastYearPool == ptoEntity.includingLastYearPool && Objects.equals(ptoRequestId, ptoEntity.ptoRequestId) && Objects.equals(requestDateTime, ptoEntity.requestDateTime) && Objects.equals(ptoStart, ptoEntity.ptoStart) && Objects.equals(ptoEnd, ptoEntity.ptoEnd) && Objects.equals(applier.getAppUserId(), ptoEntity.applier.getAppUserId()) && Objects.equals(acceptor.getAppUserId(), ptoEntity.acceptor.getAppUserId()) && Objects.equals(decisionDateTime, ptoEntity.decisionDateTime) && Objects.equals(declineReason, ptoEntity.declineReason);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(ptoRequestId, requestDateTime, ptoStart, ptoEnd, applier.getAppUserId(), acceptor.getAppUserId(), wasAccepted, decisionDateTime, businessDays, includingLastYearPool, declineReason);
+//    }
 }
