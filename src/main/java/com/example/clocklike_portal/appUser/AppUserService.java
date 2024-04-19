@@ -293,7 +293,7 @@ public class AppUserService implements UserDetailsService {
             } else if (!request.getHasSupervisorRole()) {
                 Set<PtoEntity> ptoAsAcceptor = appUserEntity.getPtoAcceptor();
                 ptoAsAcceptor.forEach(ptoEntity -> {
-                    if (!ptoEntity.isWasAccepted() && ptoEntity.getDecisionDateTime() == null) {
+                    if (ptoEntity.getDecisionDateTime() == null) {
 
                         int requestBusinessDays = ptoEntity.getBusinessDays();
                         int includingLastYearPool = ptoEntity.getIncludingLastYearPool();

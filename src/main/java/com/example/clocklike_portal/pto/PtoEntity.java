@@ -34,13 +34,14 @@ public class PtoEntity {
     private int includingLastYearPool;
     private String declineReason;
 
-    PtoEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays) {
+    public PtoEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         this.requestDateTime = LocalDateTime.now();
         this.ptoStart = ptoStart;
         this.ptoEnd = ptoEnd;
         this.applier = applier;
         this.acceptor = acceptor;
         this.businessDays = businessDays;
+        this.includingLastYearPool = includingLastYearPool;
     }
 
     @Override
