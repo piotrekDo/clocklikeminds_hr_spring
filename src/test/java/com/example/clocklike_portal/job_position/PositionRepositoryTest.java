@@ -1,4 +1,4 @@
-package com.example.clocklike_portal.appUser;
+package com.example.clocklike_portal.job_position;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,23 +10,25 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class AppUserRepositoryTest {
+class PositionRepositoryTest {
 
     @Autowired
     TestEntityManager testEntityManager;
 
     @Autowired
-    AppUserRepository appUserRepository;
+    PositionRepository positionRepository;
 
     @ParameterizedTest
-    @ValueSource(strings = {"test@test.com", "TEST@TEST.COM", "TeSt@tEsT.COm"})
-    void findByUserEmailIgnoreCaseShouldReturnValidRecordIgnoringCase(String input) {
-        AppUserEntity testAppUser = AppUserEntity.createTestAppUser("test", "test", "test@test.com");
-        testEntityManager.persist(testAppUser);
+    @ValueSource(strings = {"java_dev", "JAVA_DEV", "Java_Dev"})
+    void findByPositionKeyIgnoreCaseShouldReturnValidRecordsIgnoringCase(String input) {
+        PositionEntity javaDevPosition = new PositionEntity("java_dev", "Java Developer");
+        testEntityManager.persist(javaDevPosition);
 
-        assertEquals(testAppUser, appUserRepository.findByUserEmailIgnoreCase(input).get());
+        assertEquals(javaDevPosition, positionRepository.findByPositionKeyIgnoreCase(input).get());
     }
+
 }
