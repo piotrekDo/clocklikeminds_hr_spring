@@ -18,6 +18,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
+import static com.example.clocklike_portal.security.SecurityConfig.SUPERVISOR_AUTHORITY;
+
 @Component
 @RequiredArgsConstructor
 public class PtoService {
@@ -50,15 +53,27 @@ public class PtoService {
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + dto.getApplierId()));
 
         if (!applier.isActive()) {
-            throw new IllegalOperationException("User account is not active!");
+            throw new IllegalOperationException("Applier account is not active.");
         }
 
         AppUserEntity acceptor = appUserRepository.findById(dto.getAcceptorId())
                 .orElseThrow(() -> new NoSuchElementException("No user found for acceptor with ID: " + dto.getAcceptorId()));
 
-        boolean isAcceptorAdmin = acceptor.getUserRoles().stream().filter(r -> r.getRoleName().equals("admin")).toList().size() == 1;
+        if (!acceptor.isActive()) {
+            throw new IllegalOperationException("Acceptor account is not active.");
+        }
 
-        if (!isAcceptorAdmin) {
+        boolean isAcceptorAdmin = acceptor.getUserRoles().stream()
+                .filter(r -> r.getRoleName().equals(ADMIN_AUTHORITY))
+                .toList()
+                .size() == 1;
+
+        boolean isAcceptorSupervisor = acceptor.getUserRoles().stream()
+                .filter(r -> r.getRoleName().equals(SUPERVISOR_AUTHORITY))
+                .toList()
+                .size() == 1;
+
+        if (!(isAcceptorSupervisor || isAcceptorAdmin)) {
             throw new IllegalOperationException("Selected acceptor has no authorities to accept pto requests");
         }
 
@@ -108,8 +123,13 @@ public class PtoService {
         AppUserEntity applier = ptoRequest.getApplier();
         AppUserEntity acceptor = ptoRequest.getAcceptor();
 
-        if (!acceptor.getUserEmail().equalsIgnoreCase(currentUserEmail)) {
-            throw new IllegalOperationException("You are not authorized to resolve this PTO request!");
+        boolean isActiveAcceptor = acceptor.isActive();
+        boolean isAdminAcceptor = acceptor.getUserRoles().stream().anyMatch(r -> r.getRoleName().equals(ADMIN_AUTHORITY));
+        boolean isSupervisorAcceptor = acceptor.getUserRoles().stream().anyMatch(r -> r.getRoleName().equals(SUPERVISOR_AUTHORITY));
+        boolean isMatchingAcceptor = acceptor.getUserEmail().equalsIgnoreCase(currentUserEmail);
+
+        if (!(isActiveAcceptor && (isAdminAcceptor || (isSupervisorAcceptor && isMatchingAcceptor)))) {
+            throw new IllegalOperationException("You are not authorized to resolve this PTO request.");
         }
 
         Boolean isRequestAccepted = dto.getIsAccepted();

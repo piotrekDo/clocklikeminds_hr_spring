@@ -32,9 +32,9 @@ public class SecurityConfig {
     private final AppUserService userService;
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    private final static String USER_AUTHORITY = "user";
-    private final static String ADMIN_AUTHORITY = "admin";
-    private final static String SUPERVISOR_AUTHORITY = "supervisor";
+    public final static String USER_AUTHORITY = "user";
+    public final static String ADMIN_AUTHORITY = "admin";
+    public final static String SUPERVISOR_AUTHORITY = "supervisor";
 
 
     @Bean

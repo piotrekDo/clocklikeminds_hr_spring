@@ -25,33 +25,33 @@ class PtoRepositoryTest {
     @Autowired
     TestEntityManager testEntityManager;
 
-//    @Test
-//    void find_requests_for_year_should_return_requests_for_given_year_and_january_next_year_and_december_last_year() {
-//        //given
-//        int givenYear = 2024;
-//        PtoEntity givenYearMidYear = new PtoEntity(LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 12), null, null, 0);
-//        PtoEntity givenYearDec = new PtoEntity(LocalDate.of(2024, 12, 10), LocalDate.of(2024, 12, 12), null, null, 0);
-//        PtoEntity givenYearDecToJan = new PtoEntity(LocalDate.of(2024, 12, 26), LocalDate.of(2025, 1, 3), null, null, 0);
-//        PtoEntity givenYearJanDecPrev = new PtoEntity(LocalDate.of(2023, 12, 26), LocalDate.of(2024, 1, 3), null, null, 0);
-//        PtoEntity prevYearDec = new PtoEntity(LocalDate.of(2023, 11, 26), LocalDate.of(2023, 12, 7), null, null, 0);
-//        PtoEntity nextYearJan = new PtoEntity(LocalDate.of(2025, 1, 26), LocalDate.of(2025, 2, 7), null, null, 0);
-//        PtoEntity nextYearMidYear = new PtoEntity(LocalDate.of(2025, 7, 12), LocalDate.of(2025, 7, 17), null, null, 0);
-//        PtoEntity prevYearMidYear = new PtoEntity(LocalDate.of(2025, 6, 12), LocalDate.of(2025, 7, 17), null, null, 0);
-//        testEntityManager.persist(givenYearMidYear);
-//        testEntityManager.persist(givenYearDec);
-//        testEntityManager.persist(givenYearDecToJan);
-//        testEntityManager.persist(givenYearJanDecPrev);
-//        testEntityManager.persist(prevYearDec);
-//        testEntityManager.persist(nextYearJan);
-//        testEntityManager.persist(nextYearMidYear);
-//        testEntityManager.persist(prevYearMidYear);
-//
-//        //when
-//        List<PtoEntity> result = ptoRepository.findRequestsForYear(2024);
-//
-//        //then
-//        assertEquals(List.of(givenYearMidYear, givenYearDec, givenYearDecToJan, givenYearJanDecPrev, prevYearDec, nextYearJan), result);
-//    }
+    @Test
+    void find_requests_for_year_should_return_requests_for_given_year_and_january_next_year_and_december_last_year() {
+        //given
+        int givenYear = 2024;
+        PtoEntity givenYearMidYear = new PtoEntity(LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 12), null, null, 0, 0);
+        PtoEntity givenYearDec = new PtoEntity(LocalDate.of(2024, 12, 10), LocalDate.of(2024, 12, 12), null, null, 0, 0);
+        PtoEntity givenYearDecToJan = new PtoEntity(LocalDate.of(2024, 12, 26), LocalDate.of(2025, 1, 3), null, null, 0, 0);
+        PtoEntity givenYearJanDecPrev = new PtoEntity(LocalDate.of(2023, 12, 26), LocalDate.of(2024, 1, 3), null, null, 0, 0);
+        PtoEntity prevYearDec = new PtoEntity(LocalDate.of(2023, 11, 26), LocalDate.of(2023, 12, 7), null, null, 0, 0);
+        PtoEntity nextYearJan = new PtoEntity(LocalDate.of(2025, 1, 26), LocalDate.of(2025, 2, 7), null, null, 0, 0);
+        PtoEntity nextYearMidYear = new PtoEntity(LocalDate.of(2025, 7, 12), LocalDate.of(2025, 7, 17), null, null, 0, 0);
+        PtoEntity prevYearMidYear = new PtoEntity(LocalDate.of(2025, 6, 12), LocalDate.of(2025, 7, 17), null, null, 0, 0);
+        testEntityManager.persist(givenYearMidYear);
+        testEntityManager.persist(givenYearDec);
+        testEntityManager.persist(givenYearDecToJan);
+        testEntityManager.persist(givenYearJanDecPrev);
+        testEntityManager.persist(prevYearDec);
+        testEntityManager.persist(nextYearJan);
+        testEntityManager.persist(nextYearMidYear);
+        testEntityManager.persist(prevYearMidYear);
+
+        //when
+        List<PtoEntity> result = ptoRepository.findRequestsForYear(2024);
+
+        //then
+        assertEquals(List.of(givenYearMidYear, givenYearDec, givenYearDecToJan, givenYearJanDecPrev, prevYearDec, nextYearJan), result);
+    }
 
     @Test
     void find_request_by_user_and_date_frames_should_return_corresponding_requests() {
