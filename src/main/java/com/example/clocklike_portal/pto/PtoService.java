@@ -149,8 +149,8 @@ public class PtoService {
         return ptoTransformer.ptoEntityToDto(updatedPtoRequest);
     }
 
-    List<PtoDto> findAllRequestsToAcceptByAcceptId(long id) {
-        return ptoRequestsRepository.findAllByDecisionDateTimeIsNullAndAcceptor_appUserId(id).stream()
+    List<PtoDto> findAllRequestsByAcceptorId(long id) {
+        return ptoRequestsRepository.findAllByAcceptor_appUserId(id).stream()
                 .map(ptoTransformer::ptoEntityToDto)
                 .toList();
     }

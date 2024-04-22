@@ -169,29 +169,32 @@ public class AppUserService implements UserDetailsService {
         }
 
         if (request.getSupervisorId() != null) {
-            if (appUserEntity.getSupervisor() != null && !request.getSupervisorId().equals(appUserEntity.getSupervisor().getAppUserId())) {
+            if (appUserEntity.getSupervisor() == null || !request.getSupervisorId().equals(appUserEntity.getSupervisor().getAppUserId())) {
                 AppUserEntity newSupervisorEntity = appUserRepository.findById(request.getSupervisorId())
                         .orElseThrow(() -> new NoSuchElementException("No such supervisor found"));
                 getSupervisorRole();
                 if (!newSupervisorEntity.getUserRoles().contains(supervisorRole)) {
                     throw new IllegalOperationException("Selected new supervisor doesn't have supervisor role");
                 }
-                AppUserEntity previousSupervisor = appUserRepository.findById(appUserEntity.getSupervisor().getAppUserId())
-                        .orElseThrow(() -> new NoSuchElementException("No such supervisor found"));
-                Set<PtoEntity> previousSupervisorPtoAcceptor = previousSupervisor.getPtoAcceptor();
-                Set<PtoEntity> newSupervisorPtoAcceptor = newSupervisorEntity.getPtoAcceptor();
-                List<PtoEntity> userPtosToTransfer = previousSupervisorPtoAcceptor.stream()
-                        .filter(pto -> pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId()) && pto.getDecisionDateTime() == null)
-                        .toList();
+                if (appUserEntity.getSupervisor() != null) {
+                    AppUserEntity previousSupervisor = appUserRepository.findById(appUserEntity.getSupervisor().getAppUserId())
+                            .orElseThrow(() -> new NoSuchElementException("No such supervisor found"));
+                    Set<PtoEntity> previousSupervisorPtoAcceptor = previousSupervisor.getPtoAcceptor();
+                    Set<PtoEntity> newSupervisorPtoAcceptor = newSupervisorEntity.getPtoAcceptor();
+                    List<PtoEntity> userPtosToTransfer = previousSupervisorPtoAcceptor.stream()
+                            .filter(pto -> pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId()) && pto.getDecisionDateTime() == null)
+                            .toList();
 
-                previousSupervisor.setPtoAcceptor(previousSupervisorPtoAcceptor.stream()
-                        .filter(pto -> !pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId()) || pto.getDecisionDateTime() != null)
-                        .collect(Collectors.toSet()));
-                userPtosToTransfer.forEach(ptoEntity -> ptoEntity.setAcceptor(newSupervisorEntity));
-                newSupervisorPtoAcceptor.addAll(userPtosToTransfer);
-                newSupervisorEntity.setPtoAcceptor(newSupervisorPtoAcceptor);
+                    previousSupervisor.setPtoAcceptor(previousSupervisorPtoAcceptor.stream()
+                            .filter(pto -> !pto.getApplier().getAppUserId().equals(appUserEntity.getAppUserId()) || pto.getDecisionDateTime() != null)
+                            .collect(Collectors.toSet()));
+                    userPtosToTransfer.forEach(ptoEntity -> ptoEntity.setAcceptor(newSupervisorEntity));
+                    newSupervisorPtoAcceptor.addAll(userPtosToTransfer);
+                    newSupervisorEntity.setPtoAcceptor(newSupervisorPtoAcceptor);
+                    previousSupervisor.getSubordinates().remove(appUserEntity);
+                }
+
                 appUserEntity.setSupervisor(newSupervisorEntity);
-                previousSupervisor.getSubordinates().remove(appUserEntity);
                 newSupervisorEntity.getSubordinates().add(appUserEntity);
             }
         }

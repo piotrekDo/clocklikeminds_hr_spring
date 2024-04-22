@@ -26,9 +26,9 @@ public class PtoController {
         return ptoService.getPtoRequests(id, page, size);
     }
 
-    @GetMapping("/requests-to-accept")
-    List<PtoDto> findAllRequestAcceptByAcceptId(@RequestParam long acceptorId) {
-        return ptoService.findAllRequestsToAcceptByAcceptId(acceptorId);
+    @GetMapping("/requests-by-acceptor")
+    List<PtoDto> findAllRequestsByAcceptorId(@RequestParam long acceptorId) {
+        return ptoService.findAllRequestsByAcceptorId(acceptorId);
     }
 
     @PostMapping("/resolve-request")

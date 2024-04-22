@@ -16,7 +16,7 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
 
     List<PtoEntity> findAllByDecisionDateTimeIsNull();
 
-    List<PtoEntity> findAllByDecisionDateTimeIsNullAndAcceptor_appUserId(long id);
+    List<PtoEntity> findAllByAcceptor_appUserId(long id);
 
     List<PtoEntity> findAllByDecisionDateTimeIsNullAndApplier_appUserId(long id);
 
