@@ -70,5 +70,9 @@ public class Initializer {
         user2.setUserRoles(List.of(userRole));
         appUserRepository.save(user2);
 
+        piotrek.setSupervisor(piotrek);
+        admin.setSupervisor(piotrek);
+        appUserRepository.save(piotrek);
+        appUserRepository.save(admin);
     }
 }

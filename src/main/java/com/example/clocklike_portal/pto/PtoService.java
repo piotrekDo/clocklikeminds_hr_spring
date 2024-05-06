@@ -43,7 +43,7 @@ public class PtoService {
     PtoSummary getUserPtoSummary(long userId) {
         AppUserEntity user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + userId));
-        Page<PtoEntity> result = ptoRequestsRepository.findAllByApplier_AppUserId(userId, PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "requestDateTime")));
+        Page<PtoEntity> result = ptoRequestsRepository.findAllByApplier_AppUserId(userId, PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "requestDateTime")));
 
         return ptoTransformer.createPtoSummary(user, result.getContent());
     }
@@ -56,8 +56,20 @@ public class PtoService {
             throw new IllegalOperationException("Applier account is not active.");
         }
 
-        AppUserEntity acceptor = appUserRepository.findById(dto.getAcceptorId())
-                .orElseThrow(() -> new NoSuchElementException("No user found for acceptor with ID: " + dto.getAcceptorId()));
+        AppUserEntity acceptor = null;
+
+        if (dto.getAcceptorId() != null) {
+            acceptor = appUserRepository.findById(dto.getAcceptorId())
+                    .orElseThrow(() -> new NoSuchElementException("No user found for acceptor with ID: " + dto.getAcceptorId()));
+        } else {
+            AppUserEntity appliersSupervisor = applier.getSupervisor();
+            if (appliersSupervisor == null) {
+                throw new IllegalOperationException("Applier has no supervisor and no other acceptor was provided");
+            } else {
+                acceptor = appliersSupervisor;
+            }
+        }
+
 
         if (!acceptor.isActive()) {
             throw new IllegalOperationException("Acceptor account is not active.");
@@ -84,11 +96,11 @@ public class PtoService {
             throw new IllegalOperationException("End date cannot be before start date");
         }
 
-        List<PtoEntity> collidingRequests = ptoRequestsRepository
-                .findAllOverlappingRequests(applier, toDate, startDate);
-        if (collidingRequests.size() > 0) {
-            throw new IllegalOperationException("Request colliding with other pto request");
-        }
+//        List<PtoEntity> collidingRequests = ptoRequestsRepository
+//                .findAllOverlappingRequests(applier, toDate, startDate);
+//        if (collidingRequests.size() > 0) {
+//            throw new IllegalOperationException("Request colliding with other pto request");
+//        }
 
         int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
         int ptoDaysFromLastYear = applier.getPtoDaysLeftFromLastYear();
@@ -163,6 +175,21 @@ public class PtoService {
 
     public List<PtoDto> getRequestsForYearForAllUsers(Integer year) {
         return ptoRequestsRepository.findRequestsForYear(year).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    List<PtoDto> findAllUnresolvedPtoRequestsByAcceptor(Long id) {
+        return ptoRequestsRepository.findAllByDecisionDateTimeIsNullAndAcceptor_AppUserId(id).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    public List<PtoDto> getRequestsForSupervisorCalendar(Long acceptorId, String start, String end) {
+        LocalDate startDate = LocalDate.parse(start, dateFormatter);
+        LocalDate endDate = LocalDate.parse(end, dateFormatter);
+
+        return ptoRequestsRepository.findRequestsByAcceptorAndTimeFrame(acceptorId, startDate, endDate).stream()
                 .map(ptoTransformer::ptoEntityToDto)
                 .toList();
     }

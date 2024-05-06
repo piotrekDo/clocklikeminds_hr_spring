@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -26,6 +27,11 @@ public class PtoController {
         return ptoService.getPtoRequests(id, page, size);
     }
 
+    @GetMapping("/unresolved-by-acceptor")
+    List<PtoDto> findAllUnresolvedPtoRequestsByAcceptor(@RequestParam Long id) {
+        return ptoService.findAllUnresolvedPtoRequestsByAcceptor(id);
+    }
+
     @GetMapping("/requests-by-acceptor")
     List<PtoDto> findAllRequestsByAcceptorId(@RequestParam long acceptorId) {
         return ptoService.findAllRequestsByAcceptorId(acceptorId);
@@ -44,5 +50,10 @@ public class PtoController {
     @GetMapping("/requests-for-year")
     List<PtoDto> getRequestsForSelectedYear(@RequestParam Long userId, @RequestParam Integer year) {
         return ptoService.getRequestsForUserForYear(year, userId);
+    }
+
+    @GetMapping("/requests-for-supervisor-calendar")
+    List<PtoDto> getRequestsForSupervisorCalendar(@RequestParam Long acceptorId, @RequestParam String start, @RequestParam String end) {
+        return ptoService.getRequestsForSupervisorCalendar(acceptorId, start, end);
     }
 }

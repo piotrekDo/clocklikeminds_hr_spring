@@ -236,6 +236,27 @@ class PtoServiceTest {
         assertEquals(0, acceptor.getPtoRequests().size());
     }
 
+    //    @Test
+//    void requestPtoShouldUseApplierSupervisorAsAcceptorWhenNoOtherAcceptorSpecified() {
+//        UserRole supervisorRole = new UserRole("supervisor");
+//        AppUserEntity supervisor = createTestAppUser("supervisor", "supervisor", "supervisor@mail.com");
+//        supervisor.setAppUserId(2L);
+//        supervisor.setActive(true);
+//        supervisor.getUserRoles().add(supervisorRole);
+//        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, null);
+//        AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
+//        applier.setAppUserId(1L);
+//        applier.setActive(true);
+//        applier.setSupervisor(supervisor);
+//        supervisor.getSubordinates().add(applier);
+//
+//        Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(applier));
+//        Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2023, 5, 1), LocalDate.of(2023, 5, 1))).thenReturn(true);
+//
+//        assert
+//
+//    }
+
     @Test
     void resolveRequestShouldThrowAnExceptionWhenNoPtoToResolveFound() {
         ResolvePtoRequest request = new ResolvePtoRequest(12L, false, null);

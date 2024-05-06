@@ -32,7 +32,7 @@ public class AppUserController {
     @GetMapping("/supervisors")
     List<AppUserBasicDto> getAllSupervisors() {
         return appUserService.getAllSupervisors();
-    };
+    }
 
     @PostMapping("/update-hire-data")
     AppUserDto updateHireData(@RequestBody UpdateHireDataRequest request) {

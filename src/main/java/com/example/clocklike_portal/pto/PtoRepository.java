@@ -18,6 +18,8 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
 
     List<PtoEntity> findAllByAcceptor_appUserId(long id);
 
+    List<PtoEntity> findAllByDecisionDateTimeIsNullAndAcceptor_AppUserId(long id);
+
     List<PtoEntity> findAllByDecisionDateTimeIsNullAndApplier_appUserId(long id);
 
     Page<PtoEntity> findAllByApplier_AppUserId(long id, PageRequest pageable);
@@ -38,6 +40,13 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
             "OR (MONTH(p.ptoStart) = 1 AND YEAR(p.ptoStart) = :year + 1)")
     List<PtoEntity> findRequestsForYear(@Param("year") int year, @Param("userId") Long userId);
 
+    @Query("SELECT p FROM pto_requests p WHERE (p.acceptor.appUserId = :acceptorID) AND " +
+            "(p.wasAccepted = TRUE OR p.decisionDateTime IS NULL) AND " +
+            "(p.ptoStart >= :start AND p.ptoStart <= :end) " +
+            "ORDER BY p.requestDateTime DESC")
+    List<PtoEntity> findRequestsByAcceptorAndTimeFrame(@Param("acceptorID") Long acceptorID,
+                                                       @Param("start") LocalDate start,
+                                                       @Param("end") LocalDate end);
 
     @Query("SELECT p FROM pto_requests p " +
             "WHERE p.applier = :applier " +
