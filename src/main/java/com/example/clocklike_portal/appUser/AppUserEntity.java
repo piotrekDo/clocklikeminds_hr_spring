@@ -29,6 +29,7 @@ public class AppUserEntity {
     private String lastName;
     @Column(unique = true)
     private String userEmail;
+    private String imageUrl;
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<UserRole> userRoles = new LinkedHashSet<>();
     private boolean isRegistrationFinished;
@@ -61,6 +62,7 @@ public class AppUserEntity {
                 firstName,
                 lastName,
                 userEmail,
+                null,
                 new LinkedHashSet<>(),
                 false,
                 false,
@@ -88,6 +90,7 @@ public class AppUserEntity {
                 googlePrincipal.getFirstName(),
                 googlePrincipal.getLastName(),
                 googlePrincipal.getEmail(),
+                googlePrincipal.getPictureUrl(),
                 null,
                 false,
                 false,

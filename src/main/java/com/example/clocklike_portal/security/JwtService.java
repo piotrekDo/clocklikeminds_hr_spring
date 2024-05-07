@@ -39,7 +39,8 @@ public class JwtService {
         return generateToken(Map.of(
                         "roles", authorities,
                         "userId", appUserId,
-                        "active", appUser.isActive()),
+                        "active", appUser.isActive(),
+                        "imageUrl", appUser.getImageUrl()),
                 userDetails);
     }
 

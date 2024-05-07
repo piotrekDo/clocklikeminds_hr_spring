@@ -46,6 +46,9 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         AppUserEntity appUserEntity = userRepository.findByUserEmailIgnoreCase(googlePrincipal.getEmail())
                 .orElseGet(() -> appUserService.registerNewUser(googlePrincipal));
 
+        appUserEntity.setImageUrl(googlePrincipal.getPictureUrl());
+        userRepository.save(appUserEntity);
+
         String jwtToken = jwtService.generateToken(appUserEntity);
         loginService.appendAuthCookie(response, jwtToken);
         getRedirectStrategy().sendRedirect(request, response, AUTHENTICATED_REDIRECTION);

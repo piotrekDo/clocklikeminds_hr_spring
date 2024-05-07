@@ -41,7 +41,7 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
     List<PtoEntity> findRequestsForYear(@Param("year") int year, @Param("userId") Long userId);
 
     @Query("SELECT p FROM pto_requests p WHERE (p.acceptor.appUserId = :acceptorID) AND " +
-            "(p.wasAccepted = TRUE OR p.decisionDateTime IS NULL) AND " +
+//            "(p.wasAccepted = TRUE OR p.decisionDateTime IS NULL) AND " +
             "(p.ptoStart >= :start AND p.ptoStart <= :end) " +
             "ORDER BY p.requestDateTime DESC")
     List<PtoEntity> findRequestsByAcceptorAndTimeFrame(@Param("acceptorID") Long acceptorID,

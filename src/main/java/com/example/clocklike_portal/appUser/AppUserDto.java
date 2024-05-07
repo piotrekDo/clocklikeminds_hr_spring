@@ -21,6 +21,7 @@ public class AppUserDto {
     private String firstName;
     private String lastName;
     private String userEmail;
+    private String imageUrl;
     private List<UserRole> userRoles;
     private boolean isRegistrationFinished;
     private boolean isActive;
@@ -66,6 +67,7 @@ public class AppUserDto {
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getUserEmail(),
+                entity.getImageUrl(),
                 entity.getUserRoles().stream().toList(),
                 entity.isRegistrationFinished(),
                 entity.isActive(),

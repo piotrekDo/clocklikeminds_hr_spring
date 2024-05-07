@@ -266,7 +266,7 @@ class AppUserServiceTest {
         testAppUser.setPtoDaysAccruedLastYear(parseInt(userLastYearVal));
         testAppUser.setPtoDaysTaken(parseInt(daysTaken));
 
-        AppUserDto dto = new AppUserDto(1L, "first", "last", "mail@mail.com", null, true, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken), 0, null, null, null);
+        AppUserDto dto = new AppUserDto(1L, "first", "last", "mail@mail.com", null, null, true, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken), 0, null, null, null);
 
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
         Mockito.when(appUserRepository.save(Mockito.any())).thenReturn(testAppUser);
