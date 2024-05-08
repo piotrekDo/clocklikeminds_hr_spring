@@ -218,7 +218,7 @@ class PtoServiceTest {
         acceptor.setActive(true);
         acceptor.setUserRoles(List.of(new UserRole(1L, "admin")));
         PtoEntity ptoEntity = new PtoEntity(1L, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2, null);
-        PtoDto ptoDto = new PtoDto(1L, true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", 17, 5, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null);
+        PtoDto ptoDto = new PtoDto(1L, true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null);
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(true);

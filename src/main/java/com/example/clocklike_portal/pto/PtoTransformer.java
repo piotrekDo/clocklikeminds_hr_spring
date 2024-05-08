@@ -64,6 +64,7 @@ public class PtoTransformer {
                 applier.getUserEmail(),
                 applier.getPtoDaysLeftCurrentYear() + applier.getPtoDaysLeftFromLastYear(),
                 applier.getPtoDaysTaken(),
+                applier.getImageUrl(),
                 acceptor.getAppUserId(),
                 acceptor.getFirstName(),
                 acceptor.getLastName(),

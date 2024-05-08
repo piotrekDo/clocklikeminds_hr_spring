@@ -21,6 +21,7 @@ public class PtoDto {
     private String applierEmail;
     private int applierPtoDaysTotal;
     private int applierPtoDaysTaken;
+    private String applierImageUrl;
     private long acceptorId;
     private String acceptorFirstName;
     private String acceptorLastName;
