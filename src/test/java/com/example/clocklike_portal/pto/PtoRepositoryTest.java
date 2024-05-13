@@ -29,13 +29,17 @@ class PtoRepositoryTest {
     void find_requests_by_acceptor_and_time_frame_should_return_corresponding_requests() {
         AppUserEntity acceptor = testEntityManager.persist(AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@mail.com"));
         AppUserEntity acceptor2 = testEntityManager.persist(AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor2@mail.com"));
-        PtoEntity unMatching1 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor2).ptoStart(LocalDate.of(2024, 5, 10)).ptoEnd(LocalDate.of(2024, 5, 12)).build());
-        PtoEntity unMatching2 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor2).ptoStart(LocalDate.of(2024, 5, 10)).ptoEnd(LocalDate.of(2024, 5, 12)).decisionDateTime(LocalDateTime.now()).wasAccepted(true).build());
-        PtoEntity unMatching3 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 4, 30)).ptoEnd(LocalDate.of(2024, 5, 12)).build());
-        PtoEntity unMatching4 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 6, 1)).ptoEnd(LocalDate.of(2024, 5, 12)).build());
-        PtoEntity matching1 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 5, 1)).ptoEnd(LocalDate.of(2024, 5, 12)).build());
-        PtoEntity matching2 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 5, 12)).ptoEnd(LocalDate.of(2024, 7, 1)).build());
-        PtoEntity matching3 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 5, 31)).ptoEnd(LocalDate.of(2024, 7, 1)).build());
+
+        PtoEntity unMatching1 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor2).ptoStart(LocalDate.of(2024, 4, 10)).ptoEnd(LocalDate.of(2024, 4, 12)).build());
+        PtoEntity unMatching2 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor2).ptoStart(LocalDate.of(2024, 7, 10)).ptoEnd(LocalDate.of(2024, 12, 12)).decisionDateTime(LocalDateTime.now()).wasAccepted(true).build());
+        PtoEntity unMatching3 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2023, 4, 30)).ptoEnd(LocalDate.of(2023, 5, 12)).build());
+        PtoEntity unMatching4 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2023, 5, 1)).ptoEnd(LocalDate.of(2023, 5, 12)).build());
+
+        PtoEntity matching1 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 5, 1)).ptoEnd(LocalDate.of(2024, 5, 31)).build());
+        PtoEntity matching2 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 5, 5)).ptoEnd(LocalDate.of(2024, 5, 20)).build());
+        PtoEntity matching3 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 5, 12)).ptoEnd(LocalDate.of(2024, 7, 1)).build());
+        PtoEntity matching4 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 4, 17)).ptoEnd(LocalDate.of(2024, 5, 10)).build());
+        PtoEntity matching5 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2024, 4, 25)).ptoEnd(LocalDate.of(2024, 7, 10)).build());
 
         LocalDate start = LocalDate.of(2024, 5, 1);
         LocalDate end = LocalDate.of(2024, 5, 31);
@@ -44,10 +48,12 @@ class PtoRepositoryTest {
 
         result.forEach(x -> System.out.println(x.getPtoStart()
         ));
-        assertEquals(3, result.size());
+        assertEquals(5, result.size());
         assertEquals(matching1.getPtoRequestId(), result.get(0).getPtoRequestId());
         assertEquals(matching2.getPtoRequestId(), result.get(1).getPtoRequestId());
         assertEquals(matching3.getPtoRequestId(), result.get(2).getPtoRequestId());
+        assertEquals(matching4.getPtoRequestId(), result.get(3).getPtoRequestId());
+        assertEquals(matching5.getPtoRequestId(), result.get(4).getPtoRequestId());
     }
 
     @Test

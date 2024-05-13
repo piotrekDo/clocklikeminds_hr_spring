@@ -96,11 +96,11 @@ public class PtoService {
             throw new IllegalOperationException("End date cannot be before start date");
         }
 
-//        List<PtoEntity> collidingRequests = ptoRequestsRepository
-//                .findAllOverlappingRequests(applier, toDate, startDate);
-//        if (collidingRequests.size() > 0) {
-//            throw new IllegalOperationException("Request colliding with other pto request");
-//        }
+        List<PtoEntity> collidingRequests = ptoRequestsRepository
+                .findAllOverlappingRequests(applier, toDate, startDate);
+        if (collidingRequests.size() > 0) {
+            throw new IllegalOperationException("Request colliding with other pto request");
+        }
 
         int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
         int ptoDaysFromLastYear = applier.getPtoDaysLeftFromLastYear();
