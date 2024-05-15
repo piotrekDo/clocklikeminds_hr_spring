@@ -148,9 +148,12 @@ public class PtoService {
         if (!isRequestAccepted) {
             ptoRequest.setDeclineReason(dto.getDeclineReason());
             int requestBusinessDays = ptoRequest.getBusinessDays();
-            int includingLastYearPool = ptoRequest.getIncludingLastYearPool();
-            applier.setPtoDaysLeftFromLastYear(applier.getPtoDaysLeftFromLastYear() + includingLastYearPool);
-            applier.setPtoDaysLeftCurrentYear(applier.getPtoDaysLeftCurrentYear() + (requestBusinessDays - includingLastYearPool));
+            int ptoDaysAccruedCurrentYear = applier.getPtoDaysAccruedCurrentYear();
+            int ptoDaysLeftCurrentYear = applier.getPtoDaysLeftCurrentYear();
+            int fromLastYear = Math.max(0, (ptoDaysLeftCurrentYear + requestBusinessDays) - ptoDaysAccruedCurrentYear);
+
+            applier.setPtoDaysLeftCurrentYear(ptoDaysLeftCurrentYear + (requestBusinessDays - fromLastYear));
+            applier.setPtoDaysLeftFromLastYear(applier.getPtoDaysLeftFromLastYear() + fromLastYear);
             applier.setPtoDaysTaken(applier.getPtoDaysTaken() - requestBusinessDays);
         }
 

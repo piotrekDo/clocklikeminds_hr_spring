@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;
+import static java.lang.Integer.parseInt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -188,8 +189,8 @@ class PtoServiceTest {
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
-        applier.setPtoDaysLeftCurrentYear(Integer.parseInt(ptoCurrentYear));
-        applier.setPtoDaysLeftCurrentYear(Integer.parseInt(ptoLeftLastYear));
+        applier.setPtoDaysLeftCurrentYear(parseInt(ptoCurrentYear));
+        applier.setPtoDaysLeftCurrentYear(parseInt(ptoLeftLastYear));
         AppUserEntity acceptor = createTestAppUser("acceptor", "acceptor", "acceptor@mail.com");
         acceptor.setAppUserId(2L);
         acceptor.setActive(true);
@@ -198,7 +199,7 @@ class PtoServiceTest {
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2023, 5, 1), LocalDate.of(2023, 5, 1))).thenReturn(true);
-        Mockito.when(holidayService.calculateBusinessDays(Mockito.any(), Mockito.any())).thenReturn(Integer.parseInt(businessDays));
+        Mockito.when(holidayService.calculateBusinessDays(Mockito.any(), Mockito.any())).thenReturn(parseInt(businessDays));
         Mockito.when(ptoRepository.findAllOverlappingRequests(applier, LocalDate.of(2023, 5, 1), LocalDate.of(2023, 5, 1)))
                 .thenReturn(Collections.emptyList());
 
@@ -292,28 +293,35 @@ class PtoServiceTest {
     }
 
 
-    @Test
+    @ParameterizedTest()
+    @CsvSource({
+            "10,2,3,9,0",
+            "10,0,5,5,0",
+            "0,10,5,0,5"
+    })
     @WithMockUser(username = "acceptor@test.com")
-    void declining_pto_request_should_restore_pto_days_and_set_pto_as_declined() {
+    void declining_pto_request_should_restore_pto_days_and_set_pto_as_declined(String accruedCurrYear, String accruedLastYear, String daysTaken, String leftCurrYear, String leftLastYear) {
         UserRole adminRole = new UserRole("admin");
         ResolvePtoRequest resolveRequest = new ResolvePtoRequest(99L, false, "just because");
         AppUserEntity applier = AppUserEntity.createTestAppUser("applier", "applier", "applier@test.com");
-        applier.setPtoDaysTaken(2);
-        applier.setPtoDaysLeftCurrentYear(10);
-        applier.setPtoDaysLeftFromLastYear(0);
+        applier.setPtoDaysAccruedCurrentYear(parseInt(accruedCurrYear));
+        applier.setPtoDaysAccruedLastYear(parseInt(accruedLastYear));
+        applier.setPtoDaysTaken(parseInt(daysTaken));
+        applier.setPtoDaysLeftCurrentYear(parseInt(leftCurrYear));
+        applier.setPtoDaysLeftFromLastYear(parseInt(leftLastYear));
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");
         acceptor.setActive(true);
         acceptor.getUserRoles().add(adminRole);
-        PtoEntity ptoEntityFound = new PtoEntity(99L, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 2), applier, acceptor, false, null, 2, 1, null);
-        PtoEntity ptoEntityUpdated = new PtoEntity(99L, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 2), applier, acceptor, false, LocalDateTime.now(), 2, 1, "just because");
+        PtoEntity ptoEntityFound = new PtoEntity(99L, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 3), applier, acceptor, false, null, parseInt(daysTaken), 1, null);
+        PtoEntity ptoEntityUpdated = new PtoEntity(99L, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 3), applier, acceptor, false, LocalDateTime.now(), parseInt(daysTaken), 1, "just because");
         Mockito.when(ptoRepository.findById(99L)).thenReturn(Optional.of(ptoEntityFound));
         Mockito.when(ptoRepository.save(Mockito.any())).thenReturn(ptoEntityUpdated);
 
         ptoService.resolveRequest(resolveRequest);
 
         assertEquals(0, applier.getPtoDaysTaken());
-        assertEquals(11, applier.getPtoDaysLeftCurrentYear());
-        assertEquals(1, applier.getPtoDaysLeftFromLastYear());
+        assertEquals(parseInt(accruedCurrYear), applier.getPtoDaysLeftCurrentYear());
+        assertEquals(parseInt(accruedLastYear), applier.getPtoDaysLeftFromLastYear());
         assertEquals(ptoEntityUpdated.getDeclineReason(), ptoEntityFound.getDeclineReason());
     }
 
