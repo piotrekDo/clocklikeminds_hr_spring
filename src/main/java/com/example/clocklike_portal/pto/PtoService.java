@@ -116,7 +116,7 @@ public class PtoService {
 
 
         PtoEntity ptoEntity = ptoRequestsRepository
-                .save(ptoTransformer.ptoEntityFromNewRequest(startDate, toDate, applier, acceptor, businessDays, subtractedFromLastYearPool));
+                .save(ptoTransformer.ptoEntityFromNewRequest("pto", false, null, startDate, toDate, applier, acceptor, businessDays, subtractedFromLastYearPool));
         applier.setPtoDaysLeftFromLastYear(ptoDaysFromLastYear - subtractedFromLastYearPool);
         applier.setPtoDaysLeftCurrentYear(ptoDaysCurrentYear - subtractedFromCurrentYearPool);
         applier.setPtoDaysTaken(ptoDaysTaken + businessDays);

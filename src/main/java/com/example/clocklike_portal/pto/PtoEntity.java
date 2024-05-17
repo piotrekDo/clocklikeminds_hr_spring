@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity(name = "pto_requests")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "discriminator_type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("pto")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -21,6 +24,9 @@ public class PtoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ptoRequestId;
+    private String leaveType = "pto";
+    private boolean isDemand;
+    private String notes;
     private LocalDateTime requestDateTime;
     private LocalDate ptoStart;
     private LocalDate ptoEnd;
@@ -34,7 +40,20 @@ public class PtoEntity {
     private int includingLastYearPool;
     private String declineReason;
 
-    public PtoEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
+    public PtoEntity(boolean isDemand, LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
+        this.isDemand = isDemand;
+        this.requestDateTime = LocalDateTime.now();
+        this.ptoStart = ptoStart;
+        this.ptoEnd = ptoEnd;
+        this.applier = applier;
+        this.acceptor = acceptor;
+        this.businessDays = businessDays;
+        this.includingLastYearPool = includingLastYearPool;
+    }
+
+    public PtoEntity(String leaveType, boolean isDemand, LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
+        this.leaveType = leaveType;
+        this.isDemand = isDemand;
         this.requestDateTime = LocalDateTime.now();
         this.ptoStart = ptoStart;
         this.ptoEnd = ptoEnd;

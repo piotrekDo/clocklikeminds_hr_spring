@@ -218,13 +218,13 @@ class PtoServiceTest {
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");
         acceptor.setActive(true);
         acceptor.setUserRoles(List.of(new UserRole(1L, "admin")));
-        PtoEntity ptoEntity = new PtoEntity(1L, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2, null);
-        PtoDto ptoDto = new PtoDto(1L, true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null);
+        PtoEntity ptoEntity = new PtoEntity(1L, "", false, null, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2, null);
+        PtoDto ptoDto = new PtoDto(1L, "", false, null, true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null, null, null, null, null, null);
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(true);
         Mockito.when(holidayService.calculateBusinessDays(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(5);
-        Mockito.when(ptoTransformer.ptoEntityFromNewRequest(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2)).thenReturn(ptoEntity);
+        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", false, null, LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2)).thenReturn(ptoEntity);
         Mockito.when(ptoTransformer.ptoEntityToDto(ptoEntity)).thenReturn(ptoDto);
 
         ptoService.requestPto(request);
@@ -312,8 +312,8 @@ class PtoServiceTest {
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");
         acceptor.setActive(true);
         acceptor.getUserRoles().add(adminRole);
-        PtoEntity ptoEntityFound = new PtoEntity(99L, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 3), applier, acceptor, false, null, parseInt(daysTaken), 1, null);
-        PtoEntity ptoEntityUpdated = new PtoEntity(99L, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 3), applier, acceptor, false, LocalDateTime.now(), parseInt(daysTaken), 1, "just because");
+        PtoEntity ptoEntityFound = new PtoEntity(99L, "", false, null, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 3), applier, acceptor, false, null, parseInt(daysTaken), 1, null);
+        PtoEntity ptoEntityUpdated = new PtoEntity(99L, "", false, null, LocalDateTime.of(2024, 2, 1, 12, 12), LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 3), applier, acceptor, false, LocalDateTime.now(), parseInt(daysTaken), 1, "just because");
         Mockito.when(ptoRepository.findById(99L)).thenReturn(Optional.of(ptoEntityFound));
         Mockito.when(ptoRepository.save(Mockito.any())).thenReturn(ptoEntityUpdated);
 

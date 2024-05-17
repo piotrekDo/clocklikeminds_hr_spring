@@ -30,9 +30,12 @@ public class PtoTransformer {
 
     }
 
-    PtoEntity ptoEntityFromNewRequest(LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
+    PtoEntity ptoEntityFromNewRequest(String leaveType, boolean isDemand, String notes, LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         return new PtoEntity(
                 null,
+                leaveType,
+                isDemand,
+                notes,
                 LocalDateTime.now(),
                 start,
                 end,
@@ -49,10 +52,21 @@ public class PtoTransformer {
     PtoDto ptoEntityToDto(PtoEntity request) {
         AppUserEntity applier = request.getApplier();
         AppUserEntity acceptor = request.getAcceptor();
+
         final boolean isPending = !request.isWasAccepted() && request.getDecisionDateTime() == null;
         long totalDays = DAYS.between(request.getPtoStart(), request.getPtoEnd()) + 1;
+        final boolean isOccasionalLeave = request instanceof OccasionalLeave;
+        String leaveReason = isOccasionalLeave ? ((OccasionalLeave) request).getLeaveReason() : null;
+        Integer occasionalTypeId = isOccasionalLeave ? ((OccasionalLeave) request).getOccasionalType().getId() : null;
+        String occasionalLeaveType = isOccasionalLeave ? ((OccasionalLeave) request).getOccasionalType().getOccasionalType() : null;
+        String occasionalLeaveDescPolish = isOccasionalLeave ? ((OccasionalLeave) request).getOccasionalType().getDescriptionPolish() : null;
+        Integer occasionalDays = isOccasionalLeave ? ((OccasionalLeave) request).getOccasionalType().getDays() : null;
+
         return new PtoDto(
                 request.getPtoRequestId(),
+                request.getLeaveType(),
+                request.isDemand(),
+                request.getNotes(),
                 isPending,
                 request.isWasAccepted(),
                 request.getRequestDateTime(),
@@ -73,7 +87,13 @@ public class PtoTransformer {
                 totalDays,
                 request.getBusinessDays(),
                 request.getIncludingLastYearPool(),
-                request.getDeclineReason()
+                request.getDeclineReason(),
+                leaveReason,
+                occasionalTypeId,
+                occasionalLeaveType,
+                occasionalLeaveDescPolish,
+                occasionalDays
         );
     }
 }
+

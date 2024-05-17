@@ -6,11 +6,16 @@ import com.example.clocklike_portal.appUser.UserRole;
 import com.example.clocklike_portal.appUser.UserRoleRepository;
 import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionRepository;
+import com.example.clocklike_portal.pto.OccasionalLeave;
+import com.example.clocklike_portal.pto.OccasionalLeaveRepository;
+import com.example.clocklike_portal.pto.OccasionalLeaveType;
+import com.example.clocklike_portal.pto.OccasionalLeaveTypeRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;
@@ -22,6 +27,8 @@ public class Initializer {
     private final UserRoleRepository userRoleRepository;
     private final PositionRepository positionRepository;
     private final AppUserRepository appUserRepository;
+    private final OccasionalLeaveTypeRepository occasionalLeaveTypeRepository;
+    private final OccasionalLeaveRepository occasionalLeaveRepository;
 
     @PostConstruct
     public void run() {
@@ -40,6 +47,16 @@ public class Initializer {
         PositionEntity juniorJavaDeveloperPosition = positionRepository.save(new PositionEntity("junior_java_dev", "Junior Java Developer"));
         PositionEntity javaDeveloperPosition = positionRepository.save(new PositionEntity("java_dev", "Java Developer"));
 
+        OccasionalLeaveType weddingOccasionalType = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("wedding", "ślub pracownika (własny)", 2));
+        OccasionalLeaveType birthOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("birth", "narodziny dziecka u pracownika ", 2));
+        OccasionalLeaveType parentFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("parent_funeral", "śmierć, pogrzeb matki lub ojca / ojczyma lub macochy", 2));
+        OccasionalLeaveType spouseFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("spouse_funeral", "śmierć, pogrzeb męża lub żony ", 2));
+        OccasionalLeaveType childFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("child_funeral", "śmierć lub pogrzeb dziecka", 2));
+        OccasionalLeaveType childWeddingOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("child_wedding", "ślub dziecka ", 1));
+        OccasionalLeaveType siblingFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("sibling_funeral", "śmierć lub pogrzeb brata, siostry", 1));
+        OccasionalLeaveType inLawFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("in_law_funeral", "śmierć lub pogrzeb teściowej, teścia", 1));
+        OccasionalLeaveType grandparentFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("grandparent_funeral", "śmierć lub pogrzeb babki, dziadka", 1));
+        OccasionalLeaveType dependentFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("dependent_funeral", "śmierć lub pogrzeb osób, które pozostawały na utrzymaniu lub pod opieką pracownika", 1));
 
         AppUserEntity admin = createTestAppUser("Admin", "Adminowski", "admin.adminowski@clocklikeminds.com");
         admin.setUserRoles(List.of(userRole, adminRole, supervisorRole));
@@ -74,5 +91,8 @@ public class Initializer {
         admin.setSupervisor(piotrek);
         appUserRepository.save(piotrek);
         appUserRepository.save(admin);
+
+        OccasionalLeave takiTamTest = new OccasionalLeave(LocalDate.now(), LocalDate.now(), piotrek, piotrek, 2, 0, "taki tam test", weddingOccasionalType);
+        occasionalLeaveRepository.save(takiTamTest);
     }
 }

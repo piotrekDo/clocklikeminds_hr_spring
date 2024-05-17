@@ -60,14 +60,14 @@ class PtoRepositoryTest {
     void find_requests_for_year_should_return_requests_for_given_year_and_january_next_year_and_december_last_year() {
         //given
         int givenYear = 2024;
-        PtoEntity givenYearMidYear = new PtoEntity(LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 12), null, null, 0, 0);
-        PtoEntity givenYearDec = new PtoEntity(LocalDate.of(2024, 12, 10), LocalDate.of(2024, 12, 12), null, null, 0, 0);
-        PtoEntity givenYearDecToJan = new PtoEntity(LocalDate.of(2024, 12, 26), LocalDate.of(2025, 1, 3), null, null, 0, 0);
-        PtoEntity givenYearJanDecPrev = new PtoEntity(LocalDate.of(2023, 12, 26), LocalDate.of(2024, 1, 3), null, null, 0, 0);
-        PtoEntity prevYearDec = new PtoEntity(LocalDate.of(2023, 11, 26), LocalDate.of(2023, 12, 7), null, null, 0, 0);
-        PtoEntity nextYearJan = new PtoEntity(LocalDate.of(2025, 1, 26), LocalDate.of(2025, 2, 7), null, null, 0, 0);
-        PtoEntity nextYearMidYear = new PtoEntity(LocalDate.of(2025, 7, 12), LocalDate.of(2025, 7, 17), null, null, 0, 0);
-        PtoEntity prevYearMidYear = new PtoEntity(LocalDate.of(2025, 6, 12), LocalDate.of(2025, 7, 17), null, null, 0, 0);
+        PtoEntity givenYearMidYear = new PtoEntity("", false, LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 12), null, null, 0, 0);
+        PtoEntity givenYearDec = new PtoEntity("", false, LocalDate.of(2024, 12, 10), LocalDate.of(2024, 12, 12), null, null, 0, 0);
+        PtoEntity givenYearDecToJan = new PtoEntity("", false, LocalDate.of(2024, 12, 26), LocalDate.of(2025, 1, 3), null, null, 0, 0);
+        PtoEntity givenYearJanDecPrev = new PtoEntity("", false, LocalDate.of(2023, 12, 26), LocalDate.of(2024, 1, 3), null, null, 0, 0);
+        PtoEntity prevYearDec = new PtoEntity("", false, LocalDate.of(2023, 11, 26), LocalDate.of(2023, 12, 7), null, null, 0, 0);
+        PtoEntity nextYearJan = new PtoEntity("", false, LocalDate.of(2025, 1, 26), LocalDate.of(2025, 2, 7), null, null, 0, 0);
+        PtoEntity nextYearMidYear = new PtoEntity("", false, LocalDate.of(2025, 7, 12), LocalDate.of(2025, 7, 17), null, null, 0, 0);
+        PtoEntity prevYearMidYear = new PtoEntity("", false, LocalDate.of(2025, 6, 12), LocalDate.of(2025, 7, 17), null, null, 0, 0);
         testEntityManager.persist(givenYearMidYear);
         testEntityManager.persist(givenYearDec);
         testEntityManager.persist(givenYearDecToJan);

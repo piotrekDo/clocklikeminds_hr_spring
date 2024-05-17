@@ -10,6 +10,9 @@ import java.time.LocalDateTime;
 @Data
 public class PtoDto {
     private Long id;
+    private String leaveType;
+    private boolean isDemand;
+    private String notes;
     private boolean isPending;
     private boolean wasAccepted;
     private LocalDateTime requestDateTime;
@@ -31,4 +34,9 @@ public class PtoDto {
     private int businessDays;
     private int includingLastYearPool;
     private String declineReason;
+    private String occasional_leaveReason;
+    private Integer occasional_leaveTypeId;
+    private String occasional_leaveType;
+    private String occasional_descriptionPolish;
+    private Integer occasional_days;
 }

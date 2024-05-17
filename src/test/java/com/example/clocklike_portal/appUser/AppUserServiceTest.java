@@ -201,10 +201,10 @@ class AppUserServiceTest {
         testAppUser.setRegistrationFinished(true);
         testAppUser.setSupervisor(previousSupervisor);
         testAppUser.setPtoRequests(new LinkedHashSet<>());
-        PtoEntity ptoNoDecision = new PtoEntity(99L, LocalDateTime.of(2023, 5, 5, 12, 0), LocalDate.of(2023, 5, 5), LocalDate.of(2023, 5, 6), testAppUser, previousSupervisor, false, null, 2, 0, null);
-        PtoEntity ptoAccepted = new PtoEntity(98L, LocalDateTime.of(2023, 5, 6, 12, 0), LocalDate.of(2023, 5, 6), LocalDate.of(2023, 5, 7), testAppUser, previousSupervisor, true, LocalDateTime.of(2023, 5, 6, 13, 0), 2, 0, null);
-        PtoEntity ptoRejected = new PtoEntity(97L, LocalDateTime.of(2023, 10, 10, 12, 0), LocalDate.of(2023, 10, 11), LocalDate.of(2023, 10, 11), testAppUser, previousSupervisor, false, LocalDateTime.of(2023, 10, 11, 13, 0), 1, 0, "declined");
-        PtoEntity anotherPto = new PtoEntity(96L, LocalDateTime.of(2023, 2, 2, 12, 0), LocalDate.of(2023, 2, 2), LocalDate.of(2023, 2, 2), newSupervisor, newSupervisor, false, null, 1, 1, null);
+        PtoEntity ptoNoDecision = new PtoEntity(99L, "", false, null, LocalDateTime.of(2023, 5, 5, 12, 0), LocalDate.of(2023, 5, 5), LocalDate.of(2023, 5, 6), testAppUser, previousSupervisor, false, null, 2, 0, null);
+        PtoEntity ptoAccepted = new PtoEntity(98L, "", false, null, LocalDateTime.of(2023, 5, 6, 12, 0), LocalDate.of(2023, 5, 6), LocalDate.of(2023, 5, 7), testAppUser, previousSupervisor, true, LocalDateTime.of(2023, 5, 6, 13, 0), 2, 0, null);
+        PtoEntity ptoRejected = new PtoEntity(97L, "", false, null, LocalDateTime.of(2023, 10, 10, 12, 0), LocalDate.of(2023, 10, 11), LocalDate.of(2023, 10, 11), testAppUser, previousSupervisor, false, LocalDateTime.of(2023, 10, 11, 13, 0), 1, 0, "declined");
+        PtoEntity anotherPto = new PtoEntity(96L, "", false, null, LocalDateTime.of(2023, 2, 2, 12, 0), LocalDate.of(2023, 2, 2), LocalDate.of(2023, 2, 2), newSupervisor, newSupervisor, false, null, 1, 1, null);
         testAppUser.getPtoRequests().addAll(Set.of(ptoNoDecision, ptoAccepted, ptoRejected));
         previousSupervisor.getPtoAcceptor().addAll(Set.of(ptoNoDecision, ptoAccepted, ptoRejected));
         newSupervisor.getPtoRequests().add(anotherPto);
@@ -329,6 +329,7 @@ class AppUserServiceTest {
         assertEquals("No such position found at user's history", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
+
     @Test
     void updatePositionHistoryDataShouldRemoveOneHistoryRecord() {
         AppUserEntity testAppUser = createTestAppUser("first", "last", "mail@mail.com");
@@ -388,7 +389,7 @@ class AppUserServiceTest {
     }
 
     @Test
-    void updateUserPermissionShouldThrowAnExceptionWhenUserToUpdateHasUnfinishedRegistration(){
+    void updateUserPermissionShouldThrowAnExceptionWhenUserToUpdateHasUnfinishedRegistration() {
         UpdateUserPermissionRequest request = new UpdateUserPermissionRequest(1L, null, null, null);
         AppUserEntity testAppUser = createTestAppUser("test", "test", "test@test.com");
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
@@ -435,21 +436,21 @@ class AppUserServiceTest {
         employee2.setAppUserId(3L);
         employee2.setSupervisor(testAppUser);
         testAppUser.getSubordinates().add(employee2);
-        PtoEntity emp1PendingPto = new PtoEntity(null, null, employee1, testAppUser, 10, 5);
+        PtoEntity emp1PendingPto = new PtoEntity(false, null, null, employee1, testAppUser, 10, 5);
         emp1PendingPto.setPtoRequestId(99L);
         employee1.getPtoRequests().add(emp1PendingPto);
         testAppUser.getPtoAcceptor().add(emp1PendingPto);
-        PtoEntity emp1AcceptedPto = new PtoEntity(null, null, employee1, testAppUser, 2, 0);
+        PtoEntity emp1AcceptedPto = new PtoEntity(false, null, null, employee1, testAppUser, 2, 0);
         emp1AcceptedPto.setPtoRequestId(98L);
         emp1AcceptedPto.setWasAccepted(true);
         emp1AcceptedPto.setDecisionDateTime(LocalDateTime.now());
         employee1.getPtoRequests().add(emp1AcceptedPto);
         testAppUser.getPtoAcceptor().add(emp1AcceptedPto);
-        PtoEntity emp2PendingPto = new PtoEntity(null, null, employee2, testAppUser, 10, 1);
+        PtoEntity emp2PendingPto = new PtoEntity(false, null, null, employee2, testAppUser, 10, 1);
         emp2PendingPto.setPtoRequestId(97L);
         employee2.getPtoRequests().add(emp2PendingPto);
         testAppUser.getPtoAcceptor().add(emp2PendingPto);
-        PtoEntity emp2DeclinedPto = new PtoEntity(null, null, employee2, testAppUser, 2, 0);
+        PtoEntity emp2DeclinedPto = new PtoEntity(false, null, null, employee2, testAppUser, 2, 0);
         emp2DeclinedPto.setPtoRequestId(96L);
         emp2DeclinedPto.setWasAccepted(false);
         emp2DeclinedPto.setDecisionDateTime(LocalDateTime.now());
