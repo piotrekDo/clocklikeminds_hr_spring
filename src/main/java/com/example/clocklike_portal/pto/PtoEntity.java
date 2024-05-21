@@ -1,6 +1,7 @@
 package com.example.clocklike_portal.pto;
 
 
+import com.example.clocklike_portal.app.Library;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,12 +16,14 @@ import java.util.Objects;
 @Entity(name = "pto_requests")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator_type", discriminatorType = DiscriminatorType.STRING)
-@DiscriminatorValue("pto")
+@DiscriminatorValue(PtoEntity.DISCRIMINATOR_VALUE)
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
 public class PtoEntity {
+    static final String DISCRIMINATOR_VALUE = Library.PTO_DISCRIMINATOR_VALUE;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ptoRequestId;

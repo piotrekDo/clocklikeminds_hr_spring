@@ -1,5 +1,6 @@
 package com.example.clocklike_portal.pto;
 
+import com.example.clocklike_portal.app.Library;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -9,12 +10,14 @@ import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@DiscriminatorValue("child_care_leave")
+@DiscriminatorValue(ChildCareLeaveEntity.DISCRIMINATOR_VALUE)
 @NoArgsConstructor
 @Data
 @ToString
-public class ChildCareLeave extends PtoEntity{
-    public ChildCareLeave(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
+public class ChildCareLeaveEntity extends PtoEntity {
+    static final String DISCRIMINATOR_VALUE = Library.CHILD_CARE_LEAVE_DISCRIMINATOR_VALUE;
+
+    public ChildCareLeaveEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         super("childCare", false, ptoStart, ptoEnd, applier, acceptor, businessDays, includingLastYearPool);
     }
 

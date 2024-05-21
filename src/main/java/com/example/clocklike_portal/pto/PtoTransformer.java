@@ -55,12 +55,12 @@ public class PtoTransformer {
 
         final boolean isPending = !request.isWasAccepted() && request.getDecisionDateTime() == null;
         long totalDays = DAYS.between(request.getPtoStart(), request.getPtoEnd()) + 1;
-        final boolean isOccasionalLeave = request instanceof OccasionalLeave;
-        String leaveReason = isOccasionalLeave ? ((OccasionalLeave) request).getLeaveReason() : null;
-        Integer occasionalTypeId = isOccasionalLeave ? ((OccasionalLeave) request).getOccasionalType().getId() : null;
-        String occasionalLeaveType = isOccasionalLeave ? ((OccasionalLeave) request).getOccasionalType().getOccasionalType() : null;
-        String occasionalLeaveDescPolish = isOccasionalLeave ? ((OccasionalLeave) request).getOccasionalType().getDescriptionPolish() : null;
-        Integer occasionalDays = isOccasionalLeave ? ((OccasionalLeave) request).getOccasionalType().getDays() : null;
+        final boolean isOccasionalLeave = request instanceof OccasionalLeaveEntity;
+        String leaveReason = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getLeaveReason() : null;
+        Integer occasionalTypeId = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getId() : null;
+        String occasionalLeaveType = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getOccasionalType() : null;
+        String occasionalLeaveDescPolish = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDescriptionPolish() : null;
+        Integer occasionalDays = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDays() : null;
 
         return new PtoDto(
                 request.getPtoRequestId(),

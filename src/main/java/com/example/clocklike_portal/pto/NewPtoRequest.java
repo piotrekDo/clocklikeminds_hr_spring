@@ -13,4 +13,5 @@ public class NewPtoRequest {
     private String ptoEnd;
     private Long applierId;
     private Long acceptorId;
+    private String ptoType;
 }

@@ -2,6 +2,7 @@ package com.example.clocklike_portal.appUser;
 
 import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionHistory;
+import com.example.clocklike_portal.pto.HolidayOnSaturdayUserEntity;
 import com.example.clocklike_portal.pto.PtoEntity;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import jakarta.persistence.*;
@@ -55,6 +56,8 @@ public class AppUserEntity {
     private Set<PtoEntity> ptoRequests = new LinkedHashSet<>();
     @OneToMany(mappedBy = "acceptor")
     private Set<PtoEntity> ptoAcceptor = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "user")
+    private Set<HolidayOnSaturdayUserEntity> holidaysOnSaturday;
 
     public static AppUserEntity createTestAppUser(String firstName, String lastName, String userEmail) {
         return new AppUserEntity(
@@ -77,6 +80,7 @@ public class AppUserEntity {
                 0,
                 0,
                 null,
+                new LinkedHashSet<>(),
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>()
@@ -105,6 +109,7 @@ public class AppUserEntity {
                 0,
                 0,
                 null,
+                new LinkedHashSet<>(),
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>(),
                 new LinkedHashSet<>()

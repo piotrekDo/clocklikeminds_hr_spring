@@ -62,7 +62,7 @@ class PtoServiceTest {
 
     @Test
     void requestPtoShouldThrowAnExceptionIfNoApplierUserFound() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "");
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.empty());
 
         NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> ptoService.requestPto(request));
@@ -72,7 +72,7 @@ class PtoServiceTest {
 
     @Test
     void requestPtoShouldThrowAnExceptionIfNoAcceptorUserFound() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "");
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -87,7 +87,7 @@ class PtoServiceTest {
 
     @Test
     void requestPtoShouldThrowAnExceptionIfApplierNotActive() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "");
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
 
@@ -100,7 +100,7 @@ class PtoServiceTest {
 
     @Test
     void requestPtoShouldThrowAnExceptionIfAcceptorNotActive() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "");
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -117,7 +117,7 @@ class PtoServiceTest {
 
     @Test
     void requestPtoShouldThrowAnExceptionIfAcceptorDoesNotHaveEitherRoleOfAdminOrSupervisor() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "");
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -136,7 +136,7 @@ class PtoServiceTest {
     @Test
     void requestPtoShouldThrowAnExceptionIfPtoEndDateIsBeforeStartDate() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-04-30", 1L, 2L);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-04-30", 1L, 2L, "");
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -157,7 +157,7 @@ class PtoServiceTest {
     @Test
     void requestPtoShouldThrowAnExceptionIfAnotherRequestColliding() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "");
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -185,7 +185,7 @@ class PtoServiceTest {
     })
     void requestPtoShouldThrowAnExceptionIfApplierHasInsufficientPtoDaysLeft(String ptoCurrentYear, String ptoLeftLastYear, String businessDays) {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "");
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -210,7 +210,7 @@ class PtoServiceTest {
 
     @Test
     void requestPtoShouldSetDaysTakenAndDaysLeftValuesOnAcceptorEntityAndAddPtoRequestToAcceptorAndApplier() {
-        NewPtoRequest request = new NewPtoRequest("2024-02-12", "2024-02-16", 2L, 1L);
+        NewPtoRequest request = new NewPtoRequest("2024-02-12", "2024-02-16", 2L, 1L, "");
         AppUserEntity applier = AppUserEntity.createTestAppUser("applier", "applier", "applier@test.com");
         applier.setActive(true);
         applier.setPtoDaysLeftFromLastYear(2);
