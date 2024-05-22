@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -17,7 +16,7 @@ public class PtoController {
 
     @PostMapping("/request-new")
     PtoDto requestPto(@RequestBody @Valid NewPtoRequest dto) {
-        return ptoService.requestPto(dto);
+        return ptoService.processNewRequest(dto);
     }
 
     @GetMapping("/byId")

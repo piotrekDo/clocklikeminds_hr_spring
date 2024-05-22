@@ -60,4 +60,10 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
             @Param("ptoEnd") LocalDate ptoEnd,
             @Param("ptoStart") LocalDate ptoStart
     );
+
+    @Query("SELECT p FROM pto_requests p WHERE p.applier.appUserId = :appUserId AND p.isDemand = true AND FUNCTION('YEAR', p.requestDateTime) = FUNCTION('YEAR', CURRENT_DATE)")
+    List<PtoEntity> findUserRequestsOnDemandFromCurrentYear(@Param("appUserId") Long appUserId);
+
+    @Query("SELECT p FROM pto_requests p WHERE p.applier.appUserId = :appUserId AND p.leaveType = 'child_care' AND FUNCTION('YEAR', p.requestDateTime) = FUNCTION('YEAR', CURRENT_DATE)")
+    List<PtoEntity> findUserRequestsForChildCare(@Param("appUserId") Long appUserId);
 }

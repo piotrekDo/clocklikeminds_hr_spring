@@ -22,8 +22,8 @@ public class OccasionalLeaveEntity extends PtoEntity {
     @ManyToOne
     private OccasionalLeaveType occasionalType;
 
-    public OccasionalLeaveEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool, String leaveReason, OccasionalLeaveType occasionalType) {
-        super("occasionalLeave", false, ptoStart, ptoEnd, applier, acceptor, businessDays, includingLastYearPool);
+    public OccasionalLeaveEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, OccasionalLeaveType occasionalType) {
+        super(DISCRIMINATOR_VALUE, false, ptoStart, ptoEnd, applier, acceptor, businessDays, 0);
         this.leaveReason = leaveReason;
         this.occasionalType = occasionalType;
     }
