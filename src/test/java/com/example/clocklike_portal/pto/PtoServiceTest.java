@@ -46,19 +46,26 @@ class PtoServiceTest {
     HolidayService holidayService;
     @MockBean
     DateChecker dateChecker;
+    @MockBean
+    HolidayOnSaturdayRepository holidayOnSaturdayRepository;
+    @MockBean
+    HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
 
 
     @TestConfiguration
     static class PtoServiceTestConfiguration {
         @Bean
-        PtoService ptoService(PtoRepository ptoRepository, AppUserRepository appUserRepository, PtoTransformer ptoTransformer, HolidayService holidayService, DateChecker dateChecker, OccasionalLeaveTypeRepository occasionalLeaveTypeRepository) {
-            return new PtoService(ptoRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository);
+        PtoService ptoService(PtoRepository ptoRepository, AppUserRepository appUserRepository, PtoTransformer ptoTransformer,
+                              HolidayService holidayService, DateChecker dateChecker, OccasionalLeaveTypeRepository occasionalLeaveTypeRepository,
+                              HolidayOnSaturdayRepository holidayOnSaturdayRepository, HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository) {
+            return new PtoService(ptoRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository,
+                    holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository);
         }
     }
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfNoApplierUserFound() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.empty());
 
         NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> ptoService.processNewRequest(request));
@@ -68,7 +75,7 @@ class PtoServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfNoAcceptorUserFound() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -83,7 +90,7 @@ class PtoServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfApplierNotActive() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
 
@@ -96,7 +103,7 @@ class PtoServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfAcceptorNotActive() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -113,7 +120,7 @@ class PtoServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfAcceptorDoesNotHaveEitherRoleOfAdminOrSupervisor() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -132,7 +139,7 @@ class PtoServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfPtoEndDateIsBeforeStartDate() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-04-30", 1L, 2L, "", null);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-04-30", 1L, 2L, "", null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -153,7 +160,7 @@ class PtoServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfAnotherRequestColliding() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "", null);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "", null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -176,7 +183,7 @@ class PtoServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionWhenRequestTypeIsNull() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, null, null);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -199,7 +206,7 @@ class PtoServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionWhenUnknownRequestTypeProvided() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "incorrect type", null);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "incorrect type", null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -221,7 +228,7 @@ class PtoServiceTest {
 
     @Test
     void requestPtoShouldSetDaysTakenAndDaysLeftValuesOnAcceptorEntityAndAddPtoRequestToAcceptorAndApplier() {
-        NewPtoRequest request = new NewPtoRequest("2024-02-12", "2024-02-16", 2L, 1L, "pto", null);
+        NewPtoRequest request = new NewPtoRequest("2024-02-12", "2024-02-16", 2L, 1L, "pto", null, null);
         AppUserEntity applier = AppUserEntity.createTestAppUser("applier", "applier", "applier@test.com");
         applier.setActive(true);
         applier.setPtoDaysLeftFromLastYear(2);
@@ -250,7 +257,7 @@ class PtoServiceTest {
 
     @Test
     void processOccasionalLeaveRequestShouldThrowAnExceptionWhenNoOccasionalTypeIsSpecified() {
-        NewPtoRequest newPtoRequest = new NewPtoRequest(null, null, null, null, null, null);
+        NewPtoRequest newPtoRequest = new NewPtoRequest(null, null, null, null, null, null, null);
 
         IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processOccasionalLeaveRequest(newPtoRequest, null, null, null, null));
         assertEquals("No occasional type specified", exception.getMessage());

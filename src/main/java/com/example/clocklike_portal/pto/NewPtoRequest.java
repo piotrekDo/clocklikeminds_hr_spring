@@ -15,4 +15,5 @@ public class NewPtoRequest {
     private Long acceptorId;
     private String ptoType;
     private String occasionalType;
+    private String saturdayHolidayDate;
 }

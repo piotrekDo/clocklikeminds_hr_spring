@@ -2,11 +2,13 @@ package com.example.clocklike_portal.pto;
 
 
 import com.example.clocklike_portal.app.Library;
+import com.example.clocklike_portal.appUser.AppUserEntity;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import lombok.*;
+
+import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
@@ -19,4 +21,9 @@ public class HolidayOnSaturdayPtoEntity extends PtoEntity {
     static final String DISCRIMINATOR_VALUE = Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE;
     @ManyToOne
     private HolidayOnSaturdayEntity holiday;
+
+    public HolidayOnSaturdayPtoEntity(LocalDate ptoStart, AppUserEntity applier, AppUserEntity acceptor, HolidayOnSaturdayEntity holiday) {
+        super(DISCRIMINATOR_VALUE, false, ptoStart, ptoStart, applier, acceptor, 1, 0);
+        this.holiday = holiday;
+    }
 }

@@ -55,4 +55,9 @@ public class PtoController {
     List<PtoDto> getRequestsForSupervisorCalendar(@RequestParam Long acceptorId, @RequestParam String start, @RequestParam String end) {
         return ptoService.getRequestsForSupervisorCalendar(acceptorId, start, end);
     }
+
+    @PostMapping("/new-saturday-holiday")
+    NewSaturdayHolidayDto addNewHolidayOnSaturday(@RequestBody NewSaturdayHolidayDto dto) {
+        return ptoService.newHolidaySaturday(dto);
+    }
 }

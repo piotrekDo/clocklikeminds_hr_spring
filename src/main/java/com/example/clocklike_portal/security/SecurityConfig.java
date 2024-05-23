@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/pto/requests-for-supervisor-calendar").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers("/api/v1/pto/requests-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers("/api/v1/pto/resolve-request").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                        .requestMatchers("/api/v1/pto/new-saturday-holiday").hasAnyAuthority(ADMIN_AUTHORITY)
                         .anyRequest().denyAll()
                 )
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

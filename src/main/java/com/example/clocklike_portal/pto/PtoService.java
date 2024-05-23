@@ -14,13 +14,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,6 +35,8 @@ public class PtoService {
     private final HolidayService holidayService;
     private final DateChecker dateChecker;
     private final OccasionalLeaveTypeRepository occasionalLeaveTypeRepository;
+    private final HolidayOnSaturdayRepository holidayOnSaturdayRepository;
+    private final HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
     private Map<String, OccasionalLeaveType> occasionalTypes;
 
     @PostConstruct
@@ -121,9 +121,29 @@ public class PtoService {
                 return processPtoRequest(request, applier, acceptor, startDate, toDate);
             case Library.OCCASIONAL_LEAVE_DISCRIMINATOR_VALUE, Library.CHILD_CARE_LEAVE_DISCRIMINATOR_VALUE:
                 return processOccasionalLeaveRequest(request, applier, acceptor, startDate, toDate);
+            case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE:
+                return processOnSaturdayPtoRequest(request, applier, acceptor, startDate);
             default:
                 throw new IllegalOperationException("Unknown request type");
         }
+    }
+
+    private PtoDto processOnSaturdayPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate) {
+        LocalDate saturdayRequestDate = LocalDate.parse(request.getSaturdayHolidayDate(), dateFormatter);
+        HolidayOnSaturdayEntity holidayEntity = holidayOnSaturdayRepository.findByDate(saturdayRequestDate)
+                .orElseThrow(() -> new NoSuchElementException("No such holiday found"));
+        HolidayOnSaturdayUserEntity holidayOnSaturdayUserEntity = holidayOnSaturdayUserEntityRepository.findByHolidayAndUser_AppUserId(holidayEntity, applier.getAppUserId())
+                .orElseThrow(() -> new NoSuchElementException("No such holiday found for user"));
+
+        if (holidayOnSaturdayUserEntity.getPto() != null) {
+            throw new IllegalOperationException("Holiday already used with pto request " + holidayOnSaturdayUserEntity.getPto().getPtoRequestId());
+        }
+
+        PtoEntity ptoEntity = ptoRequestsRepository.save(new HolidayOnSaturdayPtoEntity(startDate, applier, acceptor, holidayEntity));
+        holidayOnSaturdayUserEntity.setPto(ptoEntity);
+        holidayOnSaturdayUserEntityRepository.save(holidayOnSaturdayUserEntity);
+
+        return ptoTransformer.ptoEntityToDto(ptoEntity);
     }
 
     PtoDto processOccasionalLeaveRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate) {
@@ -289,5 +309,24 @@ public class PtoService {
         return ptoRequestsRepository.findRequestsByAcceptorAndTimeFrame(acceptorId, startDate, endDate).stream()
                 .map(ptoTransformer::ptoEntityToDto)
                 .toList();
+    }
+
+    public NewSaturdayHolidayDto newHolidaySaturday(NewSaturdayHolidayDto request) {
+        LocalDate newHoliday = LocalDate.parse(request.getDate(), dateFormatter);
+        DayOfWeek dayOfWeek = newHoliday.getDayOfWeek();
+        if (dayOfWeek.getValue() != 6) {
+            throw new IllegalOperationException("New holiday must be saturday");
+        }
+
+        HolidayOnSaturdayEntity holidayEntity = holidayOnSaturdayRepository.save(new HolidayOnSaturdayEntity(newHoliday, request.getNote()));
+        List<AppUserEntity> allEmployees = appUserRepository.findAll();
+
+        List<HolidayOnSaturdayUserEntity> holidayUserEntities = new ArrayList<>();
+        for (AppUserEntity employee : allEmployees) {
+            holidayUserEntities.add(new HolidayOnSaturdayUserEntity(holidayEntity, employee));
+        }
+        holidayOnSaturdayUserEntityRepository.saveAll(holidayUserEntities);
+
+        return request;
     }
 }
