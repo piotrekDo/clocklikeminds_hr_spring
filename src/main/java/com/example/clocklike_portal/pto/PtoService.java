@@ -44,6 +44,38 @@ public class PtoService {
         occasionalTypes = occasionalLeaveTypeRepository.findAll().stream().collect(Collectors.toMap(OccasionalLeaveType::getOccasionalType, Function.identity()));
     }
 
+    List<PtoDto> findAllRequestsByAcceptorId(long id) {
+        return ptoRequestsRepository.findAllByAcceptor_appUserId(id).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    List<PtoDto> getRequestsForUserForYear(Integer year, Long userId) {
+        return ptoRequestsRepository.findRequestsForYear(year, userId).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    List<PtoDto> getRequestsForYearForAllUsers(Integer year) {
+        return ptoRequestsRepository.findRequestsForYear(year).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    List<PtoDto> findAllUnresolvedPtoRequestsByAcceptor(Long id) {
+        return ptoRequestsRepository.findAllByDecisionDateTimeIsNullAndAcceptor_AppUserId(id).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    List<PtoDto> getRequestsForSupervisorCalendar(Long acceptorId, String start, String end) {
+        LocalDate startDate = LocalDate.parse(start, dateFormatter);
+        LocalDate endDate = LocalDate.parse(end, dateFormatter);
+
+        return ptoRequestsRepository.findRequestsByAcceptorAndTimeFrame(acceptorId, startDate, endDate).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
 
     Page<PtoDto> getPtoRequests(Long userId, Integer page, Integer size) {
         page = page == null || page < 0 ? 0 : page;
@@ -128,7 +160,7 @@ public class PtoService {
         }
     }
 
-    private PtoDto processOnSaturdayPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate) {
+    PtoDto processOnSaturdayPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate) {
         LocalDate saturdayRequestDate = LocalDate.parse(request.getSaturdayHolidayDate(), dateFormatter);
         HolidayOnSaturdayEntity holidayEntity = holidayOnSaturdayRepository.findByDate(saturdayRequestDate)
                 .orElseThrow(() -> new NoSuchElementException("No such holiday found"));
@@ -258,10 +290,41 @@ public class PtoService {
             throw new IllegalOperationException("You are not authorized to resolve this PTO request.");
         }
 
-        Boolean isRequestAccepted = dto.getIsAccepted();
+        if (ptoRequest.getDecisionDateTime() != null) {
+            throw new IllegalOperationException("Pto request was already resolved");
+        }
+
+        boolean isRequestAccepted = dto.getIsAccepted();
+
+        switch (ptoRequest.getLeaveType()) {
+            case Library.PTO_DISCRIMINATOR_VALUE, Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE:
+                resolveStandardPtoRequest(isRequestAccepted, ptoRequest, applier, dto.getDeclineReason());
+            case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE:
+                resolveSaturdayHolidayPtoRequest(isRequestAccepted, ptoRequest, applier);
+        }
+
+        ptoRequest.setWasAccepted(isRequestAccepted);
+        ptoRequest.setDecisionDateTime(LocalDateTime.now());
+        PtoEntity updatedPtoRequest = ptoRequestsRepository.save(ptoRequest);
+        return ptoTransformer.ptoEntityToDto(updatedPtoRequest);
+    }
+
+    void resolveSaturdayHolidayPtoRequest(boolean isRequestAccepted, PtoEntity ptoRequest, AppUserEntity applier) {
         if (!isRequestAccepted) {
-            ptoRequest.setDeclineReason(dto.getDeclineReason());
-            int requestBusinessDays = ptoRequest.getBusinessDays();
+            if (!(ptoRequest instanceof HolidayOnSaturdayPtoEntity ptoEntity)) {
+                throw new IllegalOperationException("Unknown pto entity");
+            }
+            HolidayOnSaturdayUserEntity holidayOnSaturdayUserEntity = holidayOnSaturdayUserEntityRepository.findByHolidayAndUser_AppUserId(ptoEntity.getHoliday(), applier.getAppUserId())
+                    .orElseThrow(() -> new NoSuchElementException("No such holiday found for user"));
+            holidayOnSaturdayUserEntity.setPto(null);
+            holidayOnSaturdayUserEntityRepository.save(holidayOnSaturdayUserEntity);
+        }
+    }
+
+    void resolveStandardPtoRequest(boolean isRequestAccepted, PtoEntity ptoEntity, AppUserEntity applier, String declineReason) {
+        if (!isRequestAccepted) {
+            ptoEntity.setDeclineReason(declineReason);
+            int requestBusinessDays = ptoEntity.getBusinessDays();
             int ptoDaysAccruedCurrentYear = applier.getPtoDaysAccruedCurrentYear();
             int ptoDaysLeftCurrentYear = applier.getPtoDaysLeftCurrentYear();
             int fromLastYear = Math.max(0, (ptoDaysLeftCurrentYear + requestBusinessDays) - ptoDaysAccruedCurrentYear);
@@ -270,48 +333,10 @@ public class PtoService {
             applier.setPtoDaysLeftFromLastYear(applier.getPtoDaysLeftFromLastYear() + fromLastYear);
             applier.setPtoDaysTaken(applier.getPtoDaysTaken() - requestBusinessDays);
         }
-
-        ptoRequest.setWasAccepted(isRequestAccepted);
-        ptoRequest.setDecisionDateTime(LocalDateTime.now());
-        PtoEntity updatedPtoRequest = ptoRequestsRepository.save(ptoRequest);
-
-        return ptoTransformer.ptoEntityToDto(updatedPtoRequest);
     }
 
-    List<PtoDto> findAllRequestsByAcceptorId(long id) {
-        return ptoRequestsRepository.findAllByAcceptor_appUserId(id).stream()
-                .map(ptoTransformer::ptoEntityToDto)
-                .toList();
-    }
 
-    public List<PtoDto> getRequestsForUserForYear(Integer year, Long userId) {
-        return ptoRequestsRepository.findRequestsForYear(year, userId).stream()
-                .map(ptoTransformer::ptoEntityToDto)
-                .toList();
-    }
-
-    public List<PtoDto> getRequestsForYearForAllUsers(Integer year) {
-        return ptoRequestsRepository.findRequestsForYear(year).stream()
-                .map(ptoTransformer::ptoEntityToDto)
-                .toList();
-    }
-
-    List<PtoDto> findAllUnresolvedPtoRequestsByAcceptor(Long id) {
-        return ptoRequestsRepository.findAllByDecisionDateTimeIsNullAndAcceptor_AppUserId(id).stream()
-                .map(ptoTransformer::ptoEntityToDto)
-                .toList();
-    }
-
-    public List<PtoDto> getRequestsForSupervisorCalendar(Long acceptorId, String start, String end) {
-        LocalDate startDate = LocalDate.parse(start, dateFormatter);
-        LocalDate endDate = LocalDate.parse(end, dateFormatter);
-
-        return ptoRequestsRepository.findRequestsByAcceptorAndTimeFrame(acceptorId, startDate, endDate).stream()
-                .map(ptoTransformer::ptoEntityToDto)
-                .toList();
-    }
-
-    public NewSaturdayHolidayDto newHolidaySaturday(NewSaturdayHolidayDto request) {
+    NewSaturdayHolidayDto registerNewHolidaySaturday(NewSaturdayHolidayDto request) {
         LocalDate newHoliday = LocalDate.parse(request.getDate(), dateFormatter);
         DayOfWeek dayOfWeek = newHoliday.getDayOfWeek();
         if (dayOfWeek.getValue() != 6) {

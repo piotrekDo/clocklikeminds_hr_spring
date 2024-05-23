@@ -58,6 +58,6 @@ public class PtoController {
 
     @PostMapping("/new-saturday-holiday")
     NewSaturdayHolidayDto addNewHolidayOnSaturday(@RequestBody NewSaturdayHolidayDto dto) {
-        return ptoService.newHolidaySaturday(dto);
+        return ptoService.registerNewHolidaySaturday(dto);
     }
 }
