@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers(("/api/v1/test/anon")).permitAll()
+                        .requestMatchers(("/api/v1/meta")).hasAuthority(USER_AUTHORITY)
                         .requestMatchers(("/api/v1/test/users")).hasAuthority(USER_AUTHORITY)
                         .requestMatchers(("/api/v1/test/admins")).hasAuthority(ADMIN_AUTHORITY)
                         .requestMatchers("/api/v1/users/**").hasAuthority(ADMIN_AUTHORITY)
