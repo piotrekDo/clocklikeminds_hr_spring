@@ -28,9 +28,8 @@ class PtoRepositoryTest {
     @Test
     void findUserRequestsForChildCareShouldReturnCorrespondingRequests() {
         AppUserEntity applier = testEntityManager.persist(AppUserEntity.createTestAppUser("applier", "applier", "applier@mail.com"));
-        OccasionalLeaveType childCareType = testEntityManager.persist(new OccasionalLeaveType("child_care", "opieka nad dzieckiem", 2));
-        ChildCareLeaveEntity matching = testEntityManager.persist(new ChildCareLeaveEntity(LocalDate.now(), LocalDate.now(), applier, null, 1, childCareType));
-        OccasionalLeaveEntity unMatching1 = testEntityManager.persist(new OccasionalLeaveEntity(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 2), applier, null, 1, childCareType));
+        ChildCareLeaveEntity matching = testEntityManager.persist(new ChildCareLeaveEntity(LocalDate.now(), LocalDate.now(), applier, null, 1));
+        OccasionalLeaveEntity unMatching1 = testEntityManager.persist(new OccasionalLeaveEntity(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 2), applier, null, 1, null));
         PtoEntity unMatching2 = testEntityManager.persist(PtoEntity.builder().applier(applier).isDemand(true).requestDateTime(LocalDateTime.of(2023, 1, 1, 12, 12)).build());
 
         List<PtoEntity> result = ptoRepository.findUserRequestsForChildCare(applier.getAppUserId());

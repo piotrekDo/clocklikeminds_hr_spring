@@ -56,7 +56,6 @@ public class Initializer {
         OccasionalLeaveType inLawFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("in_law_funeral", "śmierć lub pogrzeb teściowej, teścia", 1));
         OccasionalLeaveType grandparentFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("grandparent_funeral", "śmierć lub pogrzeb babki, dziadka", 1));
         OccasionalLeaveType dependentFuneralOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("dependent_funeral", "śmierć lub pogrzeb osób, które pozostawały na utrzymaniu lub pod opieką pracownika", 1));
-        OccasionalLeaveType childCareOccasionalLeave = occasionalLeaveTypeRepository.save(new OccasionalLeaveType("child_care", "opieka nad dzieckiem", 2));
 
         AppUserEntity admin = createTestAppUser("Admin", "Adminowski", "admin.adminowski@clocklikeminds.com");
         admin.setUserRoles(List.of(userRole, adminRole, supervisorRole));
@@ -92,7 +91,7 @@ public class Initializer {
         appUserRepository.save(piotrek);
         appUserRepository.save(admin);
 
-        OccasionalLeaveEntity takiTamTest = new OccasionalLeaveEntity(LocalDate.now(), LocalDate.now(), piotrek, piotrek, 2, weddingOccasionalType);
-        occasionalLeaveRepository.save(takiTamTest);
+//        OccasionalLeaveEntity takiTamTest = new OccasionalLeaveEntity(LocalDate.now(), LocalDate.now(), piotrek, piotrek, 2, weddingOccasionalType);
+//        occasionalLeaveRepository.save(takiTamTest);
     }
 }

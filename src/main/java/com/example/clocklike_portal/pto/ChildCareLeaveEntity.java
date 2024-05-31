@@ -17,12 +17,9 @@ import java.time.LocalDate;
 @ToString
 public class ChildCareLeaveEntity extends PtoEntity {
     static final String DISCRIMINATOR_VALUE = Library.CHILD_CARE_LEAVE_DISCRIMINATOR_VALUE;
-    @ManyToOne
-    private OccasionalLeaveType occasionalType;
 
-    public ChildCareLeaveEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, OccasionalLeaveType occasionalType) {
+    public ChildCareLeaveEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays) {
         super(DISCRIMINATOR_VALUE, false, ptoStart, ptoEnd, applier, acceptor, businessDays, 0);
-        this.occasionalType = occasionalType;
     }
 
 

@@ -151,8 +151,10 @@ public class PtoService {
         switch (requestPtoType) {
             case Library.PTO_DISCRIMINATOR_VALUE, Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE:
                 return processPtoRequest(request, applier, acceptor, startDate, toDate);
-            case Library.OCCASIONAL_LEAVE_DISCRIMINATOR_VALUE, Library.CHILD_CARE_LEAVE_DISCRIMINATOR_VALUE:
+            case Library.OCCASIONAL_LEAVE_DISCRIMINATOR_VALUE:
                 return processOccasionalLeaveRequest(request, applier, acceptor, startDate, toDate);
+            case Library.CHILD_CARE_LEAVE_DISCRIMINATOR_VALUE:
+                return processChildCareLeave(request, applier, acceptor, startDate, toDate);
             case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE:
                 return processOnSaturdayPtoRequest(request, applier, acceptor, startDate);
             default:
@@ -178,6 +180,34 @@ public class PtoService {
         return ptoTransformer.ptoEntityToDto(ptoEntity);
     }
 
+    PtoDto processChildCareLeave(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate) {
+        String notes = "";
+        int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
+        if (businessDays != 2) {
+            notes = "Niepoprawna liczba dni urlopowych dla wybranego wniosku. Oczekiwana: " + 2 + ", przekazana: " + businessDays + ". ";
+        }
+        ChildCareLeaveEntity childCareLeaveEntity = new ChildCareLeaveEntity(startDate, toDate, applier, acceptor, businessDays);
+        List<PtoEntity> requests = ptoRequestsRepository.findUserRequestsForChildCare(applier.getAppUserId());
+        int totalRequests = requests.size();
+        long accepted = requests.stream()
+                .filter(PtoEntity::isWasAccepted)
+                .count();
+        long totalDaysAccepted = requests.stream()
+                .filter(PtoEntity::isWasAccepted)
+                .mapToLong(PtoEntity::getBusinessDays)
+                .sum();
+
+        if (totalRequests > 0) {
+            notes += "Wniosków o opiekę nad dzieckiem od początku roku: " + totalRequests + ", w tym zaakceptowanych: " + accepted +
+                    ". Łącznie zaakceptowanych dni urlopu na żądanie: " + totalDaysAccepted;
+        } else {
+            notes += "Pierwszy wniosek tego typu w bieżącym roku dla użytkownika.";
+        }
+        childCareLeaveEntity.setNotes(notes);
+
+        return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(childCareLeaveEntity));
+    }
+
     PtoDto processOccasionalLeaveRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate) {
         String notes = "";
 
@@ -195,36 +225,11 @@ public class PtoService {
             notes = "Niepoprawna liczba dni urlopowych dla wybranego wniosku. Oczekiwana: " + occasionalLeaveType.getDays() + ", przekazana: " + businessDays + ". ";
         }
 
-        if ("child_care".equals(occasionalLeaveType.getOccasionalType())) {
-            ChildCareLeaveEntity childCareLeaveEntity = new ChildCareLeaveEntity(startDate, toDate, applier, acceptor, businessDays, occasionalLeaveType);
-            List<PtoEntity> requests = ptoRequestsRepository.findUserRequestsForChildCare(acceptor.getAppUserId());
-            int totalRequests = requests.size();
-            long accepted = requests.stream()
-                    .filter(PtoEntity::isWasAccepted)
-                    .count();
-            long totalDaysAccepted = requests.stream()
-                    .filter(PtoEntity::isWasAccepted)
-                    .mapToLong(PtoEntity::getBusinessDays)
-                    .sum();
-
-            if (totalRequests > 0) {
-                notes += "Wniosków o opiekę nad dzieckiem od początku roku: " + totalRequests + ", w tym zaakceptowanych: " + accepted +
-                        ". Łącznie zaakceptowanych dni urlopu na żądanie: " + totalDaysAccepted;
-            }
-
-            if (notes.isEmpty() && !notes.isBlank()) {
-                childCareLeaveEntity.setNotes(notes);
-            }
-            return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(childCareLeaveEntity));
-
-        } else {
-            OccasionalLeaveEntity occasionalLeaveEntity = new OccasionalLeaveEntity(startDate, toDate, applier, acceptor, businessDays, occasionalLeaveType);
-            if (notes.isEmpty() && !notes.isBlank()) {
-                occasionalLeaveEntity.setNotes(notes);
-            }
-            return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(occasionalLeaveEntity));
+        OccasionalLeaveEntity occasionalLeaveEntity = new OccasionalLeaveEntity(startDate, toDate, applier, acceptor, businessDays, occasionalLeaveType);
+        if (notes.isEmpty() && !notes.isBlank()) {
+            occasionalLeaveEntity.setNotes(notes);
         }
-
+        return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(occasionalLeaveEntity));
     }
 
     PtoDto processPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate) {
