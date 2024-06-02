@@ -1,5 +1,6 @@
 package com.example.clocklike_portal.dates_calculations;
 
+import com.example.clocklike_portal.pto.SaturdayHolidayDto;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -25,6 +26,36 @@ public class HolidayService {
         }
 
         return selectedYearHolidays.get(date) != null;
+    }
+
+    public SaturdayHolidayDto findNextHolidayOnSaturday(LocalDate lastKnown) {
+        final LocalDate today = LocalDate.now();
+        if (year != today.getYear()) {
+            this.year = today.getYear();
+            setYear(today.getYear());
+        }
+        LocalDate holiday = null;
+        while (holiday == null) {
+            for (LocalDate date : selectedYearHolidays.keySet()) {
+                if (date.getDayOfWeek() == DayOfWeek.SATURDAY) {
+                    if (lastKnown != null && (date.equals(lastKnown) || date.isBefore(lastKnown))) {
+                        continue;
+                    }
+                    holiday = date;
+                    break;
+                }
+            }
+            if (holiday == null) {
+                this.year = this.year + 1;
+                setYear(this.year);
+            }
+        }
+
+        return new SaturdayHolidayDto(0, holiday.toString(), selectedYearHolidays.get(holiday));
+    }
+
+    public SaturdayHolidayDto findNextHolidayOnSaturday() {
+        return findNextHolidayOnSaturday(null);
     }
 
     void setYear(int year) {
@@ -56,7 +87,7 @@ public class HolidayService {
         LocalDate whitsun = easterSunday.plusDays(49);
         LocalDate corpusChristi = easterSunday.plusDays(60);
 
-        Map<LocalDate, String> holidays = new HashMap<>();
+        Map<LocalDate, String> holidays = new LinkedHashMap<>();
         holidays.put(LocalDate.of(year, 1, 1), "Nowy Rok");
         holidays.put(LocalDate.of(year, 1, 6), "Trzech Króli");
         holidays.put(easterSunday, "Niedziela Wielkanocna");

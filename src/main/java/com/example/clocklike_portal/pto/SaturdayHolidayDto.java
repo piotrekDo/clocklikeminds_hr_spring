@@ -5,7 +5,7 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-public class NewSaturdayHolidayDto {
+public class SaturdayHolidayDto {
     private long id;
     private String date;
     private String note;

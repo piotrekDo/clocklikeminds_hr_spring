@@ -1,5 +1,7 @@
 package com.example.clocklike_portal.dates_calculations;
 
+import com.example.clocklike_portal.pto.SaturdayHolidayDto;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
@@ -36,6 +38,27 @@ class HolidayServiceTest {
     @ArgumentsSource(CheckHolidayArgumentsProvider.class)
     void checking_holidays_should_return_valid_boolean(LocalDate checkedDate, boolean expectedResult) {
         assertEquals(expectedResult, holidayService.checkIfHoliday(checkedDate));
+    }
+
+    @Test
+    void findNextHolidayOnSaturdayShouldFindNext() {
+        holidayService.setYear(2024);
+        SaturdayHolidayDto result = holidayService.findNextHolidayOnSaturday();
+        assertEquals("2024-01-06", result.getDate());
+    }
+
+    @Test
+    void findNextHolidayOnSaturdayShouldFindNextDifrentThenLastKnown() {
+        holidayService.setYear(2024);
+        SaturdayHolidayDto result = holidayService.findNextHolidayOnSaturday(LocalDate.of(2024, 1,6));
+        assertEquals("2025-05-03", result.getDate());
+    }
+
+    @Test
+    void findNextHolidayOnSaturdayShouldFindNextDifrentThenLastKnownAndIgnorePrevious() {
+        holidayService.setYear(2025);
+        SaturdayHolidayDto result = holidayService.findNextHolidayOnSaturday(LocalDate.of(2025, 11,11));
+        assertEquals("2026-08-15", result.getDate());
     }
 
 }

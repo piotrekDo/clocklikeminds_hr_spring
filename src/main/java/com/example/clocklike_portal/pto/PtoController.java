@@ -57,7 +57,12 @@ public class PtoController {
     }
 
     @PostMapping("/new-saturday-holiday")
-    NewSaturdayHolidayDto addNewHolidayOnSaturday(@RequestBody NewSaturdayHolidayDto dto) {
+    SaturdayHolidayDto addNewHolidayOnSaturday(@RequestBody SaturdayHolidayDto dto) {
         return ptoService.registerNewHolidaySaturday(dto);
+    }
+
+    @GetMapping("/holidays-on-saturday-admin")
+    HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin() {
+        return ptoService.getHolidaysOnSaturdaySummaryForAdmin();
     }
 }

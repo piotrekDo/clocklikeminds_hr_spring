@@ -1,6 +1,7 @@
 package com.example.clocklike_portal.pto;
 
 import com.example.clocklike_portal.app.Library;
+import com.example.clocklike_portal.appUser.AppUserBasicDto;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.dates_calculations.DateChecker;
@@ -18,6 +19,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -275,6 +277,8 @@ public class PtoService {
         if (totalRequests > 0) {
             pto.setNotes("Wniosków na żądanie od początku roku: " + totalRequests + ", w tym zaakceptowanych: " + accepted +
                     ". Łącznie zaakceptowanych dni urlopu na żądanie: " + totalDaysAccepted);
+        } else {
+            pto.setNotes("Pierwszy wniosek o urlop na żądanie w tym roku");
         }
     }
 
@@ -340,12 +344,16 @@ public class PtoService {
         }
     }
 
-
-    NewSaturdayHolidayDto registerNewHolidaySaturday(NewSaturdayHolidayDto request) {
+    SaturdayHolidayDto registerNewHolidaySaturday(SaturdayHolidayDto request) {
         LocalDate newHoliday = LocalDate.parse(request.getDate(), dateFormatter);
         DayOfWeek dayOfWeek = newHoliday.getDayOfWeek();
         if (dayOfWeek.getValue() != 6) {
             throw new IllegalOperationException("New holiday must be saturday");
+        }
+
+        Optional<HolidayOnSaturdayEntity> byDate = holidayOnSaturdayRepository.findByDate(newHoliday);
+        if (byDate.isPresent()) {
+            throw new IllegalOperationException("Holiday already registered");
         }
 
         HolidayOnSaturdayEntity holidayEntity = holidayOnSaturdayRepository.save(new HolidayOnSaturdayEntity(newHoliday, request.getNote()));
@@ -358,5 +366,21 @@ public class PtoService {
         holidayOnSaturdayUserEntityRepository.saveAll(holidayUserEntities);
 
         return request;
+    }
+
+    public HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin() {
+        LocalDate now = LocalDate.now();
+        HolidayOnSaturdayEntity lastRegistered = holidayOnSaturdayRepository.findLastRegisteredHolidayOnSaturdayByYear(now.getYear());
+        SaturdayHolidayDto nextHolidayOnSaturday = holidayService.findNextHolidayOnSaturday(lastRegistered != null ? lastRegistered.getDate() : null);
+        LocalDate nextHolidayDate = LocalDate.parse(nextHolidayOnSaturday.getDate());
+        long daysBetween = ChronoUnit.DAYS.between(now, nextHolidayDate);
+        List<HolidayOnSaturdayUserEntity> allByHolidayYear = holidayOnSaturdayUserEntityRepository.findAllByHolidayYear(now.getYear());
+        List<HolidayOnSaturdayByUserDto> holidaysOnSaturdayByUsers = allByHolidayYear.stream().map(entity -> {
+            SaturdayHolidayDto holidayDto = new SaturdayHolidayDto(entity.getHoliday().getId(), entity.getHoliday().getDate().toString(), entity.getHoliday().getNote());
+            AppUserBasicDto appUserBasicDto = AppUserBasicDto.appUserEntityToBasicDto(entity.getUser());
+            PtoDto ptoDto = entity.getPto() != null ? ptoTransformer.ptoEntityToDto(entity.getPto()) : null;
+            return new HolidayOnSaturdayByUserDto(holidayDto, appUserBasicDto, ptoDto);
+        }).toList();
+        return new HolidayOnSaturdaySummaryDto(nextHolidayOnSaturday, (int) daysBetween, holidaysOnSaturdayByUsers);
     }
 }

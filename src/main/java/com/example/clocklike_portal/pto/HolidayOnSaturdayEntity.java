@@ -3,6 +3,7 @@ package com.example.clocklike_portal.pto;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 public class HolidayOnSaturdayEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
