@@ -89,9 +89,8 @@ public class PtoService {
     PtoSummary getUserPtoSummary(long userId) {
         AppUserEntity user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + userId));
-        Page<PtoEntity> result = ptoRequestsRepository.findAllByApplier_AppUserId(userId, PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "requestDateTime")));
-
-        return ptoTransformer.createPtoSummary(user, result.getContent());
+        List<HolidayOnSaturdayUserEntity> unusedHolidays = holidayOnSaturdayUserEntityRepository.findAllByPtoIsNullAndUser_AppUserId(userId);
+        return ptoTransformer.createPtoSummary(user, unusedHolidays);
     }
 
     PtoDto processNewRequest(NewPtoRequest request) {
@@ -133,6 +132,10 @@ public class PtoService {
             throw new IllegalOperationException("Selected acceptor has no authorities to accept pto requests");
         }
 
+        if (request.getPtoStart() == null || request.getPtoEnd() == null) {
+            throw new IllegalOperationException("Missing pto dates");
+        }
+
         LocalDate startDate = LocalDate.parse(request.getPtoStart(), dateFormatter);
         LocalDate toDate = LocalDate.parse(request.getPtoEnd(), dateFormatter);
         boolean isPtoRangeValid = dateChecker.checkIfDatesRangeIsValid(startDate, toDate);
@@ -150,21 +153,30 @@ public class PtoService {
         if (requestPtoType == null) {
             throw new IllegalOperationException("Request type not provided");
         }
+
+        int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
+        if (businessDays < 1) {
+            throw new IllegalOperationException("Pto cannot be less than 1 business day");
+        }
+
         switch (requestPtoType) {
             case Library.PTO_DISCRIMINATOR_VALUE, Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE:
-                return processPtoRequest(request, applier, acceptor, startDate, toDate);
+                return processPtoRequest(request, applier, acceptor, startDate, toDate, businessDays);
             case Library.OCCASIONAL_LEAVE_DISCRIMINATOR_VALUE:
-                return processOccasionalLeaveRequest(request, applier, acceptor, startDate, toDate);
+                return processOccasionalLeaveRequest(request, applier, acceptor, startDate, toDate, businessDays);
             case Library.CHILD_CARE_LEAVE_DISCRIMINATOR_VALUE:
-                return processChildCareLeave(request, applier, acceptor, startDate, toDate);
+                return processChildCareLeave(request, applier, acceptor, startDate, toDate, businessDays);
             case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE:
-                return processOnSaturdayPtoRequest(request, applier, acceptor, startDate);
+                return processOnSaturdayPtoRequest(request, applier, acceptor, startDate, businessDays);
             default:
                 throw new IllegalOperationException("Unknown request type");
         }
     }
 
-    PtoDto processOnSaturdayPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate) {
+    PtoDto processOnSaturdayPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, int businessDays) {
+        if (request.getSaturdayHolidayDate() == null) {
+            throw new IllegalOperationException("No holiday specified");
+        }
         LocalDate saturdayRequestDate = LocalDate.parse(request.getSaturdayHolidayDate(), dateFormatter);
         HolidayOnSaturdayEntity holidayEntity = holidayOnSaturdayRepository.findByDate(saturdayRequestDate)
                 .orElseThrow(() -> new NoSuchElementException("No such holiday found"));
@@ -175,6 +187,11 @@ public class PtoService {
             throw new IllegalOperationException("Holiday already used with pto request " + holidayOnSaturdayUserEntity.getPto().getPtoRequestId());
         }
 
+        if (businessDays != 1) {
+            throw new IllegalOperationException("Pto for saturday holiday must be 1 business day");
+        }
+
+
         PtoEntity ptoEntity = ptoRequestsRepository.save(new HolidayOnSaturdayPtoEntity(startDate, applier, acceptor, holidayEntity));
         holidayOnSaturdayUserEntity.setPto(ptoEntity);
         holidayOnSaturdayUserEntityRepository.save(holidayOnSaturdayUserEntity);
@@ -182,9 +199,8 @@ public class PtoService {
         return ptoTransformer.ptoEntityToDto(ptoEntity);
     }
 
-    PtoDto processChildCareLeave(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate) {
+    PtoDto processChildCareLeave(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
         String notes = "";
-        int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
         if (businessDays != 2) {
             notes = "Niepoprawna liczba dni urlopowych dla wybranego wniosku. Oczekiwana: " + 2 + ", przekazana: " + businessDays + ". ";
         }
@@ -210,7 +226,7 @@ public class PtoService {
         return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(childCareLeaveEntity));
     }
 
-    PtoDto processOccasionalLeaveRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate) {
+    PtoDto processOccasionalLeaveRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
         String notes = "";
 
         if (request.getOccasionalType() == null) {
@@ -222,7 +238,6 @@ public class PtoService {
             throw new NoSuchElementException("Unknown occasional type leave");
         }
 
-        int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
         if (businessDays != occasionalLeaveType.getDays()) {
             notes = "Niepoprawna liczba dni urlopowych dla wybranego wniosku. Oczekiwana: " + occasionalLeaveType.getDays() + ", przekazana: " + businessDays + ". ";
         }
@@ -234,8 +249,7 @@ public class PtoService {
         return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(occasionalLeaveEntity));
     }
 
-    PtoDto processPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate) {
-        int businessDays = holidayService.calculateBusinessDays(startDate, toDate);
+    PtoDto processPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
         int ptoDaysFromLastYear = applier.getPtoDaysLeftFromLastYear();
         int ptoDaysCurrentYear = applier.getPtoDaysLeftCurrentYear();
         int ptoDaysTaken = applier.getPtoDaysTaken();
@@ -306,10 +320,10 @@ public class PtoService {
         boolean isRequestAccepted = dto.getIsAccepted();
 
         switch (ptoRequest.getLeaveType()) {
-            case Library.PTO_DISCRIMINATOR_VALUE, Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE:
-                resolveStandardPtoRequest(isRequestAccepted, ptoRequest, applier, dto.getDeclineReason());
-            case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE:
-                resolveSaturdayHolidayPtoRequest(isRequestAccepted, ptoRequest, applier);
+            case Library.PTO_DISCRIMINATOR_VALUE, Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE ->
+                    resolveStandardPtoRequest(isRequestAccepted, ptoRequest, applier, dto.getDeclineReason());
+            case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE ->
+                    resolveSaturdayHolidayPtoRequest(isRequestAccepted, ptoRequest, applier);
         }
 
         ptoRequest.setWasAccepted(isRequestAccepted);

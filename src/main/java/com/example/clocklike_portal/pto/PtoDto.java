@@ -39,4 +39,5 @@ public class PtoDto {
     private String occasional_leaveType;
     private String occasional_descriptionPolish;
     private Integer occasional_days;
+    private String saturday_holiday_date;
 }

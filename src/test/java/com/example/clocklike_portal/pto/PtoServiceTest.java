@@ -206,7 +206,7 @@ class PtoServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionWhenUnknownRequestTypeProvided() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "incorrect type", null, null);
+        NewPtoRequest request = new NewPtoRequest("2024-05-10", "2024-05-12", 1L, 2L, "incorrect type", null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -217,9 +217,10 @@ class PtoServiceTest {
 
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(acceptor));
-        Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2023, 5, 1), LocalDate.of(2023, 5, 1))).thenReturn(true);
+        Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 12))).thenReturn(true);
         Mockito.when(ptoRepository.findAllOverlappingRequests(applier, LocalDate.of(2023, 5, 1), LocalDate.of(2023, 5, 1)))
                 .thenReturn(Collections.emptyList());
+        Mockito.when(holidayService.calculateBusinessDays(LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 12))).thenReturn(1);
 
         IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
         assertEquals("Unknown request type", exception.getMessage());
@@ -259,7 +260,7 @@ class PtoServiceTest {
     void processOccasionalLeaveRequestShouldThrowAnExceptionWhenNoOccasionalTypeIsSpecified() {
         NewPtoRequest newPtoRequest = new NewPtoRequest(null, null, null, null, null, null, null);
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processOccasionalLeaveRequest(newPtoRequest, null, null, null, null));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processOccasionalLeaveRequest(newPtoRequest, null, null, null, null, 0));
         assertEquals("No occasional type specified", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }

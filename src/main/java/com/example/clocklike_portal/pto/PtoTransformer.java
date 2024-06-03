@@ -16,8 +16,10 @@ public class PtoTransformer {
 
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    PtoSummary createPtoSummary(AppUserEntity appUserEntity, List<PtoEntity> lastRequests) {
-        final List<PtoDto> ptoRequests = lastRequests.stream().map(this::ptoEntityToDto).collect(Collectors.toList());
+    PtoSummary createPtoSummary(AppUserEntity appUserEntity, List<HolidayOnSaturdayUserEntity> unusedHolidays) {
+        final List<SaturdayHolidayDto> saturdayHolidayDtos = unusedHolidays.stream()
+                .map(holiday -> new SaturdayHolidayDto(holiday.getHoliday().getId(), holiday.getHoliday().getDate().toString(), holiday.getHoliday().getNote()))
+                .toList();
 
         return new PtoSummary(
                 appUserEntity.getPtoDaysAccruedLastYear(),
@@ -25,7 +27,7 @@ public class PtoTransformer {
                 appUserEntity.getPtoDaysLeftFromLastYear(),
                 appUserEntity.getPtoDaysLeftCurrentYear(),
                 appUserEntity.getPtoDaysTaken(),
-                ptoRequests
+                saturdayHolidayDtos
         );
 
     }
@@ -61,6 +63,7 @@ public class PtoTransformer {
         String occasionalLeaveType = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getOccasionalType() : null;
         String occasionalLeaveDescPolish = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDescriptionPolish() : null;
         Integer occasionalDays = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDays() : null;
+        String saturdayHolidayDate = request instanceof HolidayOnSaturdayPtoEntity ? ((HolidayOnSaturdayPtoEntity) request).getHoliday().getDate().toString() : null;
 
         return new PtoDto(
                 request.getPtoRequestId(),
@@ -92,7 +95,8 @@ public class PtoTransformer {
                 occasionalTypeId,
                 occasionalLeaveType,
                 occasionalLeaveDescPolish,
-                occasionalDays
+                occasionalDays,
+                saturdayHolidayDate
         );
     }
 }
