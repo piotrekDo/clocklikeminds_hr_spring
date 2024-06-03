@@ -41,13 +41,6 @@ class HolidayServiceTest {
     }
 
     @Test
-    void findNextHolidayOnSaturdayShouldFindNext() {
-        holidayService.setYear(2024);
-        SaturdayHolidayDto result = holidayService.findNextHolidayOnSaturday();
-        assertEquals("2024-01-06", result.getDate());
-    }
-
-    @Test
     void findNextHolidayOnSaturdayShouldFindNextDifrentThenLastKnown() {
         holidayService.setYear(2024);
         SaturdayHolidayDto result = holidayService.findNextHolidayOnSaturday(LocalDate.of(2024, 1,6));

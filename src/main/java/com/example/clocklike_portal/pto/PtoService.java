@@ -370,7 +370,9 @@ public class PtoService {
 
     public HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin() {
         LocalDate now = LocalDate.now();
-        HolidayOnSaturdayEntity lastRegistered = holidayOnSaturdayRepository.findLastRegisteredHolidayOnSaturdayByYear(now.getYear());
+        HolidayOnSaturdayEntity lastRegistered = holidayOnSaturdayRepository.findFirstByOrderByDateDesc();
+        System.out.println("LSAT REG");
+        System.out.println(lastRegistered);
         SaturdayHolidayDto nextHolidayOnSaturday = holidayService.findNextHolidayOnSaturday(lastRegistered != null ? lastRegistered.getDate() : null);
         LocalDate nextHolidayDate = LocalDate.parse(nextHolidayOnSaturday.getDate());
         long daysBetween = ChronoUnit.DAYS.between(now, nextHolidayDate);

@@ -38,7 +38,7 @@ public class HolidayService {
         while (holiday == null) {
             for (LocalDate date : selectedYearHolidays.keySet()) {
                 if (date.getDayOfWeek() == DayOfWeek.SATURDAY) {
-                    if (lastKnown != null && (date.equals(lastKnown) || date.isBefore(lastKnown))) {
+                    if (date.isBefore(today) || (lastKnown != null && (date.equals(lastKnown) || date.isBefore(lastKnown)))) {
                         continue;
                     }
                     holiday = date;
