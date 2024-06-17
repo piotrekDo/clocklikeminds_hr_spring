@@ -18,7 +18,7 @@ public class PtoTransformer {
 
     PtoSummary createPtoSummary(AppUserEntity appUserEntity, List<HolidayOnSaturdayUserEntity> unusedHolidays) {
         final List<SaturdayHolidayDto> saturdayHolidayDtos = unusedHolidays.stream()
-                .map(holiday -> new SaturdayHolidayDto(holiday.getHoliday().getId(), holiday.getHoliday().getDate().toString(), holiday.getHoliday().getNote()))
+                .map(holiday -> new SaturdayHolidayDto(holiday.getHoliday().getId(), holiday.getHoliday().getDate().toString(), holiday.getHoliday().getNote(), holiday.getPto() != null ? holiday.getPto().getPtoStart().toString() : null))
                 .toList();
 
         return new PtoSummary(

@@ -6,7 +6,6 @@ import com.example.clocklike_portal.appUser.UserRole;
 import com.example.clocklike_portal.appUser.UserRoleRepository;
 import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionRepository;
-import com.example.clocklike_portal.pto.OccasionalLeaveEntity;
 import com.example.clocklike_portal.pto.OccasionalLeaveRepository;
 import com.example.clocklike_portal.pto.OccasionalLeaveType;
 import com.example.clocklike_portal.pto.OccasionalLeaveTypeRepository;
@@ -14,7 +13,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;

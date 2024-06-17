@@ -13,5 +13,5 @@ public class PtoSummary {
     private int ptoDaysLeftFromLastYear;
     private int ptoDaysLeftCurrentYear;
     private int ptoDaysTaken;
-    private List<SaturdayHolidayDto> unusedSaturdayHolidays;
+    private List<SaturdayHolidayDto> saturdayHolidaysCurrentYear;
 }

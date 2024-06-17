@@ -89,7 +89,7 @@ public class PtoService {
     PtoSummary getUserPtoSummary(long userId) {
         AppUserEntity user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + userId));
-        List<HolidayOnSaturdayUserEntity> unusedHolidays = holidayOnSaturdayUserEntityRepository.findAllByPtoIsNullAndUser_AppUserId(userId);
+        List<HolidayOnSaturdayUserEntity> unusedHolidays = holidayOnSaturdayUserEntityRepository.findAllByUserIdAndYear(userId, LocalDate.now().getYear());
         return ptoTransformer.createPtoSummary(user, unusedHolidays);
     }
 
@@ -392,7 +392,7 @@ public class PtoService {
         long daysBetween = ChronoUnit.DAYS.between(now, nextHolidayDate);
         List<HolidayOnSaturdayUserEntity> allByHolidayYear = holidayOnSaturdayUserEntityRepository.findAllByHolidayYear(now.getYear());
         List<HolidayOnSaturdayByUserDto> holidaysOnSaturdayByUsers = allByHolidayYear.stream().map(entity -> {
-            SaturdayHolidayDto holidayDto = new SaturdayHolidayDto(entity.getHoliday().getId(), entity.getHoliday().getDate().toString(), entity.getHoliday().getNote());
+            SaturdayHolidayDto holidayDto = new SaturdayHolidayDto(entity.getHoliday().getId(), entity.getHoliday().getDate().toString(), entity.getHoliday().getNote(), entity.getPto() != null ? entity.getPto().getPtoStart().toString() : null);
             AppUserBasicDto appUserBasicDto = AppUserBasicDto.appUserEntityToBasicDto(entity.getUser());
             PtoDto ptoDto = entity.getPto() != null ? ptoTransformer.ptoEntityToDto(entity.getPto()) : null;
             return new HolidayOnSaturdayByUserDto(holidayDto, appUserBasicDto, ptoDto);

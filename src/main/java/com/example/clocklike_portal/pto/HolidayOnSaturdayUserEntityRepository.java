@@ -19,5 +19,7 @@ public interface HolidayOnSaturdayUserEntityRepository extends JpaRepository<Hol
             "WHERE YEAR(h.date) = :year")
     List<HolidayOnSaturdayUserEntity> findAllByHolidayYear(@Param("year") int year);
 
-    List<HolidayOnSaturdayUserEntity> findAllByPtoIsNullAndUser_AppUserId(Long userId);
+    @Query("SELECT hsu FROM HolidayOnSaturdayUserEntity hsu " +
+            "WHERE hsu.user.appUserId = :userId AND YEAR(hsu.holiday.date) = :year")
+    List<HolidayOnSaturdayUserEntity> findAllByUserIdAndYear(@Param("userId") Long userId, @Param("year") int year);
 }

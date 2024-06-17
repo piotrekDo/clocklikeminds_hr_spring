@@ -58,15 +58,13 @@ class HolidayOnSaturdayUserEntityRepositoryTest {
     @Test
     void findAllByPtoIsNullShouldReturnOnlyRecordsWithNullPto() {
         HolidayOnSaturdayEntity holiday = testEntityManager.persist(new HolidayOnSaturdayEntity(LocalDate.of(2024, 5, 25), "test note"));
-        HolidayOnSaturdayEntity holiday2 = testEntityManager.persist(new HolidayOnSaturdayEntity(LocalDate.of(2024, 6, 1), "test note"));
+        HolidayOnSaturdayEntity holiday2 = testEntityManager.persist(new HolidayOnSaturdayEntity(LocalDate.of(2025, 6, 1), "test note"));
         AppUserEntity appUser = testEntityManager.persist(AppUserEntity.createTestAppUser("user", "user", "user@user.com"));
-        PtoEntity pto = testEntityManager.persist(new PtoEntity(false, null, null, appUser, null, 0, 0));
-        HolidayOnSaturdayUserEntity unMatchingHoliday = new HolidayOnSaturdayUserEntity(holiday, appUser);
-        unMatchingHoliday.setPto(pto);
-        HolidayOnSaturdayUserEntity unMatching = testEntityManager.persist(unMatchingHoliday);
-        HolidayOnSaturdayUserEntity matching = testEntityManager.persist(new HolidayOnSaturdayUserEntity(holiday2, appUser));
 
-        List<HolidayOnSaturdayUserEntity> result = repository.findAllByPtoIsNullAndUser_AppUserId(appUser.getAppUserId());
+        HolidayOnSaturdayUserEntity unMatching = testEntityManager.persist(new HolidayOnSaturdayUserEntity(holiday2, appUser));
+        HolidayOnSaturdayUserEntity matching = testEntityManager.persist(new HolidayOnSaturdayUserEntity(holiday, appUser));
+
+        List<HolidayOnSaturdayUserEntity> result = repository.findAllByUserIdAndYear(appUser.getAppUserId(), 2024);
 
         assertEquals(1, result.size());
         assertEquals(matching.getId(), result.get(0).getId());

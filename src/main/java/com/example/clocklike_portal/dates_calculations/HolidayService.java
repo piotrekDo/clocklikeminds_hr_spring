@@ -51,7 +51,7 @@ public class HolidayService {
             }
         }
 
-        return new SaturdayHolidayDto(0, holiday.toString(), selectedYearHolidays.get(holiday));
+        return new SaturdayHolidayDto(0, holiday.toString(), selectedYearHolidays.get(holiday), null);
     }
 
     public SaturdayHolidayDto findNextHolidayOnSaturday() {
