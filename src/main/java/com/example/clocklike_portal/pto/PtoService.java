@@ -321,12 +321,15 @@ public class PtoService {
 
         switch (ptoRequest.getLeaveType()) {
             case Library.PTO_DISCRIMINATOR_VALUE, Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE ->
-                    resolveStandardPtoRequest(isRequestAccepted, ptoRequest, applier, dto.getDeclineReason());
+                    resolveStandardPtoRequest(isRequestAccepted, ptoRequest, applier);
             case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE ->
                     resolveSaturdayHolidayPtoRequest(isRequestAccepted, ptoRequest, applier);
         }
 
         ptoRequest.setWasAccepted(isRequestAccepted);
+        if (!isRequestAccepted && dto.getDeclineReason() != null) {
+            ptoRequest.setDeclineReason(dto.getDeclineReason());
+        }
         ptoRequest.setDecisionDateTime(LocalDateTime.now());
         PtoEntity updatedPtoRequest = ptoRequestsRepository.save(ptoRequest);
         return ptoTransformer.ptoEntityToDto(updatedPtoRequest);
@@ -344,9 +347,8 @@ public class PtoService {
         }
     }
 
-    void resolveStandardPtoRequest(boolean isRequestAccepted, PtoEntity ptoEntity, AppUserEntity applier, String declineReason) {
+    void resolveStandardPtoRequest(boolean isRequestAccepted, PtoEntity ptoEntity, AppUserEntity applier) {
         if (!isRequestAccepted) {
-            ptoEntity.setDeclineReason(declineReason);
             int requestBusinessDays = ptoEntity.getBusinessDays();
             int ptoDaysAccruedCurrentYear = applier.getPtoDaysAccruedCurrentYear();
             int ptoDaysLeftCurrentYear = applier.getPtoDaysLeftCurrentYear();
