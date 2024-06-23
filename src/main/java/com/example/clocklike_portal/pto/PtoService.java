@@ -243,7 +243,7 @@ public class PtoService {
         }
 
         OccasionalLeaveEntity occasionalLeaveEntity = new OccasionalLeaveEntity(startDate, toDate, applier, acceptor, businessDays, occasionalLeaveType);
-        if (notes.isEmpty() && !notes.isBlank()) {
+        if (!notes.isEmpty() && !notes.isBlank()) {
             occasionalLeaveEntity.setNotes(notes);
         }
         return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(occasionalLeaveEntity));
