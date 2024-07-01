@@ -1,0 +1,66 @@
+<html xmlns:th="http://www.thymeleaf.org" th:charset="UTF-8" lang="pl-PL">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style>
+        * {
+            font-family: Arial;
+        }
+
+        input {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+<section style="padding: 80px 250px">
+    <h1 style="text-align: center; font-size: 30px"><i>WNIOSEK URLOPOWY</i></h1>
+    <div style="width: 100%">
+        <h3 style="margin-bottom: 0;text-align: center" th:text="${applier}"></h3>
+        <hr style="width: 70%"/>
+        <p style="margin-top: 0;text-align: center">(imię i nazwisko)</p>
+    </div>
+    <div style="margin-top: 100px; width: 100%">
+        <span>Proszę o udzielenie </span><span
+            style="font-size: 25px;text-decoration: underline; text-decoration-style: dotted;" th:text="${days}"></span><span> dni</span>
+    </div>
+
+    <div style="margin-top: 50px">
+        <p><input type="checkbox" th:disabled="true" th:checked="${type == 'pto'}"/> urlopu wypoczynkowego </p>
+        <p><input type="checkbox" th:checked="${type == 'pto_on_demand'}"/> urlopu wypoczynkowego na żądanie</p>
+        <p><input type="checkbox" th:checked="${type == 'occasional_leave'}"/> zwolnienie okolicznościowe</p>
+        <p><input type="checkbox" th:checked="${type == 'child_care'}"/> zwolnienie okolicznościowe z tytułu opieki nad
+            dzieckiem</p>
+        <p><input type="checkbox" th:checked="${type == 'on_saturday_pto'}"/> odbiór dnia wolnego za święto wypadające w
+            sobotę</p>
+    </div>
+
+    <div style="margin-top: 20px">
+        <p><span>W dniach: </span><span
+                style="font-size: 30px;text-decoration: underline; text-decoration-style: dotted;"
+                th:text="${range}"></span>
+        </p>
+        <p>Pozostaje do wykorzystania: ..... dni</p>
+    </div>
+
+    <table style="margin-top: 60px; width: 100%; text-align: center;">
+        <tr>
+            <td style="width: 50%; vertical-align: middle;">
+                <div>
+                    <p style="height: 35px"> </p>
+                    <p th:text="${applier_sign}"></p>
+                    <p>Data i podpis pracownika</p>
+                </div>
+            </td>
+            <td style="width: 50%; vertical-align: middle;">
+                <div>
+                    <img src="src/main/resources/img/podpis.png" width="210px" height="35px"></img>
+                    <p th:text="${acceptor_sing}"></p>
+                    <p>Podpis przełożonego</p>
+                </div>
+            </td>
+        </tr>
+    </table>
+</section>
+</body>
+</html>

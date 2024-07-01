@@ -3,6 +3,7 @@ package com.example.clocklike_portal.security;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.appUser.AppUserService;
+import com.example.clocklike_portal.mail.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
     private final AppUserService appUserService;
     private final JwtService jwtService;
     private final GoogleOauth2LoginService loginService;
+    private final EmailService emailService;
     private static final String FAILURE_REDIRECTION = "http://localhost:5173/login-failure";
     private static final String AUTHENTICATED_REDIRECTION = "http://localhost:5173/oauth2/redirect";
 
@@ -43,8 +45,15 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
 //            return;
 //        }
 
-        AppUserEntity appUserEntity = userRepository.findByUserEmailIgnoreCase(googlePrincipal.getEmail())
-                .orElseGet(() -> appUserService.registerNewUser(googlePrincipal));
+        AppUserEntity appUserEntity;
+        Optional<AppUserEntity> userInDataBase = userRepository.findByUserEmailIgnoreCase(googlePrincipal.getEmail());
+
+        if (userInDataBase.isPresent()) {
+            appUserEntity = userInDataBase.get();
+        } else {
+            appUserEntity = appUserService.registerNewUser(googlePrincipal);
+            emailService.sendNewEmployeeRegisteredToAdmins(appUserEntity);
+        }
 
         appUserEntity.setImageUrl(googlePrincipal.getPictureUrl());
         userRepository.save(appUserEntity);

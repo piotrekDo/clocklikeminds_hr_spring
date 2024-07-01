@@ -5,6 +5,7 @@ import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionHistory;
 import com.example.clocklike_portal.job_position.PositionHistoryRepository;
 import com.example.clocklike_portal.job_position.PositionRepository;
+import com.example.clocklike_portal.mail.EmailService;
 import com.example.clocklike_portal.pto.PtoEntity;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import jakarta.annotation.PostConstruct;
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.clocklike_portal.job_position.PositionHistory.createNewPositionHistory;
+import static com.example.clocklike_portal.security.SecurityConfig.SUPERVISOR_AUTHORITY;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Service
@@ -33,18 +35,20 @@ public class AppUserService implements UserDetailsService {
     private final UserRoleRepository userRoleRepository;
     private final PositionRepository jobPositionRepository;
     private final PositionHistoryRepository positionHistoryRepository;
+    private final EmailService emailService;
     private UserRole supervisorRole = null;
 
-    public AppUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository jobPositionRepository, PositionHistoryRepository positionHistoryRepository) {
+    public AppUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository jobPositionRepository, PositionHistoryRepository positionHistoryRepository, EmailService emailService) {
         this.appUserRepository = appUserRepository;
         this.userRoleRepository = userRoleRepository;
         this.jobPositionRepository = jobPositionRepository;
         this.positionHistoryRepository = positionHistoryRepository;
+        this.emailService = emailService;
     }
 
     private void getSupervisorRole() {
         if (supervisorRole == null) {
-            this.supervisorRole = userRoleRepository.findByRoleNameIgnoreCase("supervisor")
+            this.supervisorRole = userRoleRepository.findByRoleNameIgnoreCase(SUPERVISOR_AUTHORITY)
                     .orElseThrow(() -> new NoSuchElementException("No supervisor role found"));
         }
     }
@@ -113,6 +117,7 @@ public class AppUserService implements UserDetailsService {
 
         updatePositionHistory(positionEntity, appUserEntity, hireStartLocalDate);
 
+        emailService.sendRegistrationConfirmedMsgForUser(appUserEntity);
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
 

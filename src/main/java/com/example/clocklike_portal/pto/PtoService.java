@@ -7,8 +7,11 @@ import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.dates_calculations.DateChecker;
 import com.example.clocklike_portal.dates_calculations.HolidayService;
 import com.example.clocklike_portal.error.IllegalOperationException;
+import com.example.clocklike_portal.mail.EmailService;
+import com.example.clocklike_portal.pdf.PdfCreator;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -39,6 +42,7 @@ public class PtoService {
     private final OccasionalLeaveTypeRepository occasionalLeaveTypeRepository;
     private final HolidayOnSaturdayRepository holidayOnSaturdayRepository;
     private final HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
+    private final EmailService emailService;
     private Map<String, OccasionalLeaveType> occasionalTypes;
 
     @PostConstruct
@@ -94,6 +98,7 @@ public class PtoService {
     }
 
     PtoDto processNewRequest(NewPtoRequest request) {
+        PtoDto ptoDto;
         AppUserEntity applier = appUserRepository.findById(request.getApplierId())
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + request.getApplierId()));
 
@@ -159,18 +164,20 @@ public class PtoService {
             throw new IllegalOperationException("Pto cannot be less than 1 business day");
         }
 
-        switch (requestPtoType) {
-            case Library.PTO_DISCRIMINATOR_VALUE, Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE:
-                return processPtoRequest(request, applier, acceptor, startDate, toDate, businessDays);
-            case Library.OCCASIONAL_LEAVE_DISCRIMINATOR_VALUE:
-                return processOccasionalLeaveRequest(request, applier, acceptor, startDate, toDate, businessDays);
-            case Library.CHILD_CARE_LEAVE_DISCRIMINATOR_VALUE:
-                return processChildCareLeave(request, applier, acceptor, startDate, toDate, businessDays);
-            case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE:
-                return processOnSaturdayPtoRequest(request, applier, acceptor, startDate, businessDays);
-            default:
-                throw new IllegalOperationException("Unknown request type");
-        }
+        ptoDto = switch (requestPtoType) {
+            case Library.PTO_DISCRIMINATOR_VALUE, Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE ->
+                    processPtoRequest(request, applier, acceptor, startDate, toDate, businessDays);
+            case Library.OCCASIONAL_LEAVE_DISCRIMINATOR_VALUE ->
+                    processOccasionalLeaveRequest(request, applier, acceptor, startDate, toDate, businessDays);
+            case Library.CHILD_CARE_LEAVE_DISCRIMINATOR_VALUE ->
+                    processChildCareLeave(request, applier, acceptor, startDate, toDate, businessDays);
+            case Library.ON_SATURDAY_PTO_DISCRIMINATOR_VALUE ->
+                    processOnSaturdayPtoRequest(request, applier, acceptor, startDate, businessDays);
+            default -> throw new IllegalOperationException("Unknown request type");
+        };
+
+        emailService.sendNewTimeOffRequestMailToAcceptor(ptoDto);
+        return ptoDto;
     }
 
     PtoDto processOnSaturdayPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, int businessDays) {
@@ -217,7 +224,7 @@ public class PtoService {
 
         if (totalRequests > 0) {
             notes += "Wniosków o opiekę nad dzieckiem od początku roku: " + totalRequests + ", w tym zaakceptowanych: " + accepted +
-                    ". Łącznie zaakceptowanych dni urlopu na żądanie: " + totalDaysAccepted;
+                    ". Łącznie zaakceptowanych dni urlopu na opiekę: " + totalDaysAccepted;
         } else {
             notes += "Pierwszy wniosek tego typu w bieżącym roku dla użytkownika.";
         }
@@ -332,6 +339,13 @@ public class PtoService {
         }
         ptoRequest.setDecisionDateTime(LocalDateTime.now());
         PtoEntity updatedPtoRequest = ptoRequestsRepository.save(ptoRequest);
+
+        if (updatedPtoRequest.isWasAccepted()) {
+            emailService.sendTimeOffRequestMailConformation(updatedPtoRequest);
+        } else {
+            emailService.sendTimeOffRequestDeniedMailToApplier(updatedPtoRequest);
+        }
+
         return ptoTransformer.ptoEntityToDto(updatedPtoRequest);
     }
 

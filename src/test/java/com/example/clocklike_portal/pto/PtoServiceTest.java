@@ -6,6 +6,7 @@ import com.example.clocklike_portal.appUser.UserRole;
 import com.example.clocklike_portal.dates_calculations.DateChecker;
 import com.example.clocklike_portal.dates_calculations.HolidayService;
 import com.example.clocklike_portal.error.IllegalOperationException;
+import com.example.clocklike_portal.mail.EmailService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,6 +51,8 @@ class PtoServiceTest {
     HolidayOnSaturdayRepository holidayOnSaturdayRepository;
     @MockBean
     HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
+    @MockBean
+    EmailService emailService;
 
 
     @TestConfiguration
@@ -57,9 +60,10 @@ class PtoServiceTest {
         @Bean
         PtoService ptoService(PtoRepository ptoRepository, AppUserRepository appUserRepository, PtoTransformer ptoTransformer,
                               HolidayService holidayService, DateChecker dateChecker, OccasionalLeaveTypeRepository occasionalLeaveTypeRepository,
-                              HolidayOnSaturdayRepository holidayOnSaturdayRepository, HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository) {
+                              HolidayOnSaturdayRepository holidayOnSaturdayRepository, HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository,
+                              EmailService emailService) {
             return new PtoService(ptoRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository,
-                    holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository);
+                    holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository, emailService);
         }
     }
 

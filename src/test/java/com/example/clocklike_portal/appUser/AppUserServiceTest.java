@@ -5,6 +5,7 @@ import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionHistory;
 import com.example.clocklike_portal.job_position.PositionHistoryRepository;
 import com.example.clocklike_portal.job_position.PositionRepository;
+import com.example.clocklike_portal.mail.EmailService;
 import com.example.clocklike_portal.pto.PtoEntity;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import org.junit.jupiter.api.Test;
@@ -48,11 +49,14 @@ class AppUserServiceTest {
     @MockBean
     PositionHistoryRepository positionHistoryRepository;
 
+    @MockBean
+    EmailService emailService;
+
     @TestConfiguration
     static class AppUserServiceTestConfiguration {
         @Bean
-        AppUserService appUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository positionRepository, PositionHistoryRepository positionHistoryRepository) {
-            return new AppUserService(appUserRepository, userRoleRepository, positionRepository, positionHistoryRepository);
+        AppUserService appUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository positionRepository, PositionHistoryRepository positionHistoryRepository, EmailService emailService) {
+            return new AppUserService(appUserRepository, userRoleRepository, positionRepository, positionHistoryRepository, emailService);
         }
     }
 
