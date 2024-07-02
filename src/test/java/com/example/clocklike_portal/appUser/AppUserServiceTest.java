@@ -6,13 +6,14 @@ import com.example.clocklike_portal.job_position.PositionHistory;
 import com.example.clocklike_portal.job_position.PositionHistoryRepository;
 import com.example.clocklike_portal.job_position.PositionRepository;
 import com.example.clocklike_portal.mail.EmailService;
-import com.example.clocklike_portal.pto.PtoEntity;
+import com.example.clocklike_portal.timeoff.HolidayOnSaturdayRepository;
+import com.example.clocklike_portal.timeoff.HolidayOnSaturdayUserEntityRepository;
+import com.example.clocklike_portal.timeoff.PtoEntity;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -21,8 +22,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.swing.text.html.Option;
-import java.sql.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -50,13 +49,21 @@ class AppUserServiceTest {
     PositionHistoryRepository positionHistoryRepository;
 
     @MockBean
+    HolidayOnSaturdayRepository holidayOnSaturdayRepository;
+
+    @MockBean
+    HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
+
+    @MockBean
     EmailService emailService;
 
     @TestConfiguration
     static class AppUserServiceTestConfiguration {
         @Bean
-        AppUserService appUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository positionRepository, PositionHistoryRepository positionHistoryRepository, EmailService emailService) {
-            return new AppUserService(appUserRepository, userRoleRepository, positionRepository, positionHistoryRepository, emailService);
+        AppUserService appUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository positionRepository,
+                                      PositionHistoryRepository positionHistoryRepository, EmailService emailService, HolidayOnSaturdayRepository holidayOnSaturdayRepository,
+                                      HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository) {
+            return new AppUserService(appUserRepository, userRoleRepository, positionRepository, positionHistoryRepository, emailService, holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository);
         }
     }
 

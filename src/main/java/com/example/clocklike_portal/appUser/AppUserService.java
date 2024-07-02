@@ -6,11 +6,11 @@ import com.example.clocklike_portal.job_position.PositionHistory;
 import com.example.clocklike_portal.job_position.PositionHistoryRepository;
 import com.example.clocklike_portal.job_position.PositionRepository;
 import com.example.clocklike_portal.mail.EmailService;
-import com.example.clocklike_portal.pto.PtoEntity;
+import com.example.clocklike_portal.timeoff.HolidayOnSaturdayRepository;
+import com.example.clocklike_portal.timeoff.HolidayOnSaturdayUserEntity;
+import com.example.clocklike_portal.timeoff.HolidayOnSaturdayUserEntityRepository;
+import com.example.clocklike_portal.timeoff.PtoEntity;
 import com.example.clocklike_portal.security.GooglePrincipal;
-import jakarta.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
-import org.springframework.core.annotation.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -35,14 +35,20 @@ public class AppUserService implements UserDetailsService {
     private final UserRoleRepository userRoleRepository;
     private final PositionRepository jobPositionRepository;
     private final PositionHistoryRepository positionHistoryRepository;
+    private final HolidayOnSaturdayRepository holidayOnSaturdayRepository;
+    private final HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
     private final EmailService emailService;
     private UserRole supervisorRole = null;
 
-    public AppUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository jobPositionRepository, PositionHistoryRepository positionHistoryRepository, EmailService emailService) {
+    public AppUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository jobPositionRepository,
+                          PositionHistoryRepository positionHistoryRepository, EmailService emailService, HolidayOnSaturdayRepository holidayOnSaturdayRepository,
+                          HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository) {
         this.appUserRepository = appUserRepository;
         this.userRoleRepository = userRoleRepository;
         this.jobPositionRepository = jobPositionRepository;
         this.positionHistoryRepository = positionHistoryRepository;
+        this.holidayOnSaturdayRepository = holidayOnSaturdayRepository;
+        this.holidayOnSaturdayUserEntityRepository = holidayOnSaturdayUserEntityRepository;
         this.emailService = emailService;
     }
 
@@ -116,6 +122,11 @@ public class AppUserService implements UserDetailsService {
         appUserEntity.setActive(true);
 
         updatePositionHistory(positionEntity, appUserEntity, hireStartLocalDate);
+
+        List<HolidayOnSaturdayUserEntity> accruedSaturdayHolidays = new ArrayList<>();
+        holidayOnSaturdayRepository.findAllByDateGreaterThanEqual(appUserEntity.getHireStart())
+                .forEach(holiday -> accruedSaturdayHolidays.add(new HolidayOnSaturdayUserEntity(holiday, appUserEntity)));
+        holidayOnSaturdayUserEntityRepository.saveAll(accruedSaturdayHolidays);
 
         emailService.sendRegistrationConfirmedMsgForUser(appUserEntity);
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));

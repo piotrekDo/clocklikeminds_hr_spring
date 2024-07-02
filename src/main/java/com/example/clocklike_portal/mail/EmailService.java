@@ -6,8 +6,8 @@ import com.example.clocklike_portal.appUser.UserRole;
 import com.example.clocklike_portal.appUser.UserRoleRepository;
 import com.example.clocklike_portal.pdf.PdfCreator;
 import com.example.clocklike_portal.pdf.TemplateGenerator;
-import com.example.clocklike_portal.pto.PtoDto;
-import com.example.clocklike_portal.pto.PtoEntity;
+import com.example.clocklike_portal.timeoff.PtoDto;
+import com.example.clocklike_portal.timeoff.PtoEntity;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailAttachment;
@@ -38,13 +38,14 @@ public class EmailService {
 
     @Value("${mail.mailbox.password}")
     private String mailboxPassword;
+    @Value("${mail.enabled}")
+    private boolean isEnabled;
 
     public void sendRegistrationConfirmedMsgForUser(AppUserEntity entity) {
         executorService.submit(() -> {
             String subject = "Resjestracja w Portalu Pracownika";
             String msg = templateGenerator.generateRegistrationConfirmationForUser();
             sendMail(subject, msg, entity.getUserEmail());
-            System.out.println("POSZLO");
         });
     }
 
@@ -57,7 +58,6 @@ public class EmailService {
             allAdmins.forEach(admin -> {
                 sendMail(subject, msg, admin.getUserEmail());
             });
-            System.out.println("POSZŁO");
         });
     }
 
@@ -66,7 +66,6 @@ public class EmailService {
             String subject = generateSubject(request);
             String msg = templateGenerator.generateNewTimeOffRequestMsgForAcceptor(request);
             sendMail(subject, msg, request.getAcceptorEmail());
-            System.out.println("POSZLO");
         });
     }
 
@@ -75,7 +74,6 @@ public class EmailService {
            String subject = generateSubject(request);
            String msg = templateGenerator.generateRequestDeniedMsgForApplier(request);
            sendMail(subject, msg, request.getApplier().getUserEmail());
-            System.out.println("POSZLO");
         });
     }
 
@@ -86,7 +84,6 @@ public class EmailService {
             sendMail(subject, templateGenerator.generateReqConfirmationMsgForApplier(), request.getApplier().getUserEmail(), pdf);
             sendMail(subject, templateGenerator.generateReqConfirmationMsgForAcceptor(), request.getAcceptor().getUserEmail(), pdf);
             deleteRequest(pdf);
-            System.out.println("POSZLO");
         });
     }
 
@@ -122,6 +119,7 @@ public class EmailService {
     }
 
     private void sendMail(String subject, String msg, String mailTo, String pdf) {
+        if (!isEnabled) return;
         try {
             HtmlEmail email = new HtmlEmail();
 
@@ -147,7 +145,6 @@ public class EmailService {
             email.setHtmlMsg(msg);
             email.setTextMsg("Your email client does not support HTML messages");
             email.send();
-
         } catch (EmailException e) {
             e.printStackTrace();
         }

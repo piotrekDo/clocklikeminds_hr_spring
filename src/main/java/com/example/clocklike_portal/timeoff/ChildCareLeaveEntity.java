@@ -1,10 +1,9 @@
-package com.example.clocklike_portal.pto;
+package com.example.clocklike_portal.timeoff;
 
 import com.example.clocklike_portal.app.Library;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
 import lombok.*;
 
 import java.time.LocalDate;

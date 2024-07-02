@@ -2,8 +2,8 @@ package com.example.clocklike_portal.appUser;
 
 import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionHistory;
-import com.example.clocklike_portal.pto.HolidayOnSaturdayUserEntity;
-import com.example.clocklike_portal.pto.PtoEntity;
+import com.example.clocklike_portal.timeoff.HolidayOnSaturdayUserEntity;
+import com.example.clocklike_portal.timeoff.PtoEntity;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

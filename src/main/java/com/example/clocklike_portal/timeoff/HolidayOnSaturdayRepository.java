@@ -1,4 +1,4 @@
-package com.example.clocklike_portal.pto;
+package com.example.clocklike_portal.timeoff;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +19,8 @@ public interface HolidayOnSaturdayRepository extends JpaRepository<HolidayOnSatu
 
     @Query("SELECT h FROM HolidayOnSaturdayEntity h WHERE YEAR(h.date) = :year ORDER BY h.date DESC")
     HolidayOnSaturdayEntity findLastRegisteredHolidayOnSaturdayByYear(@Param("year") int year);
+
+    List<HolidayOnSaturdayEntity> findAllByDateGreaterThanEqual(LocalDate date);
 
     HolidayOnSaturdayEntity findFirstByOrderByDateDesc();
 }

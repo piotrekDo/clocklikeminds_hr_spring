@@ -1,6 +1,6 @@
 package com.example.clocklike_portal.dates_calculations;
 
-import com.example.clocklike_portal.pto.SaturdayHolidayDto;
+import com.example.clocklike_portal.timeoff.SaturdayHolidayDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

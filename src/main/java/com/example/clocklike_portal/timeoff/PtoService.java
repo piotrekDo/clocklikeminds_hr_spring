@@ -1,4 +1,4 @@
-package com.example.clocklike_portal.pto;
+package com.example.clocklike_portal.timeoff;
 
 import com.example.clocklike_portal.app.Library;
 import com.example.clocklike_portal.appUser.AppUserBasicDto;
@@ -8,10 +8,8 @@ import com.example.clocklike_portal.dates_calculations.DateChecker;
 import com.example.clocklike_portal.dates_calculations.HolidayService;
 import com.example.clocklike_portal.error.IllegalOperationException;
 import com.example.clocklike_portal.mail.EmailService;
-import com.example.clocklike_portal.pdf.PdfCreator;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;

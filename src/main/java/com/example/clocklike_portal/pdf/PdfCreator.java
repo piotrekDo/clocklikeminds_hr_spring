@@ -1,14 +1,10 @@
 package com.example.clocklike_portal.pdf;
 
-import com.example.clocklike_portal.pto.PtoEntity;
+import com.example.clocklike_portal.timeoff.PtoEntity;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.BaseFont;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 

@@ -1,8 +1,8 @@
 package com.example.clocklike_portal.pdf;
 
 import com.example.clocklike_portal.appUser.AppUserEntity;
-import com.example.clocklike_portal.pto.PtoDto;
-import com.example.clocklike_portal.pto.PtoEntity;
+import com.example.clocklike_portal.timeoff.PtoDto;
+import com.example.clocklike_portal.timeoff.PtoEntity;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;

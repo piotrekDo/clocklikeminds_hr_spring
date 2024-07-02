@@ -1,6 +1,6 @@
 package com.example.clocklike_portal.meta_data;
 
-import com.example.clocklike_portal.pto.OccasionalLeaveTypeRepository;
+import com.example.clocklike_portal.timeoff.OccasionalLeaveTypeRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

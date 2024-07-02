@@ -1,4 +1,4 @@
-package com.example.clocklike_portal.pto;
+package com.example.clocklike_portal.timeoff;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
