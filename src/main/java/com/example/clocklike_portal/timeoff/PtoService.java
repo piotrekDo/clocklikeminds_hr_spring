@@ -45,7 +45,8 @@ public class PtoService {
 
     @PostConstruct
     void init() {
-        occasionalTypes = occasionalLeaveTypeRepository.findAll().stream().collect(Collectors.toMap(OccasionalLeaveType::getOccasionalType, Function.identity()));
+        occasionalTypes = occasionalLeaveTypeRepository.findAll().stream()
+                .collect(Collectors.toMap(OccasionalLeaveType::getOccasionalType, Function.identity()));
     }
 
     List<PtoDto> findAllRequestsByAcceptorId(long id) {
@@ -99,7 +100,7 @@ public class PtoService {
         PtoDto ptoDto;
         AppUserEntity applier = appUserRepository.findById(request.getApplierId())
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + request.getApplierId()));
-
+// is freelancer && type != pto error
         if (!applier.isActive()) {
             throw new IllegalOperationException("Applier account is not active.");
         }
@@ -205,35 +206,32 @@ public class PtoService {
     }
 
     PtoDto processChildCareLeave(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
-        String notes = "";
-        if (businessDays != 2) {
-            notes = "Niepoprawna liczba dni urlopowych dla wybranego wniosku. Oczekiwana: " + 2 + ", przekazana: " + businessDays + ". ";
+        if (businessDays > 2) {
+            throw new IllegalOperationException("Cannot apply for " + businessDays + ". Maximum days for selected request: " + 2);
         }
         ChildCareLeaveEntity childCareLeaveEntity = new ChildCareLeaveEntity(startDate, toDate, applier, acceptor, businessDays);
         List<PtoEntity> requests = ptoRequestsRepository.findUserRequestsForChildCare(applier.getAppUserId());
-        int totalRequests = requests.size();
-        long accepted = requests.stream()
-                .filter(PtoEntity::isWasAccepted)
-                .count();
-        long totalDaysAccepted = requests.stream()
-                .filter(PtoEntity::isWasAccepted)
+//        int totalRequests = requests.size();
+//        long accepted = requests.stream()
+//                .filter(PtoEntity::isWasAccepted)
+//                .count();
+        long totalDaysApplied = requests.stream()
+                .filter(pto -> pto.isWasAccepted() || pto.getDecisionDateTime() == null)
                 .mapToLong(PtoEntity::getBusinessDays)
                 .sum();
 
-        if (totalRequests > 0) {
-            notes += "Wniosków o opiekę nad dzieckiem od początku roku: " + totalRequests + ", w tym zaakceptowanych: " + accepted +
-                    ". Łącznie zaakceptowanych dni urlopu na opiekę: " + totalDaysAccepted;
-        } else {
-            notes += "Pierwszy wniosek tego typu w bieżącym roku dla użytkownika.";
+        if (totalDaysApplied >= 2) {
+            throw new IllegalOperationException("Cannot apply for " + businessDays + ". Maximum days used for current year");
         }
-        childCareLeaveEntity.setNotes(notes);
+
+        if (totalDaysApplied > 0 && businessDays > 1) {
+            throw new IllegalOperationException("Cannot apply for " + businessDays + ". 1 day left");
+        }
 
         return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(childCareLeaveEntity));
     }
 
     PtoDto processOccasionalLeaveRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
-        String notes = "";
-
         if (request.getOccasionalType() == null) {
             throw new IllegalOperationException("No occasional type specified");
         }
@@ -243,14 +241,12 @@ public class PtoService {
             throw new NoSuchElementException("Unknown occasional type leave");
         }
 
-        if (businessDays != occasionalLeaveType.getDays()) {
-            notes = "Niepoprawna liczba dni urlopowych dla wybranego wniosku. Oczekiwana: " + occasionalLeaveType.getDays() + ", przekazana: " + businessDays + ". ";
+        if (businessDays > occasionalLeaveType.getDays()) {
+            throw new IllegalOperationException("Cannot apply for " + businessDays + ". Maximum days for selected request: " + occasionalLeaveType.getDays());
         }
 
         OccasionalLeaveEntity occasionalLeaveEntity = new OccasionalLeaveEntity(startDate, toDate, applier, acceptor, businessDays, occasionalLeaveType);
-        if (!notes.isEmpty() && !notes.isBlank()) {
-            occasionalLeaveEntity.setNotes(notes);
-        }
+
         return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(occasionalLeaveEntity));
     }
 

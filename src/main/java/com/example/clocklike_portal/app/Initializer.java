@@ -89,7 +89,5 @@ public class Initializer {
         appUserRepository.save(piotrek);
         appUserRepository.save(admin);
 
-//        OccasionalLeaveEntity takiTamTest = new OccasionalLeaveEntity(LocalDate.now(), LocalDate.now(), piotrek, piotrek, 2, weddingOccasionalType);
-//        occasionalLeaveRepository.save(takiTamTest);
     }
 }

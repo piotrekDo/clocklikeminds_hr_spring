@@ -27,7 +27,7 @@ public class PtoEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ptoRequestId;
-    private String leaveType = "pto";
+    private String leaveType = Library.PTO_DISCRIMINATOR_VALUE;
     private boolean isDemand;
     private String notes;
     private LocalDateTime requestDateTime;

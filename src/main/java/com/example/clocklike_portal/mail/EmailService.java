@@ -53,7 +53,7 @@ public class EmailService {
         executorService.submit(() -> {
             getAdminRole();
             List<AppUserEntity> allAdmins = appUserRepository.findAllByUserRolesContaining(adminRole);
-            String subject = "Nowy użytkownik " + entity.getFirstName() + " " + entity.getLastName() + " utworzył konto w systemie.";
+            String subject = "Nowy użytkownik " + entity.getFirstName() + " " + entity.getLastName() + " utworzył konto w Portalu Pracownika.";
             String msg = templateGenerator.generateNewEmployeeRegisteredMsgForAdmins(entity);
             allAdmins.forEach(admin -> {
                 sendMail(subject, msg, admin.getUserEmail());
