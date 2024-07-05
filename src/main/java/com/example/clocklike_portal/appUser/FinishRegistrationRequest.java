@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString
 public class FinishRegistrationRequest {
     private Long appUserId;
+    private boolean isFreelancer;
     private String positionKey;
     private String hireStart;
     private String hireEnd;

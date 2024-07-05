@@ -64,6 +64,11 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
     @Query("SELECT p FROM pto_requests p WHERE p.applier.appUserId = :appUserId AND p.isDemand = true AND FUNCTION('YEAR', p.requestDateTime) = FUNCTION('YEAR', CURRENT_DATE)")
     List<PtoEntity> findUserRequestsOnDemandFromCurrentYear(@Param("appUserId") Long appUserId);
 
-    @Query("SELECT p FROM pto_requests p WHERE p.applier.appUserId = :appUserId AND p.leaveType = 'child_care' AND FUNCTION('YEAR', p.requestDateTime) = FUNCTION('YEAR', CURRENT_DATE)")
+    @Query("SELECT p FROM pto_requests p WHERE p.applier.appUserId = :appUserId AND p.leaveType = 'child_care' " +
+            "AND FUNCTION('YEAR', p.requestDateTime) = FUNCTION('YEAR', CURRENT_DATE)")
     List<PtoEntity> findUserRequestsForChildCare(@Param("appUserId") Long appUserId);
+
+    @Query("SELECT p FROM pto_requests p WHERE p.applier.appUserId = :appUserId AND p.leaveType = 'child_care' " +
+            "AND YEAR(p.ptoStart) = :year")
+    List<PtoEntity> findUserRequestsForChildCareAndYear(@Param("appUserId") Long appUserId, @Param("year") Integer year);
 }

@@ -100,9 +100,13 @@ public class PtoService {
         PtoDto ptoDto;
         AppUserEntity applier = appUserRepository.findById(request.getApplierId())
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + request.getApplierId()));
-// is freelancer && type != pto error
+
         if (!applier.isActive()) {
             throw new IllegalOperationException("Applier account is not active.");
+        }
+
+        if (applier.isFreelancer() && !Library.PTO_DISCRIMINATOR_VALUE.equals(request.getPtoType())) {
+            throw new IllegalOperationException("Cannot request different time off requests than PTO as a freelancer");
         }
 
         AppUserEntity acceptor = null;
@@ -206,11 +210,14 @@ public class PtoService {
     }
 
     PtoDto processChildCareLeave(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
+        if (startDate.getYear() != toDate.getYear()) {
+            throw new IllegalOperationException("Cannot use child care leave at the turn of the year. Please use 2 separate requests");
+        }
         if (businessDays > 2) {
             throw new IllegalOperationException("Cannot apply for " + businessDays + ". Maximum days for selected request: " + 2);
         }
         ChildCareLeaveEntity childCareLeaveEntity = new ChildCareLeaveEntity(startDate, toDate, applier, acceptor, businessDays);
-        List<PtoEntity> requests = ptoRequestsRepository.findUserRequestsForChildCare(applier.getAppUserId());
+        List<PtoEntity> requests = ptoRequestsRepository.findUserRequestsForChildCareAndYear(applier.getAppUserId(), startDate.getYear());
 //        int totalRequests = requests.size();
 //        long accepted = requests.stream()
 //                .filter(PtoEntity::isWasAccepted)
@@ -335,7 +342,7 @@ public class PtoService {
         PtoEntity updatedPtoRequest = ptoRequestsRepository.save(ptoRequest);
 
         if (updatedPtoRequest.isWasAccepted()) {
-            emailService.sendTimeOffRequestMailConformation(updatedPtoRequest);
+            emailService.sendTimeOffRequestMailConformation(updatedPtoRequest, !applier.isFreelancer());
         } else {
             emailService.sendTimeOffRequestDeniedMailToApplier(updatedPtoRequest);
         }
@@ -381,7 +388,7 @@ public class PtoService {
         }
 
         HolidayOnSaturdayEntity holidayEntity = holidayOnSaturdayRepository.save(new HolidayOnSaturdayEntity(newHoliday, request.getNote()));
-        List<AppUserEntity> allEmployees = appUserRepository.findAll();
+        List<AppUserEntity> allEmployees = appUserRepository.findAllByFreelancerIsFalse();
 
         List<HolidayOnSaturdayUserEntity> holidayUserEntities = new ArrayList<>();
         for (AppUserEntity employee : allEmployees) {

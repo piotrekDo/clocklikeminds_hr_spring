@@ -26,6 +26,7 @@ public class AppUserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long appUserId;
+    private boolean isFreelancer;
     private String firstName;
     private String lastName;
     @Column(unique = true)
@@ -62,6 +63,7 @@ public class AppUserEntity {
     public static AppUserEntity createTestAppUser(String firstName, String lastName, String userEmail) {
         return new AppUserEntity(
                 null,
+                false,
                 firstName,
                 lastName,
                 userEmail,
@@ -91,6 +93,7 @@ public class AppUserEntity {
     public static AppUserEntity createUserFromGooglePrincipal(GooglePrincipal googlePrincipal) {
         return new AppUserEntity(
                 null,
+                false,
                 googlePrincipal.getFirstName(),
                 googlePrincipal.getLastName(),
                 googlePrincipal.getEmail(),

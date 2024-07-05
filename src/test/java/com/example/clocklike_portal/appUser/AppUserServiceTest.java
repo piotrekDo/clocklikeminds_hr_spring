@@ -86,7 +86,7 @@ class AppUserServiceTest {
 
     @Test
     void finishRegistrationShouldThrowAnExceptionWhenUserNotFound() {
-        FinishRegistrationRequest request = new FinishRegistrationRequest(12L, null, null, null, null, null, null);
+        FinishRegistrationRequest request = new FinishRegistrationRequest(12L, false, null, null, null, null, null, null);
         Mockito.when(appUserRepository.findById(12L)).thenReturn(Optional.empty());
 
         NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> appUserService.finishRegistration(request));
@@ -96,7 +96,7 @@ class AppUserServiceTest {
 
     @Test
     void finishRegistrationShouldThrowAnExceptionAndNotSaveChangesIfRegistrationWasFinishedBefore() {
-        FinishRegistrationRequest request = new FinishRegistrationRequest(12L, null, null, null, null, null, null);
+        FinishRegistrationRequest request = new FinishRegistrationRequest(12L, false, null, null, null, null, null, null);
         AppUserEntity testAppUser = createTestAppUser("test", "test", "test@test.com");
         testAppUser.setRegistrationFinished(true);
 
@@ -109,7 +109,7 @@ class AppUserServiceTest {
 
     @Test
     void finishRegistrationShouldThrowAnExceptionWhenNoSupervisorEntityWasFound() {
-        FinishRegistrationRequest request = new FinishRegistrationRequest(12L, "junior_java_dev", "2023-10-10", null, null, null, 13L);
+        FinishRegistrationRequest request = new FinishRegistrationRequest(12L, false, "junior_java_dev", "2023-10-10", null, null, null, 13L);
         AppUserEntity testAppUser = createTestAppUser("test", "test", "test@test.com");
 
         Mockito.when(appUserRepository.findById(12L)).thenReturn(Optional.of(testAppUser));
@@ -122,7 +122,7 @@ class AppUserServiceTest {
 
     @Test
     void finishRegistrationShouldUpdateEntitySetSupervisorAndAddSubordinateToSupervisorAndSave() {
-        FinishRegistrationRequest request = new FinishRegistrationRequest(12L, "junior_java_dev", "2023-10-10", null, 20, true, 13L);
+        FinishRegistrationRequest request = new FinishRegistrationRequest(12L, false, "junior_java_dev", "2023-10-10", null, 20, true, 13L);
         AppUserEntity testAppUser = createTestAppUser("test", "test", "test@test.com");
         AppUserEntity supervisor = createTestAppUser("supervisor", "supervisor", "supervisor@test.com");
         supervisor.setAppUserId(13L);
@@ -154,7 +154,7 @@ class AppUserServiceTest {
 
     @Test
     void updateHireDataShouldThrowAnExceptionWhenNoUserFoundToUpdate() {
-        UpdateHireDataRequest request = new UpdateHireDataRequest(1L, null, null, null, null, null);
+        UpdateHireDataRequest request = new UpdateHireDataRequest(1L, null, null, null, null, null, null);
 
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -165,7 +165,7 @@ class AppUserServiceTest {
 
     @Test
     void updateHireDataShouldThrowAnExceptionWhenRegistrationOfUserToUpdateIsNotFinished() {
-        UpdateHireDataRequest request = new UpdateHireDataRequest(1L, null, null, null, null, null);
+        UpdateHireDataRequest request = new UpdateHireDataRequest(1L, null, null, null, null, null, null);
         AppUserEntity testAppUser = createTestAppUser("test", "test", "test@test.com");
 
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
@@ -177,7 +177,7 @@ class AppUserServiceTest {
 
     @Test
     void updateHireDataShouldThrowAnExceptionWhenSelectedNewSupervisorDoesntHaveCorrespondingRole() {
-        UpdateHireDataRequest request = new UpdateHireDataRequest(1L, null, null, null, null, 13L);
+        UpdateHireDataRequest request = new UpdateHireDataRequest(1L, null, null, null, null, null, 13L);
         UserRole supervisorRole = new UserRole("supervisor");
         AppUserEntity previousSupervisor = createTestAppUser("previousSupervisor", "previousSupervisor", "previousSupervisor@test.com");
         previousSupervisor.setAppUserId(22L);
@@ -197,7 +197,7 @@ class AppUserServiceTest {
 
     @Test
     void updateHireDataShouldChangeSupervisorAndTransferAllPendingPtoRequestsToNewSupervisor() {
-        UpdateHireDataRequest request = new UpdateHireDataRequest(1L, null, null, null, null, 13L);
+        UpdateHireDataRequest request = new UpdateHireDataRequest(1L, null, null, null, null, null, 13L);
         UserRole supervisorRole = new UserRole("supervisor");
         AppUserEntity previousSupervisor = createTestAppUser("previousSupervisor", "previousSupervisor", "previousSupervisor@test.com");
         previousSupervisor.setAppUserId(12L);
@@ -277,7 +277,7 @@ class AppUserServiceTest {
         testAppUser.setPtoDaysAccruedLastYear(parseInt(userLastYearVal));
         testAppUser.setPtoDaysTaken(parseInt(daysTaken));
 
-        AppUserDto dto = new AppUserDto(1L, "first", "last", "mail@mail.com", null, null, true, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken), 0, null, null, null);
+        AppUserDto dto = new AppUserDto(1L, false, "first", "last", "mail@mail.com", null, null, true, true, true, null, null, null, null, 0L, parseInt(lastYearReqVal), parseInt(totalDaysNewReqVal), parseInt(userLastYearDaysLeft), parseInt(userCurrYearDaysLeft), parseInt(daysTaken), 0, null, null, null);
 
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(testAppUser));
         Mockito.when(appUserRepository.save(Mockito.any())).thenReturn(testAppUser);

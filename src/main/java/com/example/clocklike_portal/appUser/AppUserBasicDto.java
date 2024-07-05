@@ -13,6 +13,7 @@ import java.time.temporal.ChronoUnit;
 @ToString
 public class AppUserBasicDto {
     private Long appUserId;
+    private boolean isFreelancer;
     private String firstName;
     private String lastName;
     private String userEmail;
@@ -30,6 +31,7 @@ public class AppUserBasicDto {
 
         return new AppUserBasicDto(
                 entity.getAppUserId(),
+                entity.isFreelancer(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getUserEmail(),

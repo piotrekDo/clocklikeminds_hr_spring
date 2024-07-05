@@ -118,15 +118,20 @@ public class AppUserService implements UserDetailsService {
         }
         appUserEntity.setPtoDaysAccruedCurrentYear(request.getPtoDaysTotal());
         appUserEntity.setPtoDaysLeftCurrentYear(request.getPtoDaysTotal());
+        if (request.isFreelancer()) {
+            appUserEntity.setFreelancer(true);
+        }
         appUserEntity.setRegistrationFinished(true);
         appUserEntity.setActive(true);
 
         updatePositionHistory(positionEntity, appUserEntity, hireStartLocalDate);
 
-        List<HolidayOnSaturdayUserEntity> accruedSaturdayHolidays = new ArrayList<>();
-        holidayOnSaturdayRepository.findAllByDateGreaterThanEqual(appUserEntity.getHireStart())
-                .forEach(holiday -> accruedSaturdayHolidays.add(new HolidayOnSaturdayUserEntity(holiday, appUserEntity)));
-        holidayOnSaturdayUserEntityRepository.saveAll(accruedSaturdayHolidays);
+        if (!appUserEntity.isFreelancer()) {
+            List<HolidayOnSaturdayUserEntity> accruedSaturdayHolidays = new ArrayList<>();
+            holidayOnSaturdayRepository.findAllByDateGreaterThanEqual(appUserEntity.getHireStart())
+                    .forEach(holiday -> accruedSaturdayHolidays.add(new HolidayOnSaturdayUserEntity(holiday, appUserEntity)));
+            holidayOnSaturdayUserEntityRepository.saveAll(accruedSaturdayHolidays);
+        }
 
         emailService.sendRegistrationConfirmedMsgForUser(appUserEntity);
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
@@ -213,6 +218,10 @@ public class AppUserService implements UserDetailsService {
                 appUserEntity.setSupervisor(newSupervisorEntity);
                 newSupervisorEntity.getSubordinates().add(appUserEntity);
             }
+        }
+
+        if (request.getIsFreelancer() != null) {
+            appUserEntity.setFreelancer(request.getIsFreelancer());
         }
 
         appUserEntity.setHireStart(hireStart);

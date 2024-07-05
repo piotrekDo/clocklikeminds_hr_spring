@@ -40,7 +40,8 @@ public class JwtService {
                         "roles", authorities,
                         "userId", appUserId,
                         "active", appUser.isActive(),
-                        "imageUrl", appUser.getImageUrl()),
+                        "imageUrl", appUser.getImageUrl(),
+                        "freelancer", appUser.isFreelancer()),
                 userDetails);
     }
 

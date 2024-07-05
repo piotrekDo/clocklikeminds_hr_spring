@@ -77,13 +77,18 @@ public class EmailService {
         });
     }
 
-    public void sendTimeOffRequestMailConformation(PtoEntity request) {
+    public void sendTimeOffRequestMailConformation(PtoEntity request, boolean generatePdf) {
         executorService.submit(() -> {
             String subject = generateSubject(request);
-            String pdf = pdfCreator.generateTimeOffRequestPdf(request);
+            String pdf = null;
+            if (generatePdf) {
+                pdf = pdfCreator.generateTimeOffRequestPdf(request);
+            }
             sendMail(subject, templateGenerator.generateReqConfirmationMsgForApplier(), request.getApplier().getUserEmail(), pdf);
             sendMail(subject, templateGenerator.generateReqConfirmationMsgForAcceptor(), request.getAcceptor().getUserEmail(), pdf);
-            deleteRequest(pdf);
+            if (generatePdf) {
+                deleteRequest(pdf);
+            }
         });
     }
 

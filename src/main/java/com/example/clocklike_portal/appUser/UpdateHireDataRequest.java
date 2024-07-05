@@ -7,6 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class UpdateHireDataRequest {
     private Long appUserId;
+    private Boolean isFreelancer;
     private String positionKey;
     private String positionChangeDate;
     private String workStartDate;

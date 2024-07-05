@@ -18,6 +18,7 @@ import java.util.Set;
 @ToString
 public class AppUserDto {
     private Long appUserId;
+    private boolean isFreelancer;
     private String firstName;
     private String lastName;
     private String userEmail;
@@ -64,6 +65,7 @@ public class AppUserDto {
 
         return new AppUserDto(
                 entity.getAppUserId(),
+                entity.isFreelancer(),
                 entity.getFirstName(),
                 entity.getLastName(),
                 entity.getUserEmail(),
