@@ -22,6 +22,7 @@ public class PtoDto {
     private String applierFirstName;
     private String applierLastName;
     private String applierEmail;
+    private boolean isApplierFreelancer;
     private int applierPtoDaysTotal;
     private int applierPtoDaysTaken;
     private String applierImageUrl;
