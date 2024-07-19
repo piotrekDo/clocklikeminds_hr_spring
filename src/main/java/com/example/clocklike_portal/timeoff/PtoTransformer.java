@@ -31,12 +31,12 @@ public class PtoTransformer {
 
     }
 
-    PtoEntity ptoEntityFromNewRequest(String leaveType, boolean isDemand, String notes, LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
+    PtoEntity ptoEntityFromNewRequest(String leaveType, LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         return new PtoEntity(
                 null,
                 leaveType,
-                isDemand,
-                notes,
+                false,
+                "",
                 LocalDateTime.now(),
                 start,
                 end,

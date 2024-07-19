@@ -295,7 +295,7 @@ class PtoServiceTest {
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(true);
         Mockito.when(holidayService.calculateBusinessDays(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(5);
-        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", false, null, LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2)).thenReturn(ptoEntity);
+        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2)).thenReturn(ptoEntity);
         Mockito.when(ptoTransformer.ptoEntityToDto(ptoEntity)).thenReturn(ptoDto);
 
         ptoService.processNewRequest(request);
