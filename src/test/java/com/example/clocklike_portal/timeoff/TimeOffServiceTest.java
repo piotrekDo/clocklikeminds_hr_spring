@@ -29,10 +29,10 @@ import static java.lang.Integer.parseInt;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
-class PtoServiceTest {
+class TimeOffServiceTest {
 
     @Autowired
-    PtoService ptoService;
+    TimeOffService timeOffService;
     @MockBean
     PtoRepository ptoRepository;
     @MockBean
@@ -56,11 +56,11 @@ class PtoServiceTest {
     @TestConfiguration
     static class PtoServiceTestConfiguration {
         @Bean
-        PtoService ptoService(PtoRepository ptoRepository, AppUserRepository appUserRepository, PtoTransformer ptoTransformer,
-                              HolidayService holidayService, DateChecker dateChecker, OccasionalLeaveTypeRepository occasionalLeaveTypeRepository,
-                              HolidayOnSaturdayRepository holidayOnSaturdayRepository, HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository,
-                              EmailService emailService) {
-            return new PtoService(ptoRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository,
+        TimeOffService ptoService(PtoRepository ptoRepository, AppUserRepository appUserRepository, PtoTransformer ptoTransformer,
+                                  HolidayService holidayService, DateChecker dateChecker, OccasionalLeaveTypeRepository occasionalLeaveTypeRepository,
+                                  HolidayOnSaturdayRepository holidayOnSaturdayRepository, HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository,
+                                  EmailService emailService) {
+            return new TimeOffService(ptoRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository,
                     holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository, emailService);
         }
     }
@@ -70,7 +70,7 @@ class PtoServiceTest {
         NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.empty());
 
-        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> ptoService.processNewRequest(request));
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("No user found for applier with ID: 1", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -85,7 +85,7 @@ class PtoServiceTest {
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.empty());
 
-        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> ptoService.processNewRequest(request));
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("No user found for acceptor with ID: 2", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -98,7 +98,7 @@ class PtoServiceTest {
 
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(applier));
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("Applier account is not active.", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -115,7 +115,7 @@ class PtoServiceTest {
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(acceptor));
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("Acceptor account is not active.", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -133,7 +133,7 @@ class PtoServiceTest {
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(acceptor));
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("Selected acceptor has no authorities to accept pto requests", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -154,7 +154,7 @@ class PtoServiceTest {
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2023, 5, 1), LocalDate.of(2023, 4, 30))).thenReturn(false);
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("End date cannot be before start date", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -177,7 +177,7 @@ class PtoServiceTest {
         Mockito.when(ptoRepository.findAllOverlappingRequests(applier, LocalDate.of(2023, 5, 1), LocalDate.of(2023, 5, 1)))
                 .thenReturn(List.of(new PtoEntity()));
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("Request colliding with other pto request", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -200,7 +200,7 @@ class PtoServiceTest {
         Mockito.when(ptoRepository.findAllOverlappingRequests(applier, LocalDate.of(2023, 5, 1), LocalDate.of(2023, 5, 1)))
                 .thenReturn(Collections.emptyList());
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("Request type not provided", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -224,7 +224,7 @@ class PtoServiceTest {
                 .thenReturn(Collections.emptyList());
         Mockito.when(holidayService.calculateBusinessDays(LocalDate.of(2024, 5, 10), LocalDate.of(2024, 5, 12))).thenReturn(1);
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("Unknown request type", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -233,7 +233,7 @@ class PtoServiceTest {
     void processOccasionalLeaveRequestShouldThrowAnExceptionWhenNoOccasionalTypeIsSpecified() {
         NewPtoRequest newPtoRequest = new NewPtoRequest(null, null, null, null, null, null, null);
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processOccasionalLeaveRequest(newPtoRequest, null, null, null, null, 0));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processOccasionalLeaveRequest(newPtoRequest, null, null, null, null, 0));
         assertEquals("No occasional type specified", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -243,7 +243,7 @@ class PtoServiceTest {
         ResolvePtoRequest request = new ResolvePtoRequest(12L, false, null);
         Mockito.when(ptoRepository.findById(12L)).thenReturn(Optional.empty());
 
-        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> ptoService.resolveRequest(request));
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> timeOffService.resolveRequest(request));
         assertEquals("No such PTO request found", exception.getMessage());
         Mockito.verify(ptoRepository, Mockito.never()).save(Mockito.any());
     }
@@ -274,7 +274,7 @@ class PtoServiceTest {
         Mockito.when(ptoRepository.findAllOverlappingRequests(applier, LocalDate.of(2023, 5, 1), LocalDate.of(2023, 5, 1)))
                 .thenReturn(Collections.emptyList());
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processNewRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processNewRequest(request));
         assertEquals("Insufficient pto days left", exception.getMessage());
         Mockito.verify(appUserRepository, Mockito.never()).save(Mockito.any());
     }
@@ -295,10 +295,10 @@ class PtoServiceTest {
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(true);
         Mockito.when(holidayService.calculateBusinessDays(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(5);
-        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", false, null, LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2)).thenReturn(ptoEntity);
+        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2)).thenReturn(ptoEntity);
         Mockito.when(ptoTransformer.ptoEntityToDto(ptoEntity)).thenReturn(ptoDto);
 
-        ptoService.processNewRequest(request);
+        timeOffService.processNewRequest(request);
 
         assertEquals(17, applier.getPtoDaysLeftCurrentYear());
         assertEquals(0, applier.getPtoDaysLeftFromLastYear());
@@ -327,7 +327,7 @@ class PtoServiceTest {
 
         Mockito.when(ptoRepository.findById(12L)).thenReturn(Optional.of(ptoEntity));
 
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.resolveRequest(request));
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.resolveRequest(request));
         assertEquals("You are not authorized to resolve this PTO request.", exception.getMessage());
         Mockito.verify(ptoRepository, Mockito.never()).save(Mockito.any());
     }
@@ -337,10 +337,10 @@ class PtoServiceTest {
         NewPtoRequest request = new NewPtoRequest(null, null, null, null, null, "wedding", null);
         Map<String, OccasionalLeaveType> occasionalTypes = new HashMap<>();
         occasionalTypes.put("wedding", new OccasionalLeaveType("wedding", "ślub pracownika (własny)", 2));
-        Field occasionalTypesField = PtoService.class.getDeclaredField("occasionalTypes");
+        Field occasionalTypesField = TimeOffService.class.getDeclaredField("occasionalTypes");
         occasionalTypesField.setAccessible(true);
-        occasionalTypesField.set(ptoService, occasionalTypes);
-        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> ptoService.processOccasionalLeaveRequest(request, null, null, null, null, 3));
+        occasionalTypesField.set(timeOffService, occasionalTypes);
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processOccasionalLeaveRequest(request, null, null, null, null, 3));
         assertTrue(exception.getMessage().startsWith("Cannot apply for "));
         Mockito.verify(ptoRepository, Mockito.never()).save(Mockito.any());
     }

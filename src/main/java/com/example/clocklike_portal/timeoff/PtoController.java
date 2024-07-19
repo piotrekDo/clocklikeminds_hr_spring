@@ -12,57 +12,57 @@ import java.util.List;
 @AllArgsConstructor
 public class PtoController {
 
-    private final PtoService ptoService;
+    private final TimeOffService timeOffService;
 
     @PostMapping("/request-new")
     PtoDto requestPto(@RequestBody @Valid NewPtoRequest dto) {
-        return ptoService.processNewRequest(dto);
+        return timeOffService.processNewRequest(dto);
     }
 
     @GetMapping("/byId")
     Page<PtoDto> findAllRequestsByAppliersId(@RequestParam Long id,
                                              @RequestParam(required = false) Integer page,
                                              @RequestParam(required = false) Integer size) {
-        return ptoService.getPtoRequests(id, page, size);
+        return timeOffService.getPtoRequests(id, page, size);
     }
 
     @GetMapping("/unresolved-by-acceptor")
     List<PtoDto> findAllUnresolvedPtoRequestsByAcceptor(@RequestParam Long id) {
-        return ptoService.findAllUnresolvedPtoRequestsByAcceptor(id);
+        return timeOffService.findAllUnresolvedPtoRequestsByAcceptor(id);
     }
 
     @GetMapping("/requests-by-acceptor")
     List<PtoDto> findAllRequestsByAcceptorId(@RequestParam long acceptorId) {
-        return ptoService.findAllRequestsByAcceptorId(acceptorId);
+        return timeOffService.findAllRequestsByAcceptorId(acceptorId);
     }
 
     @PostMapping("/resolve-request")
     PtoDto resolveRequest(@RequestBody ResolvePtoRequest resolveRequestDto) {
-        return ptoService.resolveRequest(resolveRequestDto);
+        return timeOffService.resolveRequest(resolveRequestDto);
     }
 
     @GetMapping("/summary")
     PtoSummary getUserSummary(@RequestParam Long id) {
-        return ptoService.getUserPtoSummary(id);
+        return timeOffService.getUserPtoSummary(id);
     }
 
     @GetMapping("/requests-for-year")
     List<PtoDto> getRequestsForSelectedYear(@RequestParam Long userId, @RequestParam Integer year) {
-        return ptoService.getRequestsForUserForYear(year, userId);
+        return timeOffService.getRequestsForUserForYear(year, userId);
     }
 
     @GetMapping("/requests-for-supervisor-calendar")
     List<PtoDto> getRequestsForSupervisorCalendar(@RequestParam Long acceptorId, @RequestParam String start, @RequestParam String end) {
-        return ptoService.getRequestsForSupervisorCalendar(acceptorId, start, end);
+        return timeOffService.getRequestsForSupervisorCalendar(acceptorId, start, end);
     }
 
     @PostMapping("/new-saturday-holiday")
     SaturdayHolidayDto addNewHolidayOnSaturday(@RequestBody SaturdayHolidayDto dto) {
-        return ptoService.registerNewHolidaySaturday(dto);
+        return timeOffService.registerNewHolidaySaturday(dto);
     }
 
     @GetMapping("/holidays-on-saturday-admin")
     HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin() {
-        return ptoService.getHolidaysOnSaturdaySummaryForAdmin();
+        return timeOffService.getHolidaysOnSaturdaySummaryForAdmin();
     }
 }

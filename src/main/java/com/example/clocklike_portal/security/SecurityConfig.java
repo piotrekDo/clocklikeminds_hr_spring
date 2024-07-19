@@ -3,6 +3,7 @@ package com.example.clocklike_portal.security;
 import com.example.clocklike_portal.appUser.AppUserService;
 import com.example.clocklike_portal.error.ErrorEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -87,7 +88,7 @@ public class SecurityConfig {
                                     HttpStatus.FORBIDDEN.value(),
                                     accessDeniedException.getClass().getSimpleName(),
                                     accessDeniedException.getMessage());
-                            response.setStatus(403);
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setContentType(APPLICATION_JSON_VALUE);
                             response.getWriter().write(new ObjectMapper().writeValueAsString(tokenExpiredError));
                         }))

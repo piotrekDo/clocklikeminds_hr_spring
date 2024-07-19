@@ -30,7 +30,7 @@ import static com.example.clocklike_portal.security.SecurityConfig.SUPERVISOR_AU
 
 @Component
 @RequiredArgsConstructor
-public class PtoService {
+public class TimeOffService {
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final PtoRepository ptoRequestsRepository;
     private final AppUserRepository appUserRepository;
@@ -269,7 +269,7 @@ public class PtoService {
         int subtractedFromLastYearPool = ptoDaysFromLastYear == 0 ? 0 : Math.min(ptoDaysFromLastYear, businessDays);
         int subtractedFromCurrentYearPool = (businessDays - subtractedFromLastYearPool);
 
-        PtoEntity ptoEntityRaw = ptoTransformer.ptoEntityFromNewRequest(request.getPtoType(), false, null, startDate, toDate, applier, acceptor, businessDays, subtractedFromLastYearPool);
+        PtoEntity ptoEntityRaw = ptoTransformer.ptoEntityFromNewRequest(request.getPtoType(), startDate, toDate, applier, acceptor, businessDays, subtractedFromLastYearPool);
         if (request.getPtoType().equals(Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE)) {
             processOnDemandPtoRequest(ptoEntityRaw);
         }
