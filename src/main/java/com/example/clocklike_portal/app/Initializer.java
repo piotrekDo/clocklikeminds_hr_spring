@@ -11,6 +11,7 @@ import com.example.clocklike_portal.timeoff.OccasionalLeaveType;
 import com.example.clocklike_portal.timeoff.OccasionalLeaveTypeRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUs
 
 @Component
 @AllArgsConstructor
+@Profile("dev")
 public class Initializer {
     private final UserRoleRepository userRoleRepository;
     private final PositionRepository positionRepository;
