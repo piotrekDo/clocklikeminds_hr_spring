@@ -35,7 +35,7 @@ public class EmailService {
     private final TemplateGenerator templateGenerator;
     private final PdfCreator pdfCreator;
     private UserRole adminRole;
-
+// TODO POST CONSTRUCT??
     @Value("${mail.mailbox.password}")
     private String mailboxPassword;
     @Value("${mail.enabled}")

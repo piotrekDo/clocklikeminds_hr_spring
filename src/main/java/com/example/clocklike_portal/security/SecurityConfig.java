@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .cors(c -> {
                     CorsConfigurationSource cs = request -> {
                         CorsConfiguration cc = new CorsConfiguration();
-                        cc.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174"));
+                        cc.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "https://clocklikeminds-hr-react.vercel.app"));
                         cc.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
                         cc.setAllowedHeaders(List.of("Origin", "Content-Type", "X-Auth-Token", "Access-Control-Expose-Header",
                                 "Authorization"));
