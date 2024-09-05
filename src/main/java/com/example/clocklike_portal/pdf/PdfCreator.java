@@ -16,7 +16,7 @@ import java.io.OutputStream;
 @RequiredArgsConstructor
 public class PdfCreator {
     private final TemplateGenerator templateGenerator;
-    public final static String PDF_TEMPLATES = "src/main/resources/pdf_temp/";
+    public final static String PDF_TEMPLATES = System.getProperty("java.io.tmpdir");
 
     public String generateTimeOffRequestPdf(PtoEntity request) {
         try {
