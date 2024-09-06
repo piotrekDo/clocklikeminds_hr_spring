@@ -6,6 +6,8 @@ import com.example.clocklike_portal.appUser.UserRole;
 import com.example.clocklike_portal.appUser.UserRoleRepository;
 import com.example.clocklike_portal.job_position.PositionEntity;
 import com.example.clocklike_portal.job_position.PositionRepository;
+import com.example.clocklike_portal.settings.Settings;
+import com.example.clocklike_portal.settings.SettingsRepository;
 import com.example.clocklike_portal.timeoff.OccasionalLeaveRepository;
 import com.example.clocklike_portal.timeoff.OccasionalLeaveType;
 import com.example.clocklike_portal.timeoff.OccasionalLeaveTypeRepository;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static com.example.clocklike_portal.settings.SettingsService.MAILING_ENABLED;
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;
 
 
@@ -28,9 +31,12 @@ public class Initializer {
     private final AppUserRepository appUserRepository;
     private final OccasionalLeaveTypeRepository occasionalLeaveTypeRepository;
     private final OccasionalLeaveRepository occasionalLeaveRepository;
+    private final SettingsRepository settingsRepository;
 
     @PostConstruct
     public void run() {
+        Settings isMailingEnabled = settingsRepository.save(new Settings(MAILING_ENABLED, "boolean", "false"));
+
         UserRole userRole = userRoleRepository.save(new UserRole("user"));
         UserRole adminRole = userRoleRepository.save(new UserRole("admin"));
         UserRole supervisorRole = userRoleRepository.save(new UserRole("supervisor"));

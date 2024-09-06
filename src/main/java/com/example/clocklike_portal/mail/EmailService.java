@@ -1,5 +1,6 @@
 package com.example.clocklike_portal.mail;
 
+import com.example.clocklike_portal.settings.SettingsRepository;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.appUser.UserRole;
@@ -8,12 +9,14 @@ import com.example.clocklike_portal.pdf.PdfCreator;
 import com.example.clocklike_portal.pdf.TemplateGenerator;
 import com.example.clocklike_portal.timeoff.PtoDto;
 import com.example.clocklike_portal.timeoff.PtoEntity;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -22,24 +25,35 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.example.clocklike_portal.settings.SettingsService.MAILING_ENABLED;
 import static com.example.clocklike_portal.pdf.PdfCreator.PDF_TEMPLATES;
 import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
 
 @Component
+@DependsOn("initializer")
 @RequiredArgsConstructor
 public class EmailService {
     ExecutorService executorService = Executors.newFixedThreadPool(5);
 
+    private final SettingsRepository settingsRepository;
     private final UserRoleRepository userRoleRepository;
     private final AppUserRepository appUserRepository;
     private final TemplateGenerator templateGenerator;
     private final PdfCreator pdfCreator;
     private UserRole adminRole;
-// TODO POST CONSTRUCT??
     @Value("${mail.mailbox.password}")
     private String mailboxPassword;
-    @Value("${mail.enabled}")
-    private boolean isEnabled;
+    private boolean isEnabled = false;
+
+    @PostConstruct
+    void init() {
+        this.isEnabled = Boolean.getBoolean(settingsRepository.findBySettingName(MAILING_ENABLED)
+                .orElseThrow(() -> new NoSuchElementException("mailingEnabled setting was not found")).getSettingValue());
+    }
+
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
+    }
 
     public void sendRegistrationConfirmedMsgForUser(AppUserEntity entity) {
         executorService.submit(() -> {
@@ -71,9 +85,9 @@ public class EmailService {
 
     public void sendTimeOffRequestDeniedMailToApplier(PtoEntity request) {
         executorService.submit(() -> {
-           String subject = generateSubject(request);
-           String msg = templateGenerator.generateRequestDeniedMsgForApplier(request);
-           sendMail(subject, msg, request.getApplier().getUserEmail());
+            String subject = generateSubject(request);
+            String msg = templateGenerator.generateRequestDeniedMsgForApplier(request);
+            sendMail(subject, msg, request.getApplier().getUserEmail());
         });
     }
 

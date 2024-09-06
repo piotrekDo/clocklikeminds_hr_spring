@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(("/api/v1/meta")).hasAuthority(USER_AUTHORITY)
                         .requestMatchers(("/api/v1/test/users")).hasAuthority(USER_AUTHORITY)
                         .requestMatchers(("/api/v1/test/admins")).hasAnyAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers(("/api/v1/settings/**")).hasAnyAuthority(ADMIN_AUTHORITY)
                         .requestMatchers("/api/v1/users/**").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers("/api/v1/positions/**").hasAuthority(ADMIN_AUTHORITY)
                         .requestMatchers("/api/v1/pto/summary").hasAuthority(USER_AUTHORITY)
