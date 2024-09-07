@@ -10,34 +10,34 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/pto")
 @AllArgsConstructor
-public class PtoController {
+public class TimeOffController {
 
     private final TimeOffService timeOffService;
 
     @PostMapping("/request-new")
-    PtoDto requestPto(@RequestBody @Valid NewPtoRequest dto) {
+    TimeOffDto requestPto(@RequestBody @Valid NewPtoRequest dto) {
         return timeOffService.processNewRequest(dto);
     }
 
     @GetMapping("/byId")
-    Page<PtoDto> findAllRequestsByAppliersId(@RequestParam Long id,
-                                             @RequestParam(required = false) Integer page,
-                                             @RequestParam(required = false) Integer size) {
+    Page<TimeOffDto> findAllRequestsByAppliersId(@RequestParam Long id,
+                                                 @RequestParam(required = false) Integer page,
+                                                 @RequestParam(required = false) Integer size) {
         return timeOffService.getPtoRequests(id, page, size);
     }
 
     @GetMapping("/unresolved-by-acceptor")
-    List<PtoDto> findAllUnresolvedPtoRequestsByAcceptor(@RequestParam Long id) {
+    List<TimeOffDto> findAllUnresolvedPtoRequestsByAcceptor(@RequestParam Long id) {
         return timeOffService.findAllUnresolvedPtoRequestsByAcceptor(id);
     }
 
     @GetMapping("/requests-by-acceptor")
-    List<PtoDto> findAllRequestsByAcceptorId(@RequestParam long acceptorId) {
+    List<TimeOffDto> findAllRequestsByAcceptorId(@RequestParam long acceptorId) {
         return timeOffService.findAllRequestsByAcceptorId(acceptorId);
     }
 
     @PostMapping("/resolve-request")
-    PtoDto resolveRequest(@RequestBody ResolvePtoRequest resolveRequestDto) {
+    TimeOffDto resolveRequest(@RequestBody ResolvePtoRequest resolveRequestDto) {
         return timeOffService.resolveRequest(resolveRequestDto);
     }
 
@@ -47,12 +47,12 @@ public class PtoController {
     }
 
     @GetMapping("/requests-for-year")
-    List<PtoDto> getRequestsForSelectedYear(@RequestParam Long userId, @RequestParam Integer year) {
+    List<TimeOffDto> getRequestsForSelectedYear(@RequestParam Long userId, @RequestParam Integer year) {
         return timeOffService.getRequestsForUserForYear(year, userId);
     }
 
     @GetMapping("/requests-for-supervisor-calendar")
-    List<PtoDto> getRequestsForSupervisorCalendar(@RequestParam Long acceptorId, @RequestParam String start, @RequestParam String end) {
+    List<TimeOffDto> getRequestsForSupervisorCalendar(@RequestParam Long acceptorId, @RequestParam String start, @RequestParam String end) {
         return timeOffService.getRequestsForSupervisorCalendar(acceptorId, start, end);
     }
 
@@ -64,5 +64,10 @@ public class PtoController {
     @GetMapping("/holidays-on-saturday-admin")
     HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin() {
         return timeOffService.getHolidaysOnSaturdaySummaryForAdmin();
+    }
+
+    @PostMapping("/withdraw")
+    WithdrawResponse withdrawTimeOffRequest(@RequestParam Long requestId) {
+        return timeOffService.withdrawTimeOffRequest(requestId);
     }
 }

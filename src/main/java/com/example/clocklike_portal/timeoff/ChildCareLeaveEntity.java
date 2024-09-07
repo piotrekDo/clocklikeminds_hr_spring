@@ -21,5 +21,8 @@ public class ChildCareLeaveEntity extends PtoEntity {
         super(DISCRIMINATOR_VALUE, false, ptoStart, ptoEnd, applier, acceptor, businessDays, 0);
     }
 
-
+    @Override
+    public void setApplierNotes(String applierNotes) {
+        super.setApplierNotes(applierNotes);
+    }
 }

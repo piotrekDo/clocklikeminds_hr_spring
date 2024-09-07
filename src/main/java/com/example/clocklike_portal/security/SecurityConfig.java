@@ -69,6 +69,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/pto/requests-for-year").hasAuthority(USER_AUTHORITY)
                         .requestMatchers("/api/v1/pto/request-new").hasAuthority(USER_AUTHORITY)
                         .requestMatchers("/api/v1/pto/byId").hasAuthority(USER_AUTHORITY)
+                        .requestMatchers("/api/v1/pto/withdraw").hasAuthority(USER_AUTHORITY)
                         .requestMatchers("/api/v1/pto/unresolved-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers("/api/v1/pto/requests-for-supervisor-calendar").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers("/api/v1/pto/requests-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)

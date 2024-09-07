@@ -1,7 +1,7 @@
 package com.example.clocklike_portal.pdf;
 
 import com.example.clocklike_portal.appUser.AppUserEntity;
-import com.example.clocklike_portal.timeoff.PtoDto;
+import com.example.clocklike_portal.timeoff.TimeOffDto;
 import com.example.clocklike_portal.timeoff.PtoEntity;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
@@ -55,7 +55,7 @@ public class TemplateGenerator {
         return templateEngine.process("thymeleaf_template/new_employee_registrated.html", context);
     }
 
-    public String generateNewTimeOffRequestMsgForAcceptor(PtoDto request) {
+    public String generateNewTimeOffRequestMsgForAcceptor(TimeOffDto request) {
         String applier = request.getApplierFirstName() + " " + request.getApplierLastName();
         Context context = new Context();
         context.setVariable("applier", applier);

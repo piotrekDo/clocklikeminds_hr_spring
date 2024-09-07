@@ -7,7 +7,7 @@ import com.example.clocklike_portal.appUser.UserRole;
 import com.example.clocklike_portal.appUser.UserRoleRepository;
 import com.example.clocklike_portal.pdf.PdfCreator;
 import com.example.clocklike_portal.pdf.TemplateGenerator;
-import com.example.clocklike_portal.timeoff.PtoDto;
+import com.example.clocklike_portal.timeoff.TimeOffDto;
 import com.example.clocklike_portal.timeoff.PtoEntity;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +75,7 @@ public class EmailService {
         });
     }
 
-    public void sendNewTimeOffRequestMailToAcceptor(PtoDto request) {
+    public void sendNewTimeOffRequestMailToAcceptor(TimeOffDto request) {
         executorService.submit(() -> {
             String subject = generateSubject(request);
             String msg = templateGenerator.generateNewTimeOffRequestMsgForAcceptor(request);
@@ -119,7 +119,7 @@ public class EmailService {
         return file.delete();
     }
 
-    private String generateSubject(PtoDto dto) {
+    private String generateSubject(TimeOffDto dto) {
         String applier = dto.getApplierFirstName() + " " + dto.getApplierLastName();
         String start = dto.getPtoStart().toString().replaceAll("-", ".");
         String end = dto.getPtoEnd().toString().replaceAll("-", ".");

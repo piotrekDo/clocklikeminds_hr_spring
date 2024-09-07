@@ -31,11 +31,14 @@ public class PtoTransformer {
 
     }
 
-    PtoEntity ptoEntityFromNewRequest(String leaveType, LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
+    PtoEntity ptoEntityFromNewRequest(String leaveType, LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool, String applierNotes) {
+
         return new PtoEntity(
                 null,
                 leaveType,
                 false,
+                applierNotes,
+                "",
                 "",
                 LocalDateTime.now(),
                 start,
@@ -46,11 +49,12 @@ public class PtoTransformer {
                 null,
                 businessDays,
                 includingLastYearPool,
-                null
+                null,
+                false
         );
     }
 
-    PtoDto ptoEntityToDto(PtoEntity request) {
+    TimeOffDto ptoEntityToDto(PtoEntity request) {
         AppUserEntity applier = request.getApplier();
         AppUserEntity acceptor = request.getAcceptor();
 
@@ -64,11 +68,13 @@ public class PtoTransformer {
         Integer occasionalDays = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDays() : null;
         String saturdayHolidayDate = request instanceof HolidayOnSaturdayPtoEntity ? ((HolidayOnSaturdayPtoEntity) request).getHoliday().getDate().toString() : null;
 
-        return new PtoDto(
+        return new TimeOffDto(
                 request.getPtoRequestId(),
                 request.getLeaveType(),
                 request.isDemand(),
-                request.getNotes(),
+                request.getApplierNotes(),
+                request.getAcceptorNotes(),
+                request.getApplicationNotes(),
                 isPending,
                 request.isWasAccepted(),
                 request.getRequestDateTime(),
@@ -96,7 +102,8 @@ public class PtoTransformer {
                 occasionalLeaveType,
                 occasionalLeaveDescPolish,
                 occasionalDays,
-                saturdayHolidayDate
+                saturdayHolidayDate,
+                request.isWasMarkedToWithdraw()
         );
     }
 }

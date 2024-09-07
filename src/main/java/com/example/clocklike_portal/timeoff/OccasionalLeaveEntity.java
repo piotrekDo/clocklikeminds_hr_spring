@@ -27,4 +27,9 @@ public class OccasionalLeaveEntity extends PtoEntity {
         this.leaveReason = leaveReason;
         this.occasionalType = occasionalType;
     }
+
+    @Override
+    public void setApplierNotes(String applierNotes) {
+        super.setApplierNotes(applierNotes);
+    }
 }

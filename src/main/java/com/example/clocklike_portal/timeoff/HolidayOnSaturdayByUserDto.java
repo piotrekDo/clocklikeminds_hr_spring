@@ -9,5 +9,5 @@ import lombok.Data;
 public class HolidayOnSaturdayByUserDto {
     private SaturdayHolidayDto holiday;
     private AppUserBasicDto employee;
-    private PtoDto pto;
+    private TimeOffDto pto;
 }

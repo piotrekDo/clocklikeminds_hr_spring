@@ -8,11 +8,13 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Data
-public class PtoDto {
+public class TimeOffDto {
     private Long id;
     private String leaveType;
     private boolean isDemand;
-    private String notes;
+    private String applierNotes;
+    private String acceptorNotes;
+    private String applicationNotes;
     private boolean isPending;
     private boolean wasAccepted;
     private LocalDateTime requestDateTime;
@@ -41,4 +43,6 @@ public class PtoDto {
     private String occasional_descriptionPolish;
     private Integer occasional_days;
     private String saturday_holiday_date;
+    private boolean wasMarkedToWithdraw;
+
 }

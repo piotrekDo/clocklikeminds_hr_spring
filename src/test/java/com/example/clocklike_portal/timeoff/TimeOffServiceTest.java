@@ -67,7 +67,7 @@ class TimeOffServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfNoApplierUserFound() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null, null);
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.empty());
 
         NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> timeOffService.processNewRequest(request));
@@ -77,7 +77,7 @@ class TimeOffServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfNoAcceptorUserFound() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -92,7 +92,7 @@ class TimeOffServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfApplierNotActive() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
 
@@ -105,7 +105,7 @@ class TimeOffServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfAcceptorNotActive() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -122,7 +122,7 @@ class TimeOffServiceTest {
 
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfAcceptorDoesNotHaveEitherRoleOfAdminOrSupervisor() {
-        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null);
+        NewPtoRequest request = new NewPtoRequest(null, null, 1L, 2L, "", null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -141,7 +141,7 @@ class TimeOffServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfPtoEndDateIsBeforeStartDate() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-04-30", 1L, 2L, "", null, null);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-04-30", 1L, 2L, "", null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -162,7 +162,7 @@ class TimeOffServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionIfAnotherRequestColliding() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "", null, null);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "", null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -185,7 +185,7 @@ class TimeOffServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionWhenRequestTypeIsNull() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, null, null, null);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, null, null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -208,7 +208,7 @@ class TimeOffServiceTest {
     @Test
     void resolveNewRequestShouldThrowAnExceptionWhenUnknownRequestTypeProvided() {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2024-05-10", "2024-05-12", 1L, 2L, "incorrect type", null, null);
+        NewPtoRequest request = new NewPtoRequest("2024-05-10", "2024-05-12", 1L, 2L, "incorrect type", null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -231,7 +231,7 @@ class TimeOffServiceTest {
 
     @Test
     void processOccasionalLeaveRequestShouldThrowAnExceptionWhenNoOccasionalTypeIsSpecified() {
-        NewPtoRequest newPtoRequest = new NewPtoRequest(null, null, null, null, null, null, null);
+        NewPtoRequest newPtoRequest = new NewPtoRequest(null, null, null, null, null, null, null, null);
 
         IllegalOperationException exception = assertThrows(IllegalOperationException.class, () -> timeOffService.processOccasionalLeaveRequest(newPtoRequest, null, null, null, null, 0));
         assertEquals("No occasional type specified", exception.getMessage());
@@ -256,7 +256,7 @@ class TimeOffServiceTest {
     })
     void resolveNewRequestShouldThrowAnExceptionIfApplierHasInsufficientPtoDaysLeft(String ptoCurrentYear, String ptoLeftLastYear, String businessDays) {
         UserRole supervisorRole = new UserRole("supervisor");
-        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "pto", null, null);
+        NewPtoRequest request = new NewPtoRequest("2023-05-01", "2023-05-01", 1L, 2L, "pto", null, null, null);
         AppUserEntity applier = createTestAppUser("test", "test", "test@test.com");
         applier.setAppUserId(1L);
         applier.setActive(true);
@@ -281,7 +281,7 @@ class TimeOffServiceTest {
 
     @Test
     void requestPtoShouldSetDaysTakenAndDaysLeftValuesOnAcceptorEntityAndAddPtoRequestToAcceptorAndApplier() {
-        NewPtoRequest request = new NewPtoRequest("2024-02-12", "2024-02-16", 2L, 1L, "pto", null, null);
+        NewPtoRequest request = new NewPtoRequest("2024-02-12", "2024-02-16", 2L, 1L, "pto", null, null, null);
         AppUserEntity applier = AppUserEntity.createTestAppUser("applier", "applier", "applier@test.com");
         applier.setActive(true);
         applier.setPtoDaysLeftFromLastYear(2);
@@ -289,14 +289,14 @@ class TimeOffServiceTest {
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");
         acceptor.setActive(true);
         acceptor.setUserRoles(List.of(new UserRole(1L, "admin")));
-        PtoEntity ptoEntity = new PtoEntity(1L, "", false, null, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2, null);
-        PtoDto ptoDto = new PtoDto(1L, "", false, null, true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", false, 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null, null, null, null, null, null, null);
+        PtoEntity ptoEntity = new PtoEntity(1L,  "", false, null, null, null, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2, null, false);
+        TimeOffDto timeOffDto = new TimeOffDto(1L, "", false, null, null, null, true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", false, 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null, null, null, null, null, null, null, false);
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(true);
         Mockito.when(holidayService.calculateBusinessDays(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(5);
-        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2)).thenReturn(ptoEntity);
-        Mockito.when(ptoTransformer.ptoEntityToDto(ptoEntity)).thenReturn(ptoDto);
+        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2, null)).thenReturn(ptoEntity);
+        Mockito.when(ptoTransformer.ptoEntityToDto(ptoEntity)).thenReturn(timeOffDto);
 
         timeOffService.processNewRequest(request);
 
@@ -334,7 +334,7 @@ class TimeOffServiceTest {
 
     @Test
     void processOccasionalLeaveRequestShouldThrowAnExceptionWhenRequestExceedsMaximumDaysForRequestType() throws NoSuchFieldException, IllegalAccessException {
-        NewPtoRequest request = new NewPtoRequest(null, null, null, null, null, "wedding", null);
+        NewPtoRequest request = new NewPtoRequest(null, null, null, null, null, "wedding", null, null);
         Map<String, OccasionalLeaveType> occasionalTypes = new HashMap<>();
         occasionalTypes.put("wedding", new OccasionalLeaveType("wedding", "ślub pracownika (własny)", 2));
         Field occasionalTypesField = TimeOffService.class.getDeclaredField("occasionalTypes");

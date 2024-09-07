@@ -29,7 +29,9 @@ public class PtoEntity {
     private Long ptoRequestId;
     private String leaveType = Library.PTO_DISCRIMINATOR_VALUE;
     private boolean isDemand;
-    private String notes;
+    private String applierNotes;
+    private String acceptorNotes;
+    private String applicationNotes;
     private LocalDateTime requestDateTime;
     private LocalDate ptoStart;
     private LocalDate ptoEnd;
@@ -42,6 +44,7 @@ public class PtoEntity {
     private int businessDays;
     private int includingLastYearPool;
     private String declineReason;
+    private boolean wasMarkedToWithdraw = false;
 
     public PtoEntity(boolean isDemand, LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         this.isDemand = isDemand;
@@ -95,17 +98,4 @@ public class PtoEntity {
                 ", declineReason='" + declineReason + '\'' +
                 '}';
     }
-
-    //    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        PtoEntity ptoEntity = (PtoEntity) o;
-//        return wasAccepted == ptoEntity.wasAccepted && businessDays == ptoEntity.businessDays && includingLastYearPool == ptoEntity.includingLastYearPool && Objects.equals(ptoRequestId, ptoEntity.ptoRequestId) && Objects.equals(requestDateTime, ptoEntity.requestDateTime) && Objects.equals(ptoStart, ptoEntity.ptoStart) && Objects.equals(ptoEnd, ptoEntity.ptoEnd) && Objects.equals(applier.getAppUserId(), ptoEntity.applier.getAppUserId()) && Objects.equals(acceptor.getAppUserId(), ptoEntity.acceptor.getAppUserId()) && Objects.equals(decisionDateTime, ptoEntity.decisionDateTime) && Objects.equals(declineReason, ptoEntity.declineReason);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(ptoRequestId, requestDateTime, ptoStart, ptoEnd, applier.getAppUserId(), acceptor.getAppUserId(), wasAccepted, decisionDateTime, businessDays, includingLastYearPool, declineReason);
-//    }
 }
