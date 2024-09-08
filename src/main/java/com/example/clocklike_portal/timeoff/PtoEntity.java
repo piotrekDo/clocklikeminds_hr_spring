@@ -45,6 +45,8 @@ public class PtoEntity {
     private int includingLastYearPool;
     private String declineReason;
     private boolean wasMarkedToWithdraw = false;
+    private boolean wasWithdrawn = false;
+    private LocalDateTime withdrawnDateTime = null;
 
     public PtoEntity(boolean isDemand, LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         this.isDemand = isDemand;

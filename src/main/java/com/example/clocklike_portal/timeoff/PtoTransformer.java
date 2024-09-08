@@ -50,7 +50,9 @@ public class PtoTransformer {
                 businessDays,
                 includingLastYearPool,
                 null,
-                false
+                false,
+                false,
+                null
         );
     }
 
@@ -103,7 +105,9 @@ public class PtoTransformer {
                 occasionalLeaveDescPolish,
                 occasionalDays,
                 saturdayHolidayDate,
-                request.isWasMarkedToWithdraw()
+                request.isWasMarkedToWithdraw(),
+                request.isWasWithdrawn(),
+                request.getWithdrawnDateTime()
         );
     }
 }

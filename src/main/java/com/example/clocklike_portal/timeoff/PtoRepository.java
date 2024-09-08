@@ -19,7 +19,7 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
     List<PtoEntity> findAllByAcceptor_appUserId(long id);
 
     @Query("SELECT p FROM pto_requests p WHERE p.acceptor.appUserId = :acceptor " +
-            "AND (p.decisionDateTime IS NULL OR p.wasMarkedToWithdraw = true)")
+            "AND (p.decisionDateTime IS NULL OR (p.wasMarkedToWithdraw = true AND p.wasWithdrawn = false))")
     List<PtoEntity> findUnresolvedOrWithdrawnRequestsByAcceptorId(@Param("acceptor") long id);
 
     List<PtoEntity> findAllByDecisionDateTimeIsNullAndAcceptor_AppUserId(long id);

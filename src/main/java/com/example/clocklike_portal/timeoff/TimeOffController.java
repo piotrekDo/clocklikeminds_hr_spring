@@ -67,7 +67,7 @@ public class TimeOffController {
     }
 
     @PostMapping("/withdraw")
-    WithdrawResponse withdrawTimeOffRequest(@RequestParam Long requestId) {
-        return timeOffService.withdrawTimeOffRequest(requestId);
+    WithdrawResponse withdrawTimeOffRequest(@RequestParam Long requestId, @RequestParam String applierNotes) {
+        return timeOffService.withdrawTimeOffRequest(requestId, applierNotes);
     }
 }

@@ -354,11 +354,13 @@ public class TimeOffService {
     }
 
     void resolveWithdrawRequest(ResolvePtoRequest withdrawRequest, PtoEntity timeOffEntity) {
+        if (withdrawRequest.getDeclineReason() != null) {
+            timeOffEntity.setAcceptorNotes(withdrawRequest.getDeclineReason());
+        }
         if (withdrawRequest.getIsAccepted()) {
-            clearWithdrawnTimeOffEntity(timeOffEntity, timeOffEntity.getPtoRequestId());
+            clearWithdrawnTimeOffEntityAndSetAsWithdrawn(timeOffEntity);
         } else {
             timeOffEntity.setWasMarkedToWithdraw(false);
-            timeOffEntity.setAcceptorNotes(timeOffEntity.getDeclineReason());
             ptoRequestsRepository.save(timeOffEntity);
         }
     }
@@ -436,7 +438,7 @@ public class TimeOffService {
         return new HolidayOnSaturdaySummaryDto(nextHolidayOnSaturday, (int) daysBetween, holidaysOnSaturdayByUsers);
     }
 
-    WithdrawResponse withdrawTimeOffRequest(Long timeOffRequestId) {
+    WithdrawResponse withdrawTimeOffRequest(Long timeOffRequestId, String applierNotes) {
         if (timeOffRequestId == null) {
             throw new IllegalOperationException("Missing time off request ID");
         }
@@ -448,9 +450,20 @@ public class TimeOffService {
         boolean wasAccepted = timeOffEntity.isWasAccepted();
         LocalDateTime decisionDateTime = timeOffEntity.getDecisionDateTime();
         if (!wasAccepted && decisionDateTime == null) {
-            return clearWithdrawnTimeOffEntity(timeOffEntity, timeOffRequestId);
+            return clearWithdrawnTimeOffEntityAndDeleteEntity(timeOffEntity, timeOffRequestId);
         } else {
+            if (timeOffEntity.getPtoEnd().isBefore(LocalDate.now())) {
+                throw new IllegalOperationException("Cant withdraw past time off request. Contact your superior.");
+            }
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss");
+            String now = LocalDateTime.now().format(dateTimeFormatter);
             timeOffEntity.setWasMarkedToWithdraw(!timeOffEntity.isWasMarkedToWithdraw());
+            String acceptedDateTime = timeOffEntity.getDecisionDateTime().format(dateTimeFormatter);
+            String applicationNotes = "Wniosek zgłoszony do usunięcia " + now + "\n" +
+                    "Zaakceptowany przez " + timeOffEntity.getAcceptor().getFirstName() + timeOffEntity.getAcceptor().getLastName() +
+                    " w dniu " + acceptedDateTime;
+            timeOffEntity.setApplicationNotes(applicationNotes);
+            timeOffEntity.setApplierNotes(applierNotes);
             ptoRequestsRepository.save(timeOffEntity);
             return new WithdrawResponse(timeOffRequestId, applier.getAppUserId(), false, true);
         }
@@ -460,7 +473,7 @@ public class TimeOffService {
      * below will restore used pto days or saturday holiday only when wasResolvedAndAccepted is true. This will prevent
      * adding additional days when deleting declined request.
      */
-    private WithdrawResponse clearWithdrawnTimeOffEntity(PtoEntity timeOffEntity, Long timeOffRequestId) {
+    private WithdrawResponse clearWithdrawnTimeOffEntityAndDeleteEntity(PtoEntity timeOffEntity, Long timeOffRequestId) {
         boolean wasResolvedAndAccepted = timeOffEntity.getDecisionDateTime() != null && timeOffEntity.isWasAccepted();
         AppUserEntity applier = timeOffEntity.getApplier();
         AppUserEntity acceptor = timeOffEntity.getAcceptor();
@@ -469,19 +482,50 @@ public class TimeOffService {
             ptoRequestsRepository.delete(timeOffEntity);
             return new WithdrawResponse(timeOffRequestId, applier.getAppUserId(), true, false);
         } else if (timeOffEntity instanceof HolidayOnSaturdayPtoEntity) {
-            if (wasResolvedAndAccepted) {
+            if (!wasResolvedAndAccepted) {
                 declineSaturdayHolidayRequestAndRestore(timeOffEntity, applier);
             }
             acceptor.getPtoAcceptor().remove(timeOffEntity);
             ptoRequestsRepository.delete(timeOffEntity);
             return new WithdrawResponse(timeOffRequestId, applier.getAppUserId(), true, false);
         } else {
-            if (wasResolvedAndAccepted) {
+            if (!wasResolvedAndAccepted) {
                 declinePtoAndRestoreAppliersDaysLeft(timeOffEntity, applier);
             }
             acceptor.getPtoAcceptor().remove(timeOffEntity);
             ptoRequestsRepository.delete(timeOffEntity);
             return new WithdrawResponse(timeOffRequestId, applier.getAppUserId(), true, false);
+        }
+    }
+
+    private void clearWithdrawnTimeOffEntityAndSetAsWithdrawn(PtoEntity timeOffEntity) {
+        boolean wasResolvedAndAccepted = timeOffEntity.getDecisionDateTime() != null && timeOffEntity.isWasAccepted();
+        AppUserEntity applier = timeOffEntity.getApplier();
+        AppUserEntity acceptor = timeOffEntity.getAcceptor();
+        if (timeOffEntity instanceof OccasionalLeaveEntity || timeOffEntity instanceof ChildCareLeaveEntity) {
+            acceptor.getPtoAcceptor().remove(timeOffEntity);
+            timeOffEntity.setWasAccepted(false);
+            timeOffEntity.setWasWithdrawn(true);
+            timeOffEntity.setWithdrawnDateTime(LocalDateTime.now());
+            ptoRequestsRepository.save(timeOffEntity);
+        } else if (timeOffEntity instanceof HolidayOnSaturdayPtoEntity) {
+            if (wasResolvedAndAccepted) {
+                declineSaturdayHolidayRequestAndRestore(timeOffEntity, applier);
+            }
+            acceptor.getPtoAcceptor().remove(timeOffEntity);
+            timeOffEntity.setWasAccepted(false);
+            timeOffEntity.setWasWithdrawn(true);
+            timeOffEntity.setWithdrawnDateTime(LocalDateTime.now());
+            ptoRequestsRepository.save(timeOffEntity);
+        } else {
+            if (wasResolvedAndAccepted) {
+                declinePtoAndRestoreAppliersDaysLeft(timeOffEntity, applier);
+            }
+            acceptor.getPtoAcceptor().remove(timeOffEntity);
+            timeOffEntity.setWasAccepted(false);
+            timeOffEntity.setWasWithdrawn(true);
+            timeOffEntity.setWithdrawnDateTime(LocalDateTime.now());
+            ptoRequestsRepository.save(timeOffEntity);
         }
     }
 }
