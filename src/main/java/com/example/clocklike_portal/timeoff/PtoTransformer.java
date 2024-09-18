@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -31,14 +32,11 @@ public class PtoTransformer {
 
     }
 
-    PtoEntity ptoEntityFromNewRequest(String leaveType, LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool, String applierNotes) {
-
+    PtoEntity ptoEntityFromNewRequest(String leaveType, LocalDate start, LocalDate end, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         return new PtoEntity(
                 null,
                 leaveType,
                 false,
-                applierNotes,
-                "",
                 "",
                 LocalDateTime.now(),
                 start,
@@ -49,10 +47,10 @@ public class PtoTransformer {
                 null,
                 businessDays,
                 includingLastYearPool,
+                false,
+                false,
                 null,
-                false,
-                false,
-                null
+                new ArrayList<>()
         );
     }
 
@@ -69,14 +67,27 @@ public class PtoTransformer {
         String occasionalLeaveDescPolish = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDescriptionPolish() : null;
         Integer occasionalDays = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDays() : null;
         String saturdayHolidayDate = request instanceof HolidayOnSaturdayPtoEntity ? ((HolidayOnSaturdayPtoEntity) request).getHoliday().getDate().toString() : null;
-
+        List<RequestHistoryDto> requestHistory = request.getHistory().stream()
+                .map(entity -> new RequestHistoryDto(
+                        entity.getHistoryId(),
+                        entity.getAction(),
+                        entity.getNotes(),
+                        entity.getDateTime(),
+                        entity.getAppUserEntity().getAppUserId(),
+                        entity.getAppUserEntity().getFirstName(),
+                        entity.getAppUserEntity().getLastName(),
+                        entity.getAppUserEntity().getUserEmail(),
+                        entity.getAppUserEntity().getImageUrl(),
+                        entity.getPtoEntity().getPtoRequestId()
+                ))
+                .toList();
+        System.out.println(requestHistory);
         return new TimeOffDto(
                 request.getPtoRequestId(),
                 request.getLeaveType(),
                 request.isDemand(),
-                request.getApplierNotes(),
-                request.getAcceptorNotes(),
                 request.getApplicationNotes(),
+                requestHistory,
                 isPending,
                 request.isWasAccepted(),
                 request.getRequestDateTime(),
@@ -98,7 +109,6 @@ public class PtoTransformer {
                 totalDays,
                 request.getBusinessDays(),
                 request.getIncludingLastYearPool(),
-                request.getDeclineReason(),
                 leaveReason,
                 occasionalTypeId,
                 occasionalLeaveType,

@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "pto_requests")
@@ -29,8 +31,6 @@ public class PtoEntity {
     private Long ptoRequestId;
     private String leaveType = Library.PTO_DISCRIMINATOR_VALUE;
     private boolean isDemand;
-    private String applierNotes;
-    private String acceptorNotes;
     private String applicationNotes;
     private LocalDateTime requestDateTime;
     private LocalDate ptoStart;
@@ -43,10 +43,11 @@ public class PtoEntity {
     private LocalDateTime decisionDateTime;
     private int businessDays;
     private int includingLastYearPool;
-    private String declineReason;
     private boolean wasMarkedToWithdraw = false;
     private boolean wasWithdrawn = false;
     private LocalDateTime withdrawnDateTime = null;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "ptoEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RequestHistory> history = new ArrayList<>();
 
     public PtoEntity(boolean isDemand, LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         this.isDemand = isDemand;
@@ -97,7 +98,17 @@ public class PtoEntity {
                 ", decisionDateTime=" + decisionDateTime +
                 ", businessDays=" + businessDays +
                 ", includingLastYearPool=" + includingLastYearPool +
-                ", declineReason='" + declineReason + '\'' +
                 '}';
     }
+
+    static class Action {
+        public static String REGISTER = "REGISTER";
+        public static String ACCEPTED = "ACCEPTED";
+        public static String DECLINED = "DECLINED";
+        public static String MARKED_WITHDRAW = "MARKED_WITHDRAW";
+        public static String WITHDRAW = "WITHDRAW";
+        public static String WITHDRAW_DECLINED = "WITHDRAW_DECLINED";
+    }
 }
+
+

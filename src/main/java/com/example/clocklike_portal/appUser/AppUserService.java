@@ -6,10 +6,7 @@ import com.example.clocklike_portal.job_position.PositionHistory;
 import com.example.clocklike_portal.job_position.PositionHistoryRepository;
 import com.example.clocklike_portal.job_position.PositionRepository;
 import com.example.clocklike_portal.mail.EmailService;
-import com.example.clocklike_portal.timeoff.HolidayOnSaturdayRepository;
-import com.example.clocklike_portal.timeoff.HolidayOnSaturdayUserEntity;
-import com.example.clocklike_portal.timeoff.HolidayOnSaturdayUserEntityRepository;
-import com.example.clocklike_portal.timeoff.PtoEntity;
+import com.example.clocklike_portal.timeoff.*;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +29,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC;
 public class AppUserService implements UserDetailsService {
 
     private final AppUserRepository appUserRepository;
+    private final RequestHistoryRepository requestHistoryRepository;
     private final UserRoleRepository userRoleRepository;
     private final PositionRepository jobPositionRepository;
     private final PositionHistoryRepository positionHistoryRepository;
@@ -40,10 +38,11 @@ public class AppUserService implements UserDetailsService {
     private final EmailService emailService;
     private UserRole supervisorRole = null;
 
-    public AppUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository jobPositionRepository,
+    public AppUserService(AppUserRepository appUserRepository, RequestHistoryRepository requestHistoryRepository, UserRoleRepository userRoleRepository, PositionRepository jobPositionRepository,
                           PositionHistoryRepository positionHistoryRepository, EmailService emailService, HolidayOnSaturdayRepository holidayOnSaturdayRepository,
                           HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository) {
         this.appUserRepository = appUserRepository;
+        this.requestHistoryRepository = requestHistoryRepository;
         this.userRoleRepository = userRoleRepository;
         this.jobPositionRepository = jobPositionRepository;
         this.positionHistoryRepository = positionHistoryRepository;
@@ -332,7 +331,10 @@ public class AppUserService implements UserDetailsService {
 
                         ptoEntity.setWasAccepted(false);
                         ptoEntity.setDecisionDateTime(LocalDateTime.now());
-                        ptoEntity.setDeclineReason("Wskazany przełożony utracił możliwość rozpatrywania wniosków.");
+                        String originalApplicationNotes = ptoEntity.getApplicationNotes();
+                        ptoEntity.setApplicationNotes(originalApplicationNotes != null ? originalApplicationNotes + " Wskazany przełożony utracił możliwość rozpatrywania wniosków." : "Wskazany przełożony utracił możliwość rozpatrywania wniosków.");
+                        requestHistoryRepository.save(new RequestHistory(null, "DECLINED", "Wskazany przełożony utracił możliwość rozpatrywania wniosków.", LocalDateTime.now(), applier, ptoEntity));
+
                     }
                 });
                 userRoles.remove(supervisorRole);

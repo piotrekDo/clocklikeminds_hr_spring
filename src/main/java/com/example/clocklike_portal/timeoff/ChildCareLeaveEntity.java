@@ -20,9 +20,4 @@ public class ChildCareLeaveEntity extends PtoEntity {
     public ChildCareLeaveEntity(LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays) {
         super(DISCRIMINATOR_VALUE, false, ptoStart, ptoEnd, applier, acceptor, businessDays, 0);
     }
-
-    @Override
-    public void setApplierNotes(String applierNotes) {
-        super.setApplierNotes(applierNotes);
-    }
 }

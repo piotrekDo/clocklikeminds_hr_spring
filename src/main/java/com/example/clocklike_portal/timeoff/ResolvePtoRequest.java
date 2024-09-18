@@ -13,5 +13,5 @@ public class ResolvePtoRequest {
     private Long ptoRequestId;
     @NonNull
     private Boolean isAccepted;
-    private String declineReason;
+    private String notes;
 }

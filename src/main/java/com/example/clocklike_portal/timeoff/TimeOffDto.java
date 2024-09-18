@@ -5,16 +5,18 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @Data
 public class TimeOffDto {
+
+    // TODO usunieto notki poza application, usunieto decline reason dodano historie
     private Long id;
     private String leaveType;
     private boolean isDemand;
-    private String applierNotes;
-    private String acceptorNotes;
     private String applicationNotes;
+    private List<RequestHistoryDto> requestHistory;
     private boolean isPending;
     private boolean wasAccepted;
     private LocalDateTime requestDateTime;
@@ -36,7 +38,6 @@ public class TimeOffDto {
     private long totalDays;
     private int businessDays;
     private int includingLastYearPool;
-    private String declineReason;
     private String occasional_leaveReason;
     private Integer occasional_leaveTypeId;
     private String occasional_leaveType;
