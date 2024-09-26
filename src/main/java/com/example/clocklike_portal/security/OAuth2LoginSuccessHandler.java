@@ -47,11 +47,11 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
             return;
         }
         GooglePrincipal googlePrincipal = principalData.get();
-        if (googlePrincipal.getHd() == null || !googlePrincipal.getHd().equals("clocklikeminds.com")) {
-            getRedirectStrategy().sendRedirect(request, response, FAILURE_REDIRECTION);
-            log.error("Unauthorized login attempt from " + googlePrincipal.getEmail());
-            return;
-        }
+//        if (googlePrincipal.getHd() == null || !googlePrincipal.getHd().equals("clocklikeminds.com")) {
+//            getRedirectStrategy().sendRedirect(request, response, FAILURE_REDIRECTION);
+//            log.error("Unauthorized login attempt from " + googlePrincipal.getEmail());
+//            return;
+//        }
 
         AppUserEntity appUserEntity;
         Optional<AppUserEntity> userInDataBase = userRepository.findByUserEmailIgnoreCase(googlePrincipal.getEmail());
@@ -67,7 +67,6 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         userRepository.save(appUserEntity);
 
         String jwtToken = jwtService.generateToken(appUserEntity);
-//        loginService.appendAuthCookie(response, jwtToken);
         System.out.println(AUTHENTICATED_REDIRECTION);
 
         String authenticatedRedirectionUrl = AUTHENTICATED_REDIRECTION + "?token=" + jwtToken;

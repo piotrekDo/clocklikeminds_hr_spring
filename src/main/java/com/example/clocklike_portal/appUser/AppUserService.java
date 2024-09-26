@@ -11,6 +11,8 @@ import com.example.clocklike_portal.security.GooglePrincipal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.clocklike_portal.job_position.PositionHistory.createNewPositionHistory;
+import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
 import static com.example.clocklike_portal.security.SecurityConfig.SUPERVISOR_AUTHORITY;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 
@@ -35,12 +38,13 @@ public class AppUserService implements UserDetailsService {
     private final PositionHistoryRepository positionHistoryRepository;
     private final HolidayOnSaturdayRepository holidayOnSaturdayRepository;
     private final HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
+    private final PtoTransformer ptoTransformer;
     private final EmailService emailService;
     private UserRole supervisorRole = null;
 
     public AppUserService(AppUserRepository appUserRepository, RequestHistoryRepository requestHistoryRepository, UserRoleRepository userRoleRepository, PositionRepository jobPositionRepository,
                           PositionHistoryRepository positionHistoryRepository, EmailService emailService, HolidayOnSaturdayRepository holidayOnSaturdayRepository,
-                          HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository) {
+                          HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository, PtoTransformer ptoTransformer) {
         this.appUserRepository = appUserRepository;
         this.requestHistoryRepository = requestHistoryRepository;
         this.userRoleRepository = userRoleRepository;
@@ -48,6 +52,7 @@ public class AppUserService implements UserDetailsService {
         this.positionHistoryRepository = positionHistoryRepository;
         this.holidayOnSaturdayRepository = holidayOnSaturdayRepository;
         this.holidayOnSaturdayUserEntityRepository = holidayOnSaturdayUserEntityRepository;
+        this.ptoTransformer = ptoTransformer;
         this.emailService = emailService;
     }
 
@@ -144,6 +149,21 @@ public class AppUserService implements UserDetailsService {
         return result == null ? Page.empty() : result.map(AppUserBasicDto::appUserEntityToBasicDto);
     }
 
+    List<EmployeeInfo> getEmployeesBySupervisorId(Long supervisorId) {
+        AppUserEntity supervisor = appUserRepository.findById(supervisorId)
+                .orElseThrow(() -> new NoSuchElementException("No user found with id: " + supervisorId));
+        boolean isAdmin = supervisor.getUserRoles().stream().map(UserRole::getRoleName).collect(Collectors.toSet()).contains("admin");
+        LocalDate today = LocalDate.now();
+        LocalDate inWeek = LocalDate.now().plusDays(7);
+        if (isAdmin) {
+            System.out.println(appUserRepository.findAllEmployeesForAdmin(today, inWeek).size());
+            System.out.println(appUserRepository.findAll().size());
+            return appUserRepository.findAllEmployeesForAdmin(today, inWeek);
+        } else {
+            return appUserRepository.findAllEmployeesBySupervisorId(supervisorId, today, inWeek);
+        }
+    }
+
     AppUserDto getAppUserById(Long id) {
         return AppUserDto.appUserEntityToDto(
                 appUserRepository.findById(id)
@@ -229,7 +249,7 @@ public class AppUserService implements UserDetailsService {
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
 
-    public AppUserDto updateHolidayData(UpdateEmployeeHolidayDataRequest request) {
+    AppUserDto updateHolidayData(UpdateEmployeeHolidayDataRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
 
@@ -296,7 +316,7 @@ public class AppUserService implements UserDetailsService {
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
 
-    public AppUserDto updateUserPermission(UpdateUserPermissionRequest request) {
+    AppUserDto updateUserPermission(UpdateUserPermissionRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
 
@@ -368,7 +388,7 @@ public class AppUserService implements UserDetailsService {
         return AppUserDto.appUserEntityToDto(appUserEntity);
     }
 
-    public List<AppUserBasicDto> getAllSupervisors() {
+    List<AppUserBasicDto> getAllSupervisors() {
         getSupervisorRole();
         List<AppUserEntity> supervisorEntities = appUserRepository.findAllByUserRolesContaining(supervisorRole);
 
@@ -376,4 +396,5 @@ public class AppUserService implements UserDetailsService {
                 .map(AppUserBasicDto::appUserEntityToBasicDto)
                 .collect(Collectors.toList());
     }
+
 }

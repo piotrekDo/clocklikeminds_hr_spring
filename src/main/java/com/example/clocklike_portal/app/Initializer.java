@@ -82,6 +82,7 @@ public class Initializer {
         piotrek.setPtoDaysLeftCurrentYear(26);
         piotrek.setRegistrationFinished(true);
         piotrek.setActive(true);
+        piotrek.setPosition(juniorJavaDeveloperPosition);
         appUserRepository.save(piotrek);
 
         AppUserEntity user1 = createTestAppUser("User", "Userski", "user.userski@clocklikeminds.com");

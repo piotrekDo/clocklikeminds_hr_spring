@@ -24,6 +24,11 @@ public class AppUserBasicDto {
     private PositionEntity position;
     private long seniorityInMonths;
     private int status;
+    private int ptoDaysAccruedLastYear;
+    private int ptoDaysAccruedCurrentYear;
+    private int ptoDaysLeftFromLastYear;
+    private int ptoDaysLeftTotal;
+    private int ptoDaysTaken;
 
     public static AppUserBasicDto appUserEntityToBasicDto(AppUserEntity entity) {
         long seniority = entity.getHireStart() != null ? ChronoUnit.MONTHS.between(entity.getHireStart(), LocalDate.now()) : 0;
@@ -41,7 +46,12 @@ public class AppUserBasicDto {
                 entity.isStillHired(),
                 entity.getPosition(),
                 seniority,
-                status
+                status,
+                entity.getPtoDaysAccruedLastYear(),
+                entity.getPtoDaysAccruedCurrentYear(),
+                entity.getPtoDaysLeftFromLastYear(),
+                entity.getPtoDaysLeftCurrentYear(),
+                entity.getPtoDaysTaken()
         );
     }
 }

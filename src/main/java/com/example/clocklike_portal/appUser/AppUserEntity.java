@@ -6,10 +6,7 @@ import com.example.clocklike_portal.timeoff.HolidayOnSaturdayUserEntity;
 import com.example.clocklike_portal.timeoff.PtoEntity;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -53,7 +50,7 @@ public class AppUserEntity {
     private AppUserEntity supervisor;
     @OneToMany(mappedBy = "supervisor")
     private Set<AppUserEntity> subordinates;
-    @OneToMany(mappedBy = "ptoRequestId", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "applier", fetch = FetchType.LAZY)
     private Set<PtoEntity> ptoRequests = new LinkedHashSet<>();
     @OneToMany(mappedBy = "acceptor")
     private Set<PtoEntity> ptoAcceptor = new LinkedHashSet<>();

@@ -10,6 +10,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -26,7 +27,7 @@ class AppUserRepositoryTest {
     void findByUserEmailIgnoreCaseShouldReturnValidRecordIgnoringCase(String input) {
         AppUserEntity testAppUser = AppUserEntity.createTestAppUser("test", "test", "test@test.com");
         testEntityManager.persist(testAppUser);
-
         assertEquals(testAppUser, appUserRepository.findByUserEmailIgnoreCase(input).get());
     }
+
 }

@@ -6,9 +6,7 @@ import com.example.clocklike_portal.job_position.PositionHistory;
 import com.example.clocklike_portal.job_position.PositionHistoryRepository;
 import com.example.clocklike_portal.job_position.PositionRepository;
 import com.example.clocklike_portal.mail.EmailService;
-import com.example.clocklike_portal.timeoff.HolidayOnSaturdayRepository;
-import com.example.clocklike_portal.timeoff.HolidayOnSaturdayUserEntityRepository;
-import com.example.clocklike_portal.timeoff.PtoEntity;
+import com.example.clocklike_portal.timeoff.*;
 import com.example.clocklike_portal.security.GooglePrincipal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +51,10 @@ class AppUserServiceTest {
 
     @MockBean
     HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
+    @MockBean
+    PtoTransformer ptoTransformer;
+    @MockBean
+    RequestHistoryRepository requestHistoryRepository;
 
     @MockBean
     EmailService emailService;
@@ -62,8 +64,8 @@ class AppUserServiceTest {
         @Bean
         AppUserService appUserService(AppUserRepository appUserRepository, UserRoleRepository userRoleRepository, PositionRepository positionRepository,
                                       PositionHistoryRepository positionHistoryRepository, EmailService emailService, HolidayOnSaturdayRepository holidayOnSaturdayRepository,
-                                      HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository) {
-            return new AppUserService(appUserRepository, userRoleRepository, positionRepository, positionHistoryRepository, emailService, holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository);
+                                      HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository, PtoTransformer ptoTransformer, RequestHistoryRepository requestHistoryRepository) {
+            return new AppUserService(appUserRepository, requestHistoryRepository, userRoleRepository, positionRepository, positionHistoryRepository, emailService, holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository, ptoTransformer);
         }
     }
 
@@ -212,10 +214,10 @@ class AppUserServiceTest {
         testAppUser.setRegistrationFinished(true);
         testAppUser.setSupervisor(previousSupervisor);
         testAppUser.setPtoRequests(new LinkedHashSet<>());
-        PtoEntity ptoNoDecision = new PtoEntity(99L, "", false, null, null, null, LocalDateTime.of(2023, 5, 5, 12, 0), LocalDate.of(2023, 5, 5), LocalDate.of(2023, 5, 6), testAppUser, previousSupervisor, false, null, 2, 0, null, false, false, null);
-        PtoEntity ptoAccepted = new PtoEntity(98L, "", false, null, null, null, LocalDateTime.of(2023, 5, 6, 12, 0), LocalDate.of(2023, 5, 6), LocalDate.of(2023, 5, 7), testAppUser, previousSupervisor, true, LocalDateTime.of(2023, 5, 6, 13, 0), 2, 0, null, false, false, null);
-        PtoEntity ptoRejected = new PtoEntity(97L, "", false, null, null, null, LocalDateTime.of(2023, 10, 10, 12, 0), LocalDate.of(2023, 10, 11), LocalDate.of(2023, 10, 11), testAppUser, previousSupervisor, false, LocalDateTime.of(2023, 10, 11, 13, 0), 1, 0, "declined", false, false, null);
-        PtoEntity anotherPto = new PtoEntity(96L, "", false, null, null, null, LocalDateTime.of(2023, 2, 2, 12, 0), LocalDate.of(2023, 2, 2), LocalDate.of(2023, 2, 2), newSupervisor, newSupervisor, false, null, 1, 1, null, false, false, null);
+        PtoEntity ptoNoDecision = new PtoEntity(99L, "", false, null, LocalDateTime.of(2023, 5, 5, 12, 0), LocalDate.of(2023, 5, 5), LocalDate.of(2023, 5, 6), testAppUser, previousSupervisor, false, null, 2, 0, false, false,  null, new ArrayList<>());
+        PtoEntity ptoAccepted = new PtoEntity(98L, "", false, null, LocalDateTime.of(2023, 5, 6, 12, 0), LocalDate.of(2023, 5, 6), LocalDate.of(2023, 5, 7), testAppUser, previousSupervisor, true, LocalDateTime.of(2023, 5, 6, 13, 0), 2, 0,  false, false, null, new ArrayList<>());
+        PtoEntity ptoRejected = new PtoEntity(97L, "", false, null, LocalDateTime.of(2023, 10, 10, 12, 0), LocalDate.of(2023, 10, 11), LocalDate.of(2023, 10, 11), testAppUser, previousSupervisor, false, LocalDateTime.of(2023, 10, 11, 13, 0), 1, 0, false, false, null, new ArrayList<>());
+        PtoEntity anotherPto = new PtoEntity(96L, "", false, null, LocalDateTime.of(2023, 2, 2, 12, 0), LocalDate.of(2023, 2, 2), LocalDate.of(2023, 2, 2), newSupervisor, newSupervisor, false, null, 1, 1,  false, false, null, new ArrayList<>());
         testAppUser.getPtoRequests().addAll(Set.of(ptoNoDecision, ptoAccepted, ptoRejected));
         previousSupervisor.getPtoAcceptor().addAll(Set.of(ptoNoDecision, ptoAccepted, ptoRejected));
         newSupervisor.getPtoRequests().add(anotherPto);
@@ -485,10 +487,8 @@ class AppUserServiceTest {
         assertEquals(1, employee2.getPtoDaysLeftFromLastYear());
         assertFalse(emp1PendingPto.isWasAccepted());
         assertNotNull(emp1PendingPto.getDecisionDateTime());
-        assertNotNull(emp1PendingPto.getDeclineReason());
         assertFalse(emp2PendingPto.isWasAccepted());
         assertNotNull(emp2PendingPto.getDecisionDateTime());
-        assertNotNull(emp2PendingPto.getDeclineReason());
     }
 
 }

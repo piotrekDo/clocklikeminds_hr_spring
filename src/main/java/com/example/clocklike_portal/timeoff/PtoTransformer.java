@@ -54,7 +54,8 @@ public class PtoTransformer {
         );
     }
 
-    TimeOffDto ptoEntityToDto(PtoEntity request) {
+    public TimeOffDto ptoEntityToDto(PtoEntity request) {
+        if (request == null) return null;
         AppUserEntity applier = request.getApplier();
         AppUserEntity acceptor = request.getAcceptor();
 

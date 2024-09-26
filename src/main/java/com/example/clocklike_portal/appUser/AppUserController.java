@@ -24,6 +24,11 @@ public class AppUserController {
         return appUserService.findAllUsers(page, size);
     }
 
+    @GetMapping("/employees-by-supervisor")
+    List<EmployeeInfo> getEmployeesBySupervisor(@RequestParam Long supervisorId) {
+        return appUserService.getEmployeesBySupervisorId(supervisorId);
+    }
+
     @GetMapping("/{id}")
     AppUserDto getAppUserById(@PathVariable Long id) {
         return appUserService.getAppUserById(id);
@@ -53,5 +58,4 @@ public class AppUserController {
     AppUserDto updateUserPermission(@RequestBody UpdateUserPermissionRequest request) {
         return appUserService.updateUserPermission(request);
     }
-
 }

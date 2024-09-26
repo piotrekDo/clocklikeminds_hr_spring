@@ -51,6 +51,9 @@ class TimeOffServiceTest {
     HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
     @MockBean
     EmailService emailService;
+    @MockBean
+    RequestHistoryRepository requestHistoryRepository;
+
 
 
     @TestConfiguration
@@ -59,9 +62,8 @@ class TimeOffServiceTest {
         TimeOffService ptoService(PtoRepository ptoRepository, AppUserRepository appUserRepository, PtoTransformer ptoTransformer,
                                   HolidayService holidayService, DateChecker dateChecker, OccasionalLeaveTypeRepository occasionalLeaveTypeRepository,
                                   HolidayOnSaturdayRepository holidayOnSaturdayRepository, HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository,
-                                  EmailService emailService) {
-            return new TimeOffService(ptoRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository,
-                    holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository, emailService);
+                                  EmailService emailService, RequestHistoryRepository requestHistoryRepository) {
+            return new TimeOffService(ptoRepository, requestHistoryRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository, holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository, emailService);
         }
     }
 
@@ -289,13 +291,13 @@ class TimeOffServiceTest {
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");
         acceptor.setActive(true);
         acceptor.setUserRoles(List.of(new UserRole(1L, "admin")));
-        PtoEntity ptoEntity = new PtoEntity(1L,  "", false, null, null, null, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2, null, false, false, null);
-        TimeOffDto timeOffDto = new TimeOffDto(1L, "", false, null, null, null, true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", false, 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null, null, null, null, null, null, null, false, false, null);
+        PtoEntity ptoEntity = new PtoEntity(1L,  "", false, null, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2,  false, false, null, new ArrayList<>());
+        TimeOffDto timeOffDto = new TimeOffDto(1L, "", false, null, null,  true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", false, 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null, null, null, null,  null, null, false, false, null);
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(true);
         Mockito.when(holidayService.calculateBusinessDays(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(5);
-        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2, null)).thenReturn(ptoEntity);
+        Mockito.when(ptoTransformer.ptoEntityFromNewRequest("", LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, 5, 2)).thenReturn(ptoEntity);
         Mockito.when(ptoTransformer.ptoEntityToDto(ptoEntity)).thenReturn(timeOffDto);
 
         timeOffService.processNewRequest(request);

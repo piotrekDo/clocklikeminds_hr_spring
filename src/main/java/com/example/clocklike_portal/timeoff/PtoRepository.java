@@ -75,4 +75,6 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
     @Query("SELECT p FROM pto_requests p WHERE p.applier.appUserId = :appUserId AND p.leaveType = 'child_care' " +
             "AND YEAR(p.ptoStart) = :year")
     List<PtoEntity> findUserRequestsForChildCareAndYear(@Param("appUserId") Long appUserId, @Param("year") Integer year);
+
+
 }

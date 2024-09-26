@@ -213,6 +213,7 @@ public class TimeOffService {
         return ptoTransformer.ptoEntityToDto(ptoEntity);
     }
 
+    @Transactional
     TimeOffDto processChildCareLeaveRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
         if (startDate.getYear() != toDate.getYear()) {
             throw new IllegalOperationException("Cannot use child care leave at the turn of the year. Please use 2 separate requests");
@@ -234,8 +235,9 @@ public class TimeOffService {
         if (totalDaysApplied > 0 && businessDays > 1) {
             throw new IllegalOperationException("Cannot apply for " + businessDays + ". 1 day left");
         }
-        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, childCareLeaveEntity));
-        return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(childCareLeaveEntity));
+        ChildCareLeaveEntity savedTimeOffEntity = ptoRequestsRepository.save(childCareLeaveEntity);
+        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, savedTimeOffEntity));
+        return ptoTransformer.ptoEntityToDto(savedTimeOffEntity);
     }
 
     TimeOffDto processOccasionalLeaveRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
@@ -252,9 +254,11 @@ public class TimeOffService {
             throw new IllegalOperationException("Cannot apply for " + businessDays + ". Maximum days for selected request: " + occasionalLeaveType.getDays());
         }
 
+
         OccasionalLeaveEntity occasionalLeaveEntity = new OccasionalLeaveEntity(startDate, toDate, applier, acceptor, businessDays, occasionalLeaveType);
-        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, occasionalLeaveEntity));
-        return ptoTransformer.ptoEntityToDto(ptoRequestsRepository.save(occasionalLeaveEntity));
+        OccasionalLeaveEntity savedTimeOffEntity = ptoRequestsRepository.save(occasionalLeaveEntity);
+        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, savedTimeOffEntity));
+        return ptoTransformer.ptoEntityToDto(savedTimeOffEntity);
     }
 
     TimeOffDto processPtoRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
@@ -356,6 +360,7 @@ public class TimeOffService {
 
         return ptoTransformer.ptoEntityToDto(updatedPtoRequest);
     }
+
 
     void resolveWithdrawRequest(ResolvePtoRequest resolveRequest, PtoEntity timeOffEntity, AppUserEntity acceptor) {
         if (resolveRequest.getIsAccepted()) {
