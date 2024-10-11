@@ -67,6 +67,7 @@ public class PtoTransformer {
         String occasionalLeaveDescPolish = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDescriptionPolish() : null;
         Integer occasionalDays = isOccasionalLeave ? ((OccasionalLeaveEntity) request).getOccasionalType().getDays() : null;
         String saturdayHolidayDate = request instanceof HolidayOnSaturdayPtoEntity ? ((HolidayOnSaturdayPtoEntity) request).getHoliday().getDate().toString() : null;
+        String saturdayHolidayDesc = request instanceof HolidayOnSaturdayPtoEntity ? ((HolidayOnSaturdayPtoEntity) request).getHoliday().getNote() : null;
         List<RequestHistoryDto> requestHistory = request.getHistory().stream()
                 .map(entity -> new RequestHistoryDto(
                         entity.getHistoryId(),
@@ -115,6 +116,7 @@ public class PtoTransformer {
                 occasionalLeaveDescPolish,
                 occasionalDays,
                 saturdayHolidayDate,
+                saturdayHolidayDesc,
                 request.isWasMarkedToWithdraw(),
                 request.isWasWithdrawn(),
                 request.getWithdrawnDateTime(),

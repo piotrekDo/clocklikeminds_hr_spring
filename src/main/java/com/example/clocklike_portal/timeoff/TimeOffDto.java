@@ -44,6 +44,7 @@ public class TimeOffDto {
     private String occasional_descriptionPolish;
     private Integer occasional_days;
     private String saturday_holiday_date;
+    private String saturday_holiday_desc;
     private boolean wasMarkedToWithdraw;
     private boolean wasWithdrawn;
     private LocalDateTime withdrawnDateTime;
