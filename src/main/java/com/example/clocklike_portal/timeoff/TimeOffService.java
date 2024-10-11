@@ -347,6 +347,9 @@ public class TimeOffService {
         }
 
         ptoRequest.setWasAccepted(isRequestAccepted);
+        if (!isRequestAccepted) {
+            ptoRequest.setDeclineReason(dto.getNotes());
+        }
         requestHistoryRepository.save(new RequestHistory(null, isRequestAccepted ? ACCEPTED : DECLINED, dto.getNotes(), now, acceptor, ptoRequest));
         ptoRequest.setDecisionDateTime(now);
         PtoEntity updatedPtoRequest = ptoRequestsRepository.save(ptoRequest);

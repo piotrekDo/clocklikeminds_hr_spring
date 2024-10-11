@@ -214,10 +214,10 @@ class AppUserServiceTest {
         testAppUser.setRegistrationFinished(true);
         testAppUser.setSupervisor(previousSupervisor);
         testAppUser.setPtoRequests(new LinkedHashSet<>());
-        PtoEntity ptoNoDecision = new PtoEntity(99L, "", false, null, LocalDateTime.of(2023, 5, 5, 12, 0), LocalDate.of(2023, 5, 5), LocalDate.of(2023, 5, 6), testAppUser, previousSupervisor, false, null, 2, 0, false, false,  null, new ArrayList<>());
-        PtoEntity ptoAccepted = new PtoEntity(98L, "", false, null, LocalDateTime.of(2023, 5, 6, 12, 0), LocalDate.of(2023, 5, 6), LocalDate.of(2023, 5, 7), testAppUser, previousSupervisor, true, LocalDateTime.of(2023, 5, 6, 13, 0), 2, 0,  false, false, null, new ArrayList<>());
-        PtoEntity ptoRejected = new PtoEntity(97L, "", false, null, LocalDateTime.of(2023, 10, 10, 12, 0), LocalDate.of(2023, 10, 11), LocalDate.of(2023, 10, 11), testAppUser, previousSupervisor, false, LocalDateTime.of(2023, 10, 11, 13, 0), 1, 0, false, false, null, new ArrayList<>());
-        PtoEntity anotherPto = new PtoEntity(96L, "", false, null, LocalDateTime.of(2023, 2, 2, 12, 0), LocalDate.of(2023, 2, 2), LocalDate.of(2023, 2, 2), newSupervisor, newSupervisor, false, null, 1, 1,  false, false, null, new ArrayList<>());
+        PtoEntity ptoNoDecision = new PtoEntity(99L, "", false, null, LocalDateTime.of(2023, 5, 5, 12, 0), LocalDate.of(2023, 5, 5), LocalDate.of(2023, 5, 6), testAppUser, previousSupervisor, false, null, 2, 0, false, false,  null, new ArrayList<>(), "");
+        PtoEntity ptoAccepted = new PtoEntity(98L, "", false, null, LocalDateTime.of(2023, 5, 6, 12, 0), LocalDate.of(2023, 5, 6), LocalDate.of(2023, 5, 7), testAppUser, previousSupervisor, true, LocalDateTime.of(2023, 5, 6, 13, 0), 2, 0,  false, false, null, new ArrayList<>(), "");
+        PtoEntity ptoRejected = new PtoEntity(97L, "", false, null, LocalDateTime.of(2023, 10, 10, 12, 0), LocalDate.of(2023, 10, 11), LocalDate.of(2023, 10, 11), testAppUser, previousSupervisor, false, LocalDateTime.of(2023, 10, 11, 13, 0), 1, 0, false, false, null, new ArrayList<>(), "");
+        PtoEntity anotherPto = new PtoEntity(96L, "", false, null, LocalDateTime.of(2023, 2, 2, 12, 0), LocalDate.of(2023, 2, 2), LocalDate.of(2023, 2, 2), newSupervisor, newSupervisor, false, null, 1, 1,  false, false, null, new ArrayList<>(), "");
         testAppUser.getPtoRequests().addAll(Set.of(ptoNoDecision, ptoAccepted, ptoRejected));
         previousSupervisor.getPtoAcceptor().addAll(Set.of(ptoNoDecision, ptoAccepted, ptoRejected));
         newSupervisor.getPtoRequests().add(anotherPto);

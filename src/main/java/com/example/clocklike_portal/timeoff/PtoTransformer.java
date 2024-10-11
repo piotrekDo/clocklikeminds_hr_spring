@@ -14,8 +14,6 @@ import static java.time.temporal.ChronoUnit.DAYS;
 @Service
 public class PtoTransformer {
 
-    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     PtoSummary createPtoSummary(AppUserEntity appUserEntity, List<HolidayOnSaturdayUserEntity> unusedHolidays) {
         final List<SaturdayHolidayDto> saturdayHolidayDtos = unusedHolidays.stream()
                 .map(holiday -> new SaturdayHolidayDto(holiday.getHoliday().getId(), holiday.getHoliday().getDate().toString(), holiday.getHoliday().getNote(), holiday.getPto() != null ? holiday.getPto().getPtoStart().toString() : null))
@@ -50,7 +48,8 @@ public class PtoTransformer {
                 false,
                 false,
                 null,
-                new ArrayList<>()
+                new ArrayList<>(),
+                ""
         );
     }
 
@@ -118,7 +117,8 @@ public class PtoTransformer {
                 saturdayHolidayDate,
                 request.isWasMarkedToWithdraw(),
                 request.isWasWithdrawn(),
-                request.getWithdrawnDateTime()
+                request.getWithdrawnDateTime(),
+                request.getDeclineReason()
         );
     }
 }

@@ -47,5 +47,5 @@ public class TimeOffDto {
     private boolean wasMarkedToWithdraw;
     private boolean wasWithdrawn;
     private LocalDateTime withdrawnDateTime;
-
+    private String declineReason;
 }

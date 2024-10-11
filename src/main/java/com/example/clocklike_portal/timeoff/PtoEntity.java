@@ -48,6 +48,7 @@ public class PtoEntity {
     private LocalDateTime withdrawnDateTime = null;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "ptoEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RequestHistory> history = new ArrayList<>();
+    private String declineReason;
 
     public PtoEntity(boolean isDemand, LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         this.isDemand = isDemand;
