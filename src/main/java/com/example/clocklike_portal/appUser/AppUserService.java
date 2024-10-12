@@ -156,8 +156,6 @@ public class AppUserService implements UserDetailsService {
         LocalDate today = LocalDate.now();
         LocalDate inWeek = LocalDate.now().plusDays(7);
         if (isAdmin) {
-            System.out.println(appUserRepository.findAllEmployeesForAdmin(today, inWeek).size());
-            System.out.println(appUserRepository.findAll().size());
             return appUserRepository.findAllEmployeesForAdmin(today, inWeek);
         } else {
             return appUserRepository.findAllEmployeesBySupervisorId(supervisorId, today, inWeek);

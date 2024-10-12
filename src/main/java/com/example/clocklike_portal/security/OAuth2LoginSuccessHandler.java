@@ -67,7 +67,6 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         userRepository.save(appUserEntity);
 
         String jwtToken = jwtService.generateToken(appUserEntity);
-        System.out.println(AUTHENTICATED_REDIRECTION);
 
         String authenticatedRedirectionUrl = AUTHENTICATED_REDIRECTION + "?token=" + jwtToken;
         getRedirectStrategy().sendRedirect(request, response, authenticatedRedirectionUrl);

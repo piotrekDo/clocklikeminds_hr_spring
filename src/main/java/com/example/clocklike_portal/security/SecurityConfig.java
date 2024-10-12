@@ -85,7 +85,6 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(config -> config
                         .accessDeniedHandler(((request, response, accessDeniedException) -> {
-                            System.out.println(request.getServletPath());
                             ErrorEntity<String> tokenExpiredError = new ErrorEntity<>(
                                     HttpStatus.FORBIDDEN.value(),
                                     accessDeniedException.getClass().getSimpleName(),

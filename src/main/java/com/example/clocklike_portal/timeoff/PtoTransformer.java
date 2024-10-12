@@ -82,7 +82,6 @@ public class PtoTransformer {
                         entity.getPtoEntity().getPtoRequestId()
                 ))
                 .toList();
-        System.out.println(requestHistory);
         return new TimeOffDto(
                 request.getPtoRequestId(),
                 request.getLeaveType(),

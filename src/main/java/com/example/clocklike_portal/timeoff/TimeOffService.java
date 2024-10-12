@@ -95,7 +95,8 @@ public class TimeOffService {
     PtoSummary getUserPtoSummary(long userId) {
         AppUserEntity user = appUserRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("No user found for applier with ID: " + userId));
-        List<HolidayOnSaturdayUserEntity> unusedHolidays = holidayOnSaturdayUserEntityRepository.findAllByUserIdAndYear(userId, LocalDate.now().getYear());
+        LocalDate now = LocalDate.now();
+        List<HolidayOnSaturdayUserEntity> unusedHolidays = holidayOnSaturdayUserEntityRepository.findAllByUserIdAndYearUpToCurrentMonth(userId, now.getYear(), now.getMonthValue());
         return ptoTransformer.createPtoSummary(user, unusedHolidays);
     }
 
@@ -433,8 +434,6 @@ public class TimeOffService {
     HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin() {
         LocalDate now = LocalDate.now();
         HolidayOnSaturdayEntity lastRegistered = holidayOnSaturdayRepository.findFirstByOrderByDateDesc();
-        System.out.println("LSAT REG");
-        System.out.println(lastRegistered);
         SaturdayHolidayDto nextHolidayOnSaturday = holidayService.findNextHolidayOnSaturday(lastRegistered != null ? lastRegistered.getDate() : null);
         LocalDate nextHolidayDate = LocalDate.parse(nextHolidayOnSaturday.getDate());
         long daysBetween = ChronoUnit.DAYS.between(now, nextHolidayDate);
