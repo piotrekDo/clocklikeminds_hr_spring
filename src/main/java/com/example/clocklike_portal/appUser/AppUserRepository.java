@@ -31,6 +31,9 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
                     u.appUserId,
                     u.isFreelancer,
                     u.isActive,
+                    u.supervisor.appUserId,
+                    u.supervisor.firstName,
+                    u.supervisor.lastName,
                     u.firstName,
                     u.lastName,
                     u.userEmail,
@@ -63,6 +66,7 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
                     )
                 )
                 FROM AppUserEntity u
+                LEFT JOIN u.supervisor s
                 WHERE u.supervisor.appUserId = :supervisorId
             """)
     List<EmployeeInfo> findAllEmployeesBySupervisorId(@Param("supervisorId") long supervisorId, @Param("today")LocalDate today, @Param("inWeek") LocalDate inWeek);
