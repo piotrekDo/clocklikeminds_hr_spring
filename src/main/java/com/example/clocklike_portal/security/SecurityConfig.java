@@ -28,6 +28,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    public static final String API_VERSION = "/api/v1";
 
     private final JwtAuthorizationFilter jwtAuthenticationFilter;
     private final AppUserService userService;
@@ -58,24 +59,25 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
-                        .requestMatchers(("/api/v1/test/anon")).permitAll()
-                        .requestMatchers(("/api/v1/meta")).hasAuthority(USER_AUTHORITY)
-                        .requestMatchers(("/api/v1/test/users")).hasAuthority(USER_AUTHORITY)
-                        .requestMatchers(("/api/v1/test/admins")).hasAnyAuthority(ADMIN_AUTHORITY)
-                        .requestMatchers(("/api/v1/settings/**")).hasAnyAuthority(ADMIN_AUTHORITY)
-                        .requestMatchers("/api/v1/users/**").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
-                        .requestMatchers("/api/v1/positions/**").hasAuthority(ADMIN_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/summary").hasAuthority(USER_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/requests-for-year").hasAuthority(USER_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/request-new").hasAuthority(USER_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/byId").hasAuthority(USER_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/withdraw").hasAuthority(USER_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/unresolved-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/requests-for-supervisor-calendar").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/requests-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/resolve-request").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/new-saturday-holiday").hasAnyAuthority(ADMIN_AUTHORITY)
-                        .requestMatchers("/api/v1/pto/holidays-on-saturday-admin").hasAnyAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers((API_VERSION + "/test/anon")).permitAll()
+                        .requestMatchers((API_VERSION + "/meta")).hasAuthority(USER_AUTHORITY)
+                        .requestMatchers((API_VERSION + "/test/users")).hasAuthority(USER_AUTHORITY)
+                        .requestMatchers((API_VERSION + "/test/admins")).hasAnyAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers((API_VERSION + "/settings/**")).hasAnyAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/users/**").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/positions/**").hasAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/dashboard/supervisor").hasAnyAuthority(SUPERVISOR_AUTHORITY, ADMIN_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/summary").hasAuthority(USER_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/requests-for-year").hasAuthority(USER_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/request-new").hasAuthority(USER_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/byId").hasAuthority(USER_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/withdraw").hasAuthority(USER_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/unresolved-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/requests-for-supervisor-calendar").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/requests-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/resolve-request").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/new-saturday-holiday").hasAnyAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/holidays-on-saturday-admin").hasAnyAuthority(ADMIN_AUTHORITY)
                         .anyRequest().denyAll()
                 )
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

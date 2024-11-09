@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.example.clocklike_portal.security.SecurityConfig.API_VERSION;
+
 @RestController
-@RequestMapping("/api/v1/settings")
+@RequestMapping(API_VERSION + "/settings")
 @AllArgsConstructor
 public class SettingsController {
 

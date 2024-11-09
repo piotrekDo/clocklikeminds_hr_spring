@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.example.clocklike_portal.security.SecurityConfig.API_VERSION;
+
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping(API_VERSION + "/users")
 @AllArgsConstructor
 public class AppUserController {
 

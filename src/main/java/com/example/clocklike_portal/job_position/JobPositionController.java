@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.example.clocklike_portal.security.SecurityConfig.API_VERSION;
+
 @RestController
-@RequestMapping("/api/v1/positions")
+@RequestMapping(API_VERSION + "/positions")
 @AllArgsConstructor
 public class JobPositionController {
 

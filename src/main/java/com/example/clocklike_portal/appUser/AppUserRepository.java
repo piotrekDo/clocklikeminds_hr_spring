@@ -19,6 +19,8 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
 
     List<AppUserEntity> findAllByUserRolesContaining(UserRole role);
 
+    List<AppUserEntity> findAllByIsRegistrationFinishedFalseOrIsActiveFalse();
+
     @Query("SELECT a FROM AppUserEntity a WHERE a.isFreelancer = false")
     List<AppUserEntity> findAllByFreelancerIsFalse();
 

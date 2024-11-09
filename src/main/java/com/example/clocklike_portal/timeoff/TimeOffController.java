@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.example.clocklike_portal.security.SecurityConfig.API_VERSION;
+
 @RestController
-@RequestMapping("/api/v1/pto")
+@RequestMapping(API_VERSION + "/pto")
 @AllArgsConstructor
 public class TimeOffController {
 
