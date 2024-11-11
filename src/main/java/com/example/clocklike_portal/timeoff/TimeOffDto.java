@@ -1,5 +1,6 @@
 package com.example.clocklike_portal.timeoff;
 
+import com.example.clocklike_portal.timeoff_history.RequestHistoryDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

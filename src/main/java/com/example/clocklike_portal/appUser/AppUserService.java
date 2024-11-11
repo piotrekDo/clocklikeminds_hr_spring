@@ -8,11 +8,14 @@ import com.example.clocklike_portal.job_position.PositionRepository;
 import com.example.clocklike_portal.mail.EmailService;
 import com.example.clocklike_portal.timeoff.*;
 import com.example.clocklike_portal.security.GooglePrincipal;
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayRepository;
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayUserEntity;
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayUserEntityRepository;
+import com.example.clocklike_portal.timeoff_history.RequestHistory;
+import com.example.clocklike_portal.timeoff_history.RequestHistoryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,7 +27,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.clocklike_portal.job_position.PositionHistory.createNewPositionHistory;
-import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
 import static com.example.clocklike_portal.security.SecurityConfig.SUPERVISOR_AUTHORITY;
 import static org.springframework.data.domain.Sort.Direction.DESC;
 

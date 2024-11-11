@@ -1,6 +1,6 @@
 package com.example.clocklike_portal.dates_calculations;
 
-import com.example.clocklike_portal.timeoff.SaturdayHolidayDto;
+import com.example.clocklike_portal.timeoff.on_saturday.SaturdayHolidayDto;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;

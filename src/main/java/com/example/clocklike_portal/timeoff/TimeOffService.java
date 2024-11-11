@@ -8,6 +8,12 @@ import com.example.clocklike_portal.dates_calculations.DateChecker;
 import com.example.clocklike_portal.dates_calculations.HolidayService;
 import com.example.clocklike_portal.error.IllegalOperationException;
 import com.example.clocklike_portal.mail.EmailService;
+import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveEntity;
+import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveType;
+import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveTypeRepository;
+import com.example.clocklike_portal.timeoff.on_saturday.*;
+import com.example.clocklike_portal.timeoff_history.RequestHistory;
+import com.example.clocklike_portal.timeoff_history.RequestHistoryRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -85,10 +91,17 @@ public class TimeOffService {
                 .toList();
     }
 
-    Page<TimeOffDto> getPtoRequests(Long userId, Integer page, Integer size) {
+    Page<TimeOffDto> getPtoRequestsByApplier(Long userId, Integer page, Integer size) {
         page = page == null || page < 0 ? 0 : page;
         size = size == null || size < 1 ? 1000 : size;
         Page<PtoEntity> result = ptoRequestsRepository.findAllByApplier_AppUserId(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestDateTime")));
+        return result == null ? Page.empty() : result.map(ptoTransformer::ptoEntityToDto);
+    }
+
+    Page<TimeOffDto> getPtoRequestsByAcceptor(Long supervisorId, Integer page, Integer size) {
+        page = page == null || page < 0 ? 0 : page;
+        size = size == null || size < 1 ? 20 : size;
+        Page<PtoEntity> result = ptoRequestsRepository.findAllByAcceptor_AppUserId(supervisorId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestDateTime")));
         return result == null ? Page.empty() : result.map(ptoTransformer::ptoEntityToDto);
     }
 
@@ -534,4 +547,8 @@ public class TimeOffService {
             ptoRequestsRepository.save(timeOffEntity);
         }
     }
+
+//    List<TimeOffDto> findTimeOffRequestByQuery() {
+//
+//    }
 }

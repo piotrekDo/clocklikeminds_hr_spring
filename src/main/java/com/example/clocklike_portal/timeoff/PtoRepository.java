@@ -23,6 +23,8 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
 
     Page<PtoEntity> findAllByApplier_AppUserId(long id, PageRequest pageable);
 
+    Page<PtoEntity> findAllByAcceptor_AppUserId(long id, PageRequest pageable);
+
     @Query("SELECT p FROM pto_requests p WHERE (p.wasAccepted = true OR p.decisionDateTime IS NULL) AND (YEAR(p.ptoStart) = :year OR YEAR(p.ptoEnd) = :year) " +
             "OR (MONTH(p.ptoStart) = 12 AND YEAR(p.ptoStart) = :year -1) " +
             "OR (MONTH(p.ptoEnd) = 12 AND YEAR(p.ptoEnd) = :year -1)" +

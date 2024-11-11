@@ -1,6 +1,11 @@
 package com.example.clocklike_portal.timeoff;
 
 import com.example.clocklike_portal.appUser.AppUserEntity;
+import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveEntity;
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayPtoEntity;
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayUserEntity;
+import com.example.clocklike_portal.timeoff.on_saturday.SaturdayHolidayDto;
+import com.example.clocklike_portal.timeoff_history.RequestHistoryDto;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

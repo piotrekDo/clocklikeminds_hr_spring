@@ -1,4 +1,4 @@
-package com.example.clocklike_portal.timeoff;
+package com.example.clocklike_portal.timeoff_history;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

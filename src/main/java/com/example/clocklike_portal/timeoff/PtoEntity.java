@@ -3,6 +3,7 @@ package com.example.clocklike_portal.timeoff;
 
 import com.example.clocklike_portal.app.Library;
 import com.example.clocklike_portal.appUser.AppUserEntity;
+import com.example.clocklike_portal.timeoff_history.RequestHistory;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

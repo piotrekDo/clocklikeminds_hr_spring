@@ -1,4 +1,4 @@
-package com.example.clocklike_portal.timeoff;
+package com.example.clocklike_portal.timeoff.occasional;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

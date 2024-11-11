@@ -1,5 +1,7 @@
 package com.example.clocklike_portal.timeoff;
 
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdaySummaryDto;
+import com.example.clocklike_portal.timeoff.on_saturday.SaturdayHolidayDto;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,7 +27,7 @@ public class TimeOffController {
     Page<TimeOffDto> findAllRequestsByAppliersId(@RequestParam Long id,
                                                  @RequestParam(required = false) Integer page,
                                                  @RequestParam(required = false) Integer size) {
-        return timeOffService.getPtoRequests(id, page, size);
+        return timeOffService.getPtoRequestsByApplier(id, page, size);
     }
 
     @GetMapping("/unresolved-by-acceptor")

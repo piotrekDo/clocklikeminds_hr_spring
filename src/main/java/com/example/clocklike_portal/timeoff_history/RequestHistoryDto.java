@@ -1,4 +1,4 @@
-package com.example.clocklike_portal.timeoff;
+package com.example.clocklike_portal.timeoff_history;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

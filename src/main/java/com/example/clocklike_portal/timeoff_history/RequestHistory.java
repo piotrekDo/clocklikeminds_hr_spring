@@ -1,6 +1,7 @@
-package com.example.clocklike_portal.timeoff;
+package com.example.clocklike_portal.timeoff_history;
 
 import com.example.clocklike_portal.appUser.AppUserEntity;
+import com.example.clocklike_portal.timeoff.PtoEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

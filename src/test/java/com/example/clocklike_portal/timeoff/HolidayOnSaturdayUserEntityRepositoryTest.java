@@ -1,6 +1,9 @@
 package com.example.clocklike_portal.timeoff;
 
 import com.example.clocklike_portal.appUser.AppUserEntity;
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayEntity;
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayUserEntity;
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayUserEntityRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
