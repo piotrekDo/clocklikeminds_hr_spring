@@ -16,7 +16,9 @@ import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -30,7 +32,6 @@ import static com.example.clocklike_portal.pdf.PdfCreator.PDF_TEMPLATES;
 import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
 
 @Component
-@DependsOn("initializer")
 @RequiredArgsConstructor
 public class EmailService {
     ExecutorService executorService = Executors.newFixedThreadPool(5);
@@ -45,8 +46,8 @@ public class EmailService {
     private String mailboxPassword;
     private boolean isEnabled = false;
 
-    @PostConstruct
-    void init() {
+    @EventListener(ApplicationReadyEvent.class)
+    public void init() {
         this.isEnabled = Boolean.getBoolean(settingsRepository.findBySettingName(MAILING_ENABLED)
                 .orElseThrow(() -> new NoSuchElementException("mailingEnabled setting was not found")).getSettingValue());
     }
