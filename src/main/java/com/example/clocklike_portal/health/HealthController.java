@@ -19,15 +19,16 @@ public class HealthController {
 
     @Value("${server.ssl.key-store-password}")
     private String keystorePassword;
+    @Value("${server.ssl.key-store}")
+    private String keystorePath;
 
     @GetMapping("/ssl")
     public String checkSslStatus() {
-
+        String pathWithoutPrefix = keystorePath.replace("file:", "");
+        System.out.println(pathWithoutPrefix);
         try {
-            String keystorePath = "src/main/resources/keystore.p12";
-
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
-            FileInputStream keystoreFile = new FileInputStream(keystorePath);
+            FileInputStream keystoreFile = new FileInputStream(pathWithoutPrefix);
             keyStore.load(keystoreFile, keystorePassword.toCharArray());
 
             String alias = "1";
