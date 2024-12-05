@@ -1,6 +1,7 @@
 package com.example.clocklike_portal.pdf;
 
 import com.example.clocklike_portal.appUser.AppUserEntity;
+import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.timeoff.TimeOffDto;
 import com.example.clocklike_portal.timeoff.PtoEntity;
 import jakarta.annotation.PostConstruct;
@@ -41,14 +42,16 @@ public class TemplateGenerator {
         return templateEngine.process("thymeleaf_template/timeoff_request_pdf_file.html", context);
     }
 
-    public String generateRegistrationConfirmationForUser() {
+    public String generateRegistrationConfirmationForUser(AppUserEntity newEmployee) {
+        String userFirstName = newEmployee.getFirstName();
         Context context = new Context();
+        context.setVariable("name", userFirstName);
         return templateEngine.process("thymeleaf_template/registration_finished.html", context);
     }
 
-    public String generateNewEmployeeRegisteredMsgForAdmins(AppUserEntity entity) {
-        String applier = entity.getFirstName() + " " + entity.getLastName();
-        String empId = entity.getAppUserId().toString();
+    public String generateNewEmployeeRegisteredMsgForAdmins(AppUserEntity newEmployee) {
+        String applier = newEmployee.getFirstName() + " " + newEmployee.getLastName();
+        String empId = newEmployee.getAppUserId().toString();
         Context context = new Context();
         context.setVariable("applier", applier);
         context.setVariable("empId", empId);

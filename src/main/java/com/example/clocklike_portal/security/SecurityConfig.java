@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers((API_VERSION + "/test/anon")).permitAll()
+                        .requestMatchers((API_VERSION + "/health/**")).permitAll()
                         .requestMatchers((API_VERSION + "/meta")).hasAuthority(USER_AUTHORITY)
                         .requestMatchers((API_VERSION + "/test/users")).hasAuthority(USER_AUTHORITY)
                         .requestMatchers((API_VERSION + "/test/admins")).hasAnyAuthority(ADMIN_AUTHORITY)

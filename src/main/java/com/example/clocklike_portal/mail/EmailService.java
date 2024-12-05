@@ -1,15 +1,14 @@
 package com.example.clocklike_portal.mail;
 
-import com.example.clocklike_portal.settings.SettingsRepository;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.appUser.UserRole;
 import com.example.clocklike_portal.appUser.UserRoleRepository;
 import com.example.clocklike_portal.pdf.PdfCreator;
 import com.example.clocklike_portal.pdf.TemplateGenerator;
-import com.example.clocklike_portal.timeoff.TimeOffDto;
+import com.example.clocklike_portal.settings.SettingsRepository;
 import com.example.clocklike_portal.timeoff.PtoEntity;
-import jakarta.annotation.PostConstruct;
+import com.example.clocklike_portal.timeoff.TimeOffDto;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.EmailAttachment;
@@ -17,7 +16,6 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -27,9 +25,9 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.example.clocklike_portal.settings.SettingsService.MAILING_ENABLED;
 import static com.example.clocklike_portal.pdf.PdfCreator.PDF_TEMPLATES;
 import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
+import static com.example.clocklike_portal.settings.SettingsService.MAILING_ENABLED;
 
 @Component
 @RequiredArgsConstructor
@@ -59,17 +57,17 @@ public class EmailService {
     public void sendRegistrationConfirmedMsgForUser(AppUserEntity entity) {
         executorService.submit(() -> {
             String subject = "Resjestracja w Portalu Pracownika";
-            String msg = templateGenerator.generateRegistrationConfirmationForUser();
+            String msg = templateGenerator.generateRegistrationConfirmationForUser(entity);
             sendMail(subject, msg, entity.getUserEmail());
         });
     }
 
-    public void sendNewEmployeeRegisteredToAdmins(AppUserEntity entity) {
+    public void sendNewEmployeeRegisteredToAdmins(AppUserEntity newEmployee) {
         executorService.submit(() -> {
             getAdminRole();
             List<AppUserEntity> allAdmins = appUserRepository.findAllByUserRolesContaining(adminRole);
-            String subject = "Nowy użytkownik " + entity.getFirstName() + " " + entity.getLastName() + " utworzył konto w Portalu Pracownika.";
-            String msg = templateGenerator.generateNewEmployeeRegisteredMsgForAdmins(entity);
+            String subject = "Nowy użytkownik " + newEmployee.getFirstName() + " " + newEmployee.getLastName() + " utworzył konto w Portalu Pracownika.";
+            String msg = templateGenerator.generateNewEmployeeRegisteredMsgForAdmins(newEmployee);
             allAdmins.forEach(admin -> {
                 sendMail(subject, msg, admin.getUserEmail());
             });
