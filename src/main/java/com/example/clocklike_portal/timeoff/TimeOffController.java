@@ -1,5 +1,6 @@
 package com.example.clocklike_portal.timeoff;
 
+import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayByUserDto;
 import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdaySummaryDto;
 import com.example.clocklike_portal.timeoff.on_saturday.SaturdayHolidayDto;
 import jakarta.validation.Valid;
@@ -66,8 +67,18 @@ public class TimeOffController {
     }
 
     @GetMapping("/holidays-on-saturday-admin")
-    HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin() {
-        return timeOffService.getHolidaysOnSaturdaySummaryForAdmin();
+    HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin(@RequestParam(required = false) Integer year) {
+        return timeOffService.getHolidaysOnSaturdaySummaryForAdmin(year);
+    }
+
+    /**
+     *
+     * @param supervisorId pass -1 for All users, regardless supervisor
+     */
+    @GetMapping("/holiday-on-saturday-by-users")
+    List<HolidayOnSaturdayByUserDto> getHolidayBySaturdayByUsers(@RequestParam(required = true) Long holidayId,
+                                                                 @RequestParam(required = true) Long supervisorId){
+        return timeOffService.getHolidayOnSaturdaySummaryByUsers(holidayId, supervisorId);
     }
 
     @PostMapping("/withdraw")

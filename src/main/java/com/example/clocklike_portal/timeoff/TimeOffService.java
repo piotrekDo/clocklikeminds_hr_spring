@@ -1,7 +1,6 @@
 package com.example.clocklike_portal.timeoff;
 
 import com.example.clocklike_portal.app.Library;
-import com.example.clocklike_portal.appUser.AppUserBasicDto;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.dates_calculations.DateChecker;
@@ -444,20 +443,17 @@ public class TimeOffService {
         return request;
     }
 
-    HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin() {
+    HolidayOnSaturdaySummaryDto getHolidaysOnSaturdaySummaryForAdmin(Integer year) {
         LocalDate now = LocalDate.now();
+        int selectedYear = year != null ? year : now.getYear();
         HolidayOnSaturdayEntity lastRegistered = holidayOnSaturdayRepository.findFirstByOrderByDateDesc();
         SaturdayHolidayDto nextHolidayOnSaturday = holidayService.findNextHolidayOnSaturday(lastRegistered != null ? lastRegistered.getDate() : null);
         LocalDate nextHolidayDate = LocalDate.parse(nextHolidayOnSaturday.getDate());
         long daysBetween = ChronoUnit.DAYS.between(now, nextHolidayDate);
-        List<HolidayOnSaturdayUserEntity> allByHolidayYear = holidayOnSaturdayUserEntityRepository.findAllByHolidayYear(now.getYear());
-        List<HolidayOnSaturdayByUserDto> holidaysOnSaturdayByUsers = allByHolidayYear.stream().map(entity -> {
-            SaturdayHolidayDto holidayDto = new SaturdayHolidayDto(entity.getHoliday().getId(), entity.getHoliday().getDate().toString(), entity.getHoliday().getNote(), entity.getPto() != null ? entity.getPto().getPtoStart().toString() : null);
-            AppUserBasicDto appUserBasicDto = AppUserBasicDto.appUserEntityToBasicDto(entity.getUser());
-            TimeOffDto timeOffDto = entity.getPto() != null ? ptoTransformer.ptoEntityToDto(entity.getPto()) : null;
-            return new HolidayOnSaturdayByUserDto(holidayDto, appUserBasicDto, timeOffDto);
-        }).toList();
-        return new HolidayOnSaturdaySummaryDto(nextHolidayOnSaturday, (int) daysBetween, holidaysOnSaturdayByUsers);
+        List<SaturdayHolidayDto> saturdayHolidaysSelectedYear = holidayOnSaturdayRepository.findAllByYearOrderByDateDesc(selectedYear).stream()
+                .map(SaturdayHolidayDto::fromEntity)
+                .toList();
+        return new HolidayOnSaturdaySummaryDto(nextHolidayOnSaturday, (int) daysBetween, saturdayHolidaysSelectedYear);
     }
 
     WithdrawResponse withdrawTimeOffRequest(Long timeOffRequestId, String applierNotes) {
@@ -548,7 +544,25 @@ public class TimeOffService {
         }
     }
 
-//    List<TimeOffDto> findTimeOffRequestByQuery() {
-//
-//    }
+    /**
+     *
+     * @param supervisorId -1 as admin option to fetch all users, regardless supervisor id
+     */
+    List<HolidayOnSaturdayByUserDto> getHolidayOnSaturdaySummaryByUsers(Long holidayId, Long supervisorId) {
+        if (supervisorId == 0) {
+            return holidayOnSaturdayUserEntityRepository.findAllByHoliday_Id(holidayId).stream()
+                    .map(entity -> {
+                        TimeOffDto timeOffDto = ptoTransformer.ptoEntityToDto(entity.getPto());
+                        return HolidayOnSaturdayByUserDto.fromEntity(entity, timeOffDto);
+                    })
+                    .toList();
+        }
+        return holidayOnSaturdayUserEntityRepository.findAllByHolidayIdAndSupervisorId(holidayId, supervisorId).stream()
+                .map(entity -> {
+                    TimeOffDto timeOffDto = ptoTransformer.ptoEntityToDto(entity.getPto());
+                    return HolidayOnSaturdayByUserDto.fromEntity(entity, timeOffDto);
+                })
+                .toList();
+    }
+
 }

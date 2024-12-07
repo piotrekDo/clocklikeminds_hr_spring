@@ -11,4 +11,12 @@ public class HolidayOnSaturdayByUserDto {
     private SaturdayHolidayDto holiday;
     private AppUserBasicDto employee;
     private TimeOffDto pto;
+
+    public static HolidayOnSaturdayByUserDto fromEntity(HolidayOnSaturdayUserEntity entity, TimeOffDto timeOffDto) {
+        return new HolidayOnSaturdayByUserDto(
+                SaturdayHolidayDto.fromEntity(entity.getHoliday()),
+                AppUserBasicDto.appUserEntityToBasicDto(entity.getUser()),
+                timeOffDto
+        );
+    }
 }

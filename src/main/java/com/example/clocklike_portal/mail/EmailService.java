@@ -139,7 +139,9 @@ public class EmailService {
     private void sendMail(String subject, String msg, String mailTo, String pdf) {
         if (!isEnabled) return;
         try {
+            System.out.println(mailboxPassword);
             HtmlEmail email = new HtmlEmail();
+            email.setDebug(true);
 
             if (pdf != null) {
                 EmailAttachment attachment = new EmailAttachment();

@@ -79,6 +79,7 @@ public class SecurityConfig {
                         .requestMatchers(API_VERSION + "/pto/resolve-request").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/new-saturday-holiday").hasAnyAuthority(ADMIN_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/holidays-on-saturday-admin").hasAnyAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/holiday-on-saturday-by-users").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .anyRequest().denyAll()
                 )
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

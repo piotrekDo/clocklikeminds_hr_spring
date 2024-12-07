@@ -30,4 +30,13 @@ public interface HolidayOnSaturdayUserEntityRepository extends JpaRepository<Hol
             @Param("userId") Long userId,
             @Param("year") int year,
             @Param("currentMonth") int currentMonth);
+
+    @Query("SELECT h FROM HolidayOnSaturdayUserEntity h " +
+            "WHERE h.holiday.id = :holidayId " +
+            "AND h.user.supervisor.appUserId = :supervisorId")
+    List<HolidayOnSaturdayUserEntity> findAllByHolidayIdAndSupervisorId(@Param("holidayId") Long holidayId,
+                                                                        @Param("supervisorId") Long supervisorId);
+
+    List<HolidayOnSaturdayUserEntity> findAllByHoliday_Id(Long holidayId);
+
 }

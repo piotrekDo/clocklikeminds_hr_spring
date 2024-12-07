@@ -10,5 +10,5 @@ import java.util.List;
 public class HolidayOnSaturdaySummaryDto {
     private SaturdayHolidayDto nextHolidayOnSaturday;
     private int nextHolidayOnSaturdayInDays;
-    private List<HolidayOnSaturdayByUserDto> currentYearHolidaysOnSaturday;
+    private List<SaturdayHolidayDto> currentYearHolidaysOnSaturday;
 }
