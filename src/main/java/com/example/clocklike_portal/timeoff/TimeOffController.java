@@ -72,17 +72,21 @@ public class TimeOffController {
     }
 
     /**
-     *
      * @param supervisorId pass -1 for All users, regardless supervisor
      */
     @GetMapping("/holiday-on-saturday-by-users")
     List<HolidayOnSaturdayByUserDto> getHolidayBySaturdayByUsers(@RequestParam(required = true) Long holidayId,
-                                                                 @RequestParam(required = true) Long supervisorId){
+                                                                 @RequestParam(required = true) Long supervisorId) {
         return timeOffService.getHolidayOnSaturdaySummaryByUsers(holidayId, supervisorId);
     }
 
     @PostMapping("/withdraw")
     WithdrawResponse withdrawTimeOffRequest(@RequestParam Long requestId, @RequestParam String applierNotes) {
         return timeOffService.withdrawTimeOffRequest(requestId, applierNotes);
+    }
+
+    @GetMapping("/by-criteria")
+    List<TimeOffDto> getRequestsByCriteria(@RequestBody TimeOffByQueryRequest request) {
+        return timeOffService.findTimeOffRequestsByQuery(request);
     }
 }
