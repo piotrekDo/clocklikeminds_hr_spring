@@ -36,6 +36,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
 import static com.example.clocklike_portal.security.SecurityConfig.SUPERVISOR_AUTHORITY;
@@ -573,26 +574,76 @@ public class TimeOffService {
                 .toList();
     }
 
-    List<TimeOffDto> findTimeOffRequestsByQuery(TimeOffByQueryRequest request) {
+
+    List<TimeOffDto> findTimeOffRequestsForAdmin(Long id, Long employeeId, String employeeEmail,
+                                                        Long acceptorId, String acceptorEmail,
+                                                        Boolean wasAccepted, Boolean wasRejected, Boolean isPending,
+                                                        String requestDateFrom, String requestDateTo,
+                                                        String ptoStartFrom, String ptoStartTo,
+                                                        String ptoEndFrom, String ptoEndTo, Boolean useOr) {
+        return performQuery(id, employeeId, employeeEmail, acceptorId, acceptorEmail,
+                wasAccepted, wasRejected, isPending,
+                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo,
+                ptoEndFrom, ptoEndTo, useOr);
+    }
+
+    List<TimeOffDto> findTimeOffRequestsForSupervisor(Long id, Long employeeId, String employeeEmail,
+                                                             Long acceptorId, String acceptorEmail,
+                                                             Boolean wasAccepted, Boolean wasRejected, Boolean isPending,
+                                                             String requestDateFrom, String requestDateTo,
+                                                             String ptoStartFrom, String ptoStartTo,
+                                                             String ptoEndFrom, String ptoEndTo) {
+
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        AppUserEntity appUserEntity = appUserRepository.findByUserEmailIgnoreCase(currentUserEmail)
+                .orElseThrow(() -> new NoSuchElementException("No user found with email: " + currentUserEmail));
+
+        if (acceptorId == null && acceptorEmail == null) {
+            throw new IllegalOperationException("Supervisors must provide either their ID or email!");
+        }
+
+        if ((acceptorId != null && !Objects.equals(appUserEntity.getAppUserId(), acceptorId)) ||
+                (acceptorEmail != null && !Objects.equals(appUserEntity.getUserEmail(), acceptorEmail))) {
+            throw new IllegalOperationException("Supervisors cannot query requests without their own ID or email!");
+        }
+
+        return performQuery(id, employeeId, employeeEmail, acceptorId, acceptorEmail,
+                wasAccepted, wasRejected, isPending,
+                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo,
+                ptoEndFrom, ptoEndTo, false);
+    }
+
+    private List<TimeOffDto> performQuery(Long id, Long employeeId, String employeeEmail,
+                                          Long acceptorId, String acceptorEmail,
+                                          Boolean wasAccepted, Boolean wasRejected, Boolean isPending,
+                                          String requestDateFrom, String requestDateTo,
+                                          String ptoStartFrom, String ptoStartTo,
+                                          String ptoEndFrom, String ptoEndTo, Boolean useOr) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<PtoEntity> cq = cb.createQuery(PtoEntity.class);
         Root<PtoEntity> ptoRoot = cq.from(PtoEntity.class);
+
+        List<Predicate> predicates = buildPredicates(cb, ptoRoot, id, employeeId, employeeEmail, acceptorId, acceptorEmail,
+                wasAccepted, wasRejected, isPending,
+                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo,
+                ptoEndFrom, ptoEndTo);
+
+        cq.where(useOr != null && useOr ? cb.or(predicates.toArray(new Predicate[0]))
+                : cb.and(predicates.toArray(new Predicate[0])));
+
+        return entityManager.createQuery(cq).getResultList().stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
+    private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<PtoEntity> ptoRoot,
+                                            Long id, Long employeeId, String employeeEmail,
+                                            Long acceptorId, String acceptorEmail,
+                                            Boolean wasAccepted, Boolean wasRejected, Boolean isPending,
+                                            String requestDateFrom, String requestDateTo,
+                                            String ptoStartFrom, String ptoStartTo,
+                                            String ptoEndFrom, String ptoEndTo) {
         List<Predicate> predicates = new ArrayList<>();
-        Long id = request.getId();
-        Long employeeId = request.getEmployeeId();
-        String employeeEmail = request.getEmployeeEmail();
-        Long acceptorId = request.getAcceptorId();
-        String acceptorEmail = request.getAcceptorEmail();
-        Boolean wasAccepted = request.getWasAccepted();
-        Boolean wasRejected = request.getWasRejected();
-        Boolean isPending = request.getIsPending();
-        String requestDateFrom = request.getRequestDateFrom();
-        String requestDateTo = request.getRequestDateTo();
-        String ptoStartFrom = request.getPtoStartFrom();
-        String ptoStartTo = request.getPtoStartTo();
-        String ptoEndFrom = request.getPtoEndFrom();
-        String ptoEndTo = request.getPtoEndTo();
-        Boolean useOr = request.getUseOr();
 
         if (id != null) {
             predicates.add(cb.equal(ptoRoot.get("ptoRequestId"), id));
@@ -638,17 +689,7 @@ public class TimeOffService {
         if (ptoEndTo != null) {
             predicates.add(cb.lessThanOrEqualTo(ptoRoot.get("ptoEnd"), LocalDate.parse(ptoEndTo)));
         }
-        Predicate finalPredicate;
-        if (useOr != null && useOr == true) {
-            finalPredicate = cb.or(predicates.toArray(new Predicate[0]));
-        } else {
-            finalPredicate = cb.and(predicates.toArray(new Predicate[0]));
-        }
 
-        cq.where(finalPredicate);
-
-        return entityManager.createQuery(cq).getResultList().stream()
-                .map(ptoTransformer::ptoEntityToDto)
-                .toList();
+        return predicates;
     }
 }

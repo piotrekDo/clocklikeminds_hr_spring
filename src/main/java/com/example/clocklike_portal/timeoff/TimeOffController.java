@@ -85,8 +85,42 @@ public class TimeOffController {
         return timeOffService.withdrawTimeOffRequest(requestId, applierNotes);
     }
 
-    @GetMapping("/by-criteria")
-    List<TimeOffDto> getRequestsByCriteria(@RequestBody TimeOffByQueryRequest request) {
-        return timeOffService.findTimeOffRequestsByQuery(request);
+    @GetMapping("/by-criteria-admin")
+    List<TimeOffDto> getRequestsByCriteria(@RequestParam(required = false) Long id,
+                                           @RequestParam(required = false) Long employeeId,
+                                           @RequestParam(required = false) String employeeEmail,
+                                           @RequestParam(required = false) Long acceptorId,
+                                           @RequestParam(required = false) String acceptorEmail,
+                                           @RequestParam(required = false) Boolean wasAccepted,
+                                           @RequestParam(required = false) Boolean wasRejected,
+                                           @RequestParam(required = false) Boolean isPending,
+                                           @RequestParam(required = false) String requestDateFrom,
+                                           @RequestParam(required = false) String requestDateTo,
+                                           @RequestParam(required = false) String ptoStartFrom,
+                                           @RequestParam(required = false) String ptoStartTo,
+                                           @RequestParam(required = false) String ptoEndFrom,
+                                           @RequestParam(required = false) String ptoEndTo,
+                                           @RequestParam(required = false) Boolean useOr) {
+        return timeOffService.findTimeOffRequestsForAdmin(id, employeeId, employeeEmail, acceptorId, acceptorEmail, wasAccepted, wasRejected, isPending,
+                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo, ptoEndFrom, ptoEndTo, useOr);
+    }
+
+    @GetMapping("/by-criteria-supervisor")
+    List<TimeOffDto> getRequestsByCriteria(@RequestParam(required = false) Long id,
+                                           @RequestParam(required = false) Long employeeId,
+                                           @RequestParam(required = false) String employeeEmail,
+                                           @RequestParam(required = false) Long acceptorId,
+                                           @RequestParam(required = false) String acceptorEmail,
+                                           @RequestParam(required = false) Boolean wasAccepted,
+                                           @RequestParam(required = false) Boolean wasRejected,
+                                           @RequestParam(required = false) Boolean isPending,
+                                           @RequestParam(required = false) String requestDateFrom,
+                                           @RequestParam(required = false) String requestDateTo,
+                                           @RequestParam(required = false) String ptoStartFrom,
+                                           @RequestParam(required = false) String ptoStartTo,
+                                           @RequestParam(required = false) String ptoEndFrom,
+                                           @RequestParam(required = false) String ptoEndTo) {
+        return timeOffService.findTimeOffRequestsForSupervisor(id, employeeId, employeeEmail, acceptorId, acceptorEmail, wasAccepted, wasRejected, isPending,
+                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo, ptoEndFrom, ptoEndTo);
     }
 }
