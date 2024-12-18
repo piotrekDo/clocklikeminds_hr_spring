@@ -79,12 +79,6 @@ public class TimeOffService {
                 .toList();
     }
 
-    List<TimeOffDto> getRequestsForYearForAllUsers(Integer year) {
-        return ptoRequestsRepository.findRequestsForYear(year).stream()
-                .map(ptoTransformer::ptoEntityToDto)
-                .toList();
-    }
-
     List<TimeOffDto> findAllUnresolvedPtoRequestsByAcceptor(Long id) {
         return ptoRequestsRepository.findUnresolvedOrWithdrawnRequestsByAcceptorId(id).stream()
                 .map(ptoTransformer::ptoEntityToDto)

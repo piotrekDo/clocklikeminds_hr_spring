@@ -1,7 +1,6 @@
 package com.example.clocklike_portal.appUser;
 
 import com.example.clocklike_portal.job_position.PositionEntity;
-import com.example.clocklike_portal.timeoff.PtoEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -25,6 +25,62 @@ class PtoRepositoryTest {
 
     @Autowired
     TestEntityManager testEntityManager;
+
+    @Test
+    void findRequestsForGivenYearShouldReturnOnlyAcceptedOrPendingRequestsForGivenUser() {
+        AppUserEntity applier = testEntityManager.persist(AppUserEntity.createTestAppUser("applier", "applier", "applier@mail.com"));
+        AppUserEntity applier2 = testEntityManager.persist(AppUserEntity.createTestAppUser("applier2", "applier2", "applier2@mail.com"));
+        PtoEntity matching1 = testEntityManager.persist(PtoEntity.builder()
+                .applier(applier)
+                .ptoStart(LocalDate.of(2024, 12, 17))
+                .ptoEnd(LocalDate.of(2025, 1, 8))
+                .build());
+        PtoEntity matching2 = testEntityManager.persist(PtoEntity.builder()
+                .applier(applier)
+                .ptoStart(LocalDate.of(2023, 12, 17))
+                .ptoEnd(LocalDate.of(2024, 1, 8))
+                .build());
+        PtoEntity matching3 = testEntityManager.persist(PtoEntity.builder()
+                .applier(applier)
+                .ptoStart(LocalDate.of(2024, 3, 17))
+                .ptoEnd(LocalDate.of(2024, 4, 8))
+                .build());
+        PtoEntity unMatching1 = testEntityManager.persist(PtoEntity.builder()
+                .applier(applier2)
+                .ptoStart(LocalDate.of(2024, 12, 17))
+                .ptoEnd(LocalDate.of(2025, 1, 8))
+                .build());
+        PtoEntity unMatching2 = testEntityManager.persist(PtoEntity.builder()
+                .applier(applier)
+                .ptoStart(LocalDate.of(2025, 1, 1))
+                .ptoEnd(LocalDate.of(2025, 1, 8))
+                .build());
+        PtoEntity unMatching3 = testEntityManager.persist(PtoEntity.builder()
+                .applier(applier)
+                .ptoStart(LocalDate.of(2023, 1, 1))
+                .ptoEnd(LocalDate.of(2023, 1, 8))
+                .build());
+        PtoEntity unMatching4 = testEntityManager.persist(PtoEntity.builder()
+                .applier(applier)
+                .ptoStart(LocalDate.of(2024, 5, 1))
+                .ptoEnd(LocalDate.of(2024, 6, 8))
+                .wasAccepted(false)
+                .decisionDateTime(LocalDateTime.now())
+                .build());
+        PtoEntity unMatching5 = testEntityManager.persist(PtoEntity.builder()
+                .applier(applier)
+                .ptoStart(LocalDate.of(2023, 12, 1))
+                .ptoEnd(LocalDate.of(2024, 1, 8))
+                .wasAccepted(false)
+                .decisionDateTime(LocalDateTime.now())
+                .build());
+
+        List<PtoEntity> result = ptoRepository.findRequestsForYear(2024, 1L);
+        assertEquals(3, result.size());
+        assertEquals(matching1.getPtoRequestId(), result.get(0).getPtoRequestId());
+        assertEquals(matching2.getPtoRequestId(), result.get(1).getPtoRequestId());
+        assertEquals(matching3.getPtoRequestId(), result.get(2).getPtoRequestId());
+    }
 
     @Test
     void findUserRequestsForChildCareShouldReturnCorrespondingRequests() {
