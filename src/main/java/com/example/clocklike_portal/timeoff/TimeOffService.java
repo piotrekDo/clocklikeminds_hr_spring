@@ -36,7 +36,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
 import static com.example.clocklike_portal.security.SecurityConfig.SUPERVISOR_AUTHORITY;
@@ -116,6 +115,7 @@ public class TimeOffService {
         return ptoTransformer.createPtoSummary(user, unusedHolidays);
     }
 
+    @Transactional
     TimeOffDto processNewRequest(NewPtoRequest request) {
         TimeOffDto timeOffDto;
         AppUserEntity applier = appUserRepository.findById(request.getApplierId())
@@ -230,7 +230,6 @@ public class TimeOffService {
         return ptoTransformer.ptoEntityToDto(ptoEntity);
     }
 
-    @Transactional
     TimeOffDto processChildCareLeaveRequest(NewPtoRequest request, AppUserEntity applier, AppUserEntity acceptor, LocalDate startDate, LocalDate toDate, int businessDays) {
         if (startDate.getYear() != toDate.getYear()) {
             throw new IllegalOperationException("Cannot use child care leave at the turn of the year. Please use 2 separate requests");
@@ -294,7 +293,6 @@ public class TimeOffService {
         if (request.getPtoType().equals(Library.PTO_ON_DEMAND_DISCRIMINATOR_VALUE)) {
             processOnDemandPtoRequest(ptoEntityRaw);
         }
-        // TODO update na encji pto do history???
         PtoEntity savedPtoEntity = ptoRequestsRepository.save(ptoEntityRaw);
         applier.setPtoDaysLeftFromLastYear(ptoDaysFromLastYear - subtractedFromLastYearPool);
         requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, savedPtoEntity));
@@ -327,6 +325,7 @@ public class TimeOffService {
         }
     }
 
+    @Transactional
     TimeOffDto resolveRequest(ResolvePtoRequest dto) {
         PtoEntity ptoRequest = ptoRequestsRepository.findById(dto.getPtoRequestId())
                 .orElseThrow(() -> new NoSuchElementException("No such PTO request found"));
@@ -423,6 +422,7 @@ public class TimeOffService {
         applier.setPtoDaysTaken(applier.getPtoDaysTaken() - requestBusinessDays);
     }
 
+    @Transactional
     SaturdayHolidayDto registerNewHolidaySaturday(SaturdayHolidayDto request) {
         LocalDate newHoliday = LocalDate.parse(request.getDate(), dateFormatter);
         DayOfWeek dayOfWeek = newHoliday.getDayOfWeek();
@@ -460,6 +460,7 @@ public class TimeOffService {
         return new HolidayOnSaturdaySummaryDto(nextHolidayOnSaturday, (int) daysBetween, saturdayHolidaysSelectedYear);
     }
 
+    @Transactional
     WithdrawResponse withdrawTimeOffRequest(Long timeOffRequestId, String applierNotes) {
         if (timeOffRequestId == null) {
             throw new IllegalOperationException("Missing time off request ID");
@@ -488,7 +489,6 @@ public class TimeOffService {
      * below will restore used pto days or saturday holiday only when wasResolvedAndAccepted is true. This will prevent
      * adding additional days when deleting declined request.
      */
-    @Transactional
     WithdrawResponse clearWithdrawnTimeOffEntityAndDeleteEntity(PtoEntity timeOffEntity, Long timeOffRequestId) {
         boolean wasResolvedAndAccepted = timeOffEntity.getDecisionDateTime() != null && timeOffEntity.isWasAccepted();
         AppUserEntity applier = timeOffEntity.getApplier();
@@ -515,7 +515,6 @@ public class TimeOffService {
         }
     }
 
-    @Transactional
     void clearWithdrawnTimeOffEntityAndSetAsWithdrawn(PtoEntity timeOffEntity, String notes) {
         boolean wasResolvedAndAccepted = timeOffEntity.getDecisionDateTime() != null && timeOffEntity.isWasAccepted();
         AppUserEntity applier = timeOffEntity.getApplier();

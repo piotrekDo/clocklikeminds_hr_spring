@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -84,6 +85,7 @@ public class AppUserService implements UserDetailsService {
         return appUserRepository.save(userFromGooglePrincipal);
     }
 
+    @Transactional
     AppUserDto finishRegistration(FinishRegistrationRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
@@ -171,6 +173,7 @@ public class AppUserService implements UserDetailsService {
         );
     }
 
+    @Transactional
     AppUserDto updateHireData(UpdateHireDataRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));
@@ -316,6 +319,7 @@ public class AppUserService implements UserDetailsService {
         return AppUserDto.appUserEntityToDto(appUserRepository.save(appUserEntity));
     }
 
+    @Transactional
     AppUserDto updateUserPermission(UpdateUserPermissionRequest request) {
         AppUserEntity appUserEntity = appUserRepository.findById(request.getAppUserId())
                 .orElseThrow(() -> new NoSuchElementException("No user found with id: " + request.getAppUserId()));

@@ -50,7 +50,7 @@ public class AppUserBasicDto {
                 entity.getPtoDaysAccruedLastYear(),
                 entity.getPtoDaysAccruedCurrentYear(),
                 entity.getPtoDaysLeftFromLastYear(),
-                entity.getPtoDaysLeftCurrentYear(),
+                entity.getPtoDaysLeftCurrentYear() + entity.getPtoDaysLeftFromLastYear(),
                 entity.getPtoDaysTaken()
         );
     }
