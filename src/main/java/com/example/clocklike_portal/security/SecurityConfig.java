@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers((API_VERSION + "/test/users")).hasAuthority(USER_AUTHORITY)
                         .requestMatchers((API_VERSION + "/test/admins")).hasAnyAuthority(ADMIN_AUTHORITY)
                         .requestMatchers((API_VERSION + "/settings/**")).hasAnyAuthority(ADMIN_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/users/{id}").hasAuthority(USER_AUTHORITY)
                         .requestMatchers(API_VERSION + "/users/**").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers(API_VERSION + "/positions/**").hasAuthority(ADMIN_AUTHORITY)
                         .requestMatchers(API_VERSION + "/dashboard/supervisor").hasAnyAuthority(SUPERVISOR_AUTHORITY, ADMIN_AUTHORITY)
