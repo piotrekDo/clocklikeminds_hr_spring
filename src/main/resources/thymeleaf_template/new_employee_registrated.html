@@ -7,15 +7,17 @@
     }
   </style>
 </head>
-<body>
+<body style="width: 100%; height: 100%">
 <section
         style="width: 100%; height: 100%; background-color: #385898; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center">
   <h1>Nowy pracownik <span th:text="${applier}"></span> zarejestrowany w systemie </h1>
-  <button>
-    <a th:href="@{'clocklikeminds-hr-react.vercel.app/finish-employee-registration?empId=' + ${empId}}" target="_blank">
-      Dokończ rejestrację
-    </a>
-  </button>
+  <div>
+    <button>
+      <a th:href="@{'clocklikeminds-hr-react.vercel.app/finish-employee-registration?empId=' + ${empId}}" target="_blank">
+        Dokończ rejestrację
+      </a>
+    </button>
+  </div>
 </section>
 </body>
 </html>

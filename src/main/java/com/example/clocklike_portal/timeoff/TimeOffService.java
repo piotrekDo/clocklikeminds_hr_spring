@@ -371,7 +371,7 @@ public class TimeOffService {
         PtoEntity updatedPtoRequest = ptoRequestsRepository.save(ptoRequest);
 
         if (updatedPtoRequest.isWasAccepted()) {
-            emailService.sendTimeOffRequestMailConformation(updatedPtoRequest, !applier.isFreelancer());
+            emailService.sendTimeOffRequestMailConformation(updatedPtoRequest, applier.isFreelancer());
         } else {
             emailService.sendTimeOffRequestDeniedMailToApplier(updatedPtoRequest);
         }
@@ -388,6 +388,7 @@ public class TimeOffService {
             timeOffEntity.setWasMarkedToWithdraw(false);
             requestHistoryRepository.save(new RequestHistory(null, WITHDRAW_DECLINED, resolveRequest.getNotes(), LocalDateTime.now(), acceptor, timeOffEntity));
             ptoRequestsRepository.save(timeOffEntity);
+            emailService.sendRequestWithdrawDeclinedMessage(timeOffEntity);
         }
     }
 
@@ -481,6 +482,7 @@ public class TimeOffService {
             timeOffEntity.setWasMarkedToWithdraw(true);
             requestHistoryRepository.save(new RequestHistory(null, MARKED_WITHDRAW, applierNotes, LocalDateTime.now(), applier, timeOffEntity));
             ptoRequestsRepository.save(timeOffEntity);
+            emailService.sendRequestMarkedForWithdrawMessage(timeOffEntity);
             return new WithdrawResponse(timeOffRequestId, applier.getAppUserId(), false, true);
         }
     }
@@ -511,6 +513,7 @@ public class TimeOffService {
             }
             acceptor.getPtoAcceptor().remove(timeOffEntity);
             ptoRequestsRepository.delete(timeOffEntity);
+            emailService.sendWithdrawConformationForNotResolvedRequest(timeOffEntity);
             return new WithdrawResponse(timeOffRequestId, applier.getAppUserId(), true, false);
         }
     }
@@ -544,6 +547,7 @@ public class TimeOffService {
             timeOffEntity.setWasWithdrawn(true);
             timeOffEntity.setWithdrawnDateTime(LocalDateTime.now());
             ptoRequestsRepository.save(timeOffEntity);
+            emailService.sendRequestWithdrawnMessage(timeOffEntity);
         }
     }
 

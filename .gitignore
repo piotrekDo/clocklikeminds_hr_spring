@@ -40,3 +40,6 @@ src/main/resources/application-qa.properties
 src/main/resources/keystore.p12
 src/test/resources/application.properties
 src/test/resources/keystore.p12
+
+## google ##
+src/main/resources/google/

@@ -1,7 +1,6 @@
 package com.example.clocklike_portal.pdf;
 
 import com.example.clocklike_portal.appUser.AppUserEntity;
-import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.timeoff.TimeOffDto;
 import com.example.clocklike_portal.timeoff.PtoEntity;
 import jakarta.annotation.PostConstruct;
@@ -72,14 +71,52 @@ public class TemplateGenerator {
         return templateEngine.process("thymeleaf_template/timeoff_request_denied.html", context);
     }
 
-    public String generateReqConfirmationMsgForApplier() {
+    public String generateReqConfirmationMsgForApplier(boolean isFreelancer) {
         Context context = new Context();
+        context.setVariable("isFreelancer", isFreelancer);
         return templateEngine.process("thymeleaf_template/timeoff_request_confirmed_applier.html", context);
     }
 
-    public String generateReqConfirmationMsgForAcceptor() {
+    public String generateReqConfirmationMsgForAcceptor(boolean isFreelancer) {
         Context context = new Context();
+        context.setVariable("isFreelancer", isFreelancer);
         return templateEngine.process("thymeleaf_template/timeoff_request_confirmed_acceptor.html", context);
     }
 
+    public String generateReqConformationForHr(PtoEntity entity) {
+        Context context = new Context();
+        AppUserEntity applierEntity = entity.getApplier();
+        String applier = applierEntity.getFirstName() + " " + applierEntity.getLastName();
+        context.setVariable("applier", applier);
+        return templateEngine.process("thymeleaf_template/timeoff_request_confirmed_hr.html", context);
+    }
+
+    public String generateTimeOffWithdrawConformationBeforeResolving() {
+        Context context = new Context();
+        return templateEngine.process("thymeleaf_template/timeoff_request_canceled_before_resolving.html", context);
+    }
+
+    public String generateTimeOffRequestMarkedForWithdraw() {
+        Context context = new Context();
+        return templateEngine.process("thymeleaf_template/timeoff_request_marked_for_withdraw.html", context);
+    }
+
+    public String generateRequestWithdrawDeclined() {
+        Context context = new Context();
+        return templateEngine.process("thymeleaf_template/timeoff_request_withdraw_declined.html", context);
+    }
+
+    public String generateRequestWithdrawConformation(boolean isFreelancer) {
+        Context context = new Context();
+        context.setVariable("isFreelancer", isFreelancer);
+        return templateEngine.process("thymeleaf_template/timeoff_request_withdrawn_conformation.html", context);
+    }
+
+    public String generateRequestWithdrawForHr(PtoEntity request) {
+        Context context = new Context();
+        AppUserEntity applierEntity = request.getApplier();
+        String applier = applierEntity.getFirstName() + " " + applierEntity.getLastName();
+        context.setVariable("applier", applier);
+        return templateEngine.process("thymeleaf_template/timeoff_request_withdraw_hr.html", context);
+    }
 }

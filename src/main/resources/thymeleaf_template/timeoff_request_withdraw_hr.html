@@ -20,9 +20,9 @@
   </style>
 </head>
 <body>
-<h1>Wniosek urlopowy został zaakceptowany</h1>
-<div th:if="${!isFreelancer}">
-  <p>wniosek w załączniku do wglądu</p>
+<h1>Wniosek urlopowy <span th:text="${applier}"></span> został wycofany</h1>
+<div>
+  <p>Dzień dobry, proszę o anulację załączonego wniosku.</p>
 </div>
 </body>
 </html>

@@ -42,6 +42,8 @@ public class EmailService {
     private UserRole adminRole;
     @Value("${mail.mailbox.password}")
     private String mailboxPassword;
+    @Value("${mail.hr}")
+    private String hrMailbox;
     private boolean isEnabled = false;
 
     @EventListener(ApplicationReadyEvent.class)
@@ -90,16 +92,66 @@ public class EmailService {
         });
     }
 
-    public void sendTimeOffRequestMailConformation(PtoEntity request, boolean generatePdf) {
+    public void sendTimeOffRequestMailConformation(PtoEntity request, boolean isFreelancer) {
         executorService.submit(() -> {
             String subject = generateSubject(request);
             String pdf = null;
-            if (generatePdf) {
+            if (!isFreelancer) {
                 pdf = pdfCreator.generateTimeOffRequestPdf(request);
             }
-            sendMail(subject, templateGenerator.generateReqConfirmationMsgForApplier(), request.getApplier().getUserEmail(), pdf);
-            sendMail(subject, templateGenerator.generateReqConfirmationMsgForAcceptor(), request.getAcceptor().getUserEmail(), pdf);
-            if (generatePdf) {
+            sendMail(subject, templateGenerator.generateReqConfirmationMsgForApplier(isFreelancer), request.getApplier().getUserEmail(), pdf);
+            sendMail(subject, templateGenerator.generateReqConfirmationMsgForAcceptor(isFreelancer), request.getAcceptor().getUserEmail(), pdf);
+            if (!isFreelancer) {
+                sendMail(subject, templateGenerator.generateReqConformationForHr(request), hrMailbox, pdf);
+                deleteRequest(pdf);
+            }
+        });
+    }
+
+    public void sendWithdrawConformationForNotResolvedRequest(PtoEntity request) {
+        AppUserEntity acceptor = request.getAcceptor();
+        AppUserEntity applier = request.getApplier();
+        executorService.submit(() -> {
+            String subject = generateSubject(request);
+            sendMail(subject, templateGenerator.generateTimeOffWithdrawConformationBeforeResolving(), acceptor.getUserEmail());
+            sendMail(subject, templateGenerator.generateTimeOffWithdrawConformationBeforeResolving(), applier.getUserEmail());
+        });
+    }
+
+    public void sendRequestMarkedForWithdrawMessage(PtoEntity request) {
+        AppUserEntity acceptor = request.getAcceptor();
+        AppUserEntity applier = request.getApplier();
+        executorService.submit(() -> {
+            String subject = generateSubject(request);
+            sendMail(subject, templateGenerator.generateTimeOffRequestMarkedForWithdraw(), acceptor.getUserEmail());
+            sendMail(subject, templateGenerator.generateTimeOffRequestMarkedForWithdraw(), applier.getUserEmail());
+        });
+    }
+
+    public void sendRequestWithdrawDeclinedMessage(PtoEntity request) {
+        AppUserEntity acceptor = request.getAcceptor();
+        AppUserEntity applier = request.getApplier();
+        executorService.submit(() -> {
+            String subject = generateSubject(request);
+            sendMail(subject, templateGenerator.generateRequestWithdrawDeclined(), acceptor.getUserEmail());
+            sendMail(subject, templateGenerator.generateRequestWithdrawDeclined(), applier.getUserEmail());
+        });
+    }
+
+    public void sendRequestWithdrawnMessage(PtoEntity request) {
+        AppUserEntity acceptor = request.getAcceptor();
+        AppUserEntity applier = request.getApplier();
+        boolean isFreelancer = applier.isFreelancer();
+        executorService.submit(() -> {
+            String subject = generateSubject(request);
+            String pdf = null;
+            if (!isFreelancer) {
+                pdf = pdfCreator.generateTimeOffRequestPdf(request);
+            }
+            sendMail(subject, templateGenerator.generateRequestWithdrawConformation(isFreelancer), request.getApplier().getUserEmail(), pdf);
+            sendMail(subject, templateGenerator.generateRequestWithdrawConformation(isFreelancer), request.getAcceptor().getUserEmail(), pdf);
+            if (!isFreelancer) {
+                sendMail(subject, templateGenerator.generateRequestWithdrawForHr(request), hrMailbox, pdf);
                 deleteRequest(pdf);
             }
         });
@@ -139,9 +191,8 @@ public class EmailService {
     private void sendMail(String subject, String msg, String mailTo, String pdf) {
         if (!isEnabled) return;
         try {
-            System.out.println(mailboxPassword);
             HtmlEmail email = new HtmlEmail();
-            email.setDebug(true);
+            System.out.println("mailTo :" + mailTo);
 
             if (pdf != null) {
                 EmailAttachment attachment = new EmailAttachment();
@@ -169,6 +220,4 @@ public class EmailService {
             e.printStackTrace();
         }
     }
-
-
 }
