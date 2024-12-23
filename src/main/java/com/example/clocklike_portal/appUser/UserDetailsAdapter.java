@@ -23,6 +23,10 @@ public class UserDetailsAdapter implements UserDetails {
         return authorities;
     }
 
+    public long getUserId() {
+        return appUser.getAppUserId();
+    }
+
     @Override
     public String getPassword() {
         return "";

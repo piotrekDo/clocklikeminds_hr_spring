@@ -36,9 +36,11 @@ public class TimeOffController {
         return timeOffService.findAllUnresolvedPtoRequestsByAcceptor(id);
     }
 
+
     @GetMapping("/requests-by-acceptor")
-    List<TimeOffDto> findAllRequestsByAcceptorId(@RequestParam long acceptorId) {
-        return timeOffService.findAllRequestsByAcceptorId(acceptorId);
+    Page<TimeOffDto> findAllRequestsByAcceptorId(@RequestParam(required = false) Integer page,
+                                                 @RequestParam(required = false) Integer size) {
+        return timeOffService.getPtoRequestsByAcceptor(page, size);
     }
 
     @PostMapping("/resolve-request")
@@ -83,44 +85,5 @@ public class TimeOffController {
     @PostMapping("/withdraw")
     WithdrawResponse withdrawTimeOffRequest(@RequestParam Long requestId, @RequestParam String applierNotes) {
         return timeOffService.withdrawTimeOffRequest(requestId, applierNotes);
-    }
-
-    @GetMapping("/by-criteria-admin")
-    List<TimeOffDto> getRequestsByCriteria(@RequestParam(required = false) Long id,
-                                           @RequestParam(required = false) Long employeeId,
-                                           @RequestParam(required = false) String employeeEmail,
-                                           @RequestParam(required = false) Long acceptorId,
-                                           @RequestParam(required = false) String acceptorEmail,
-                                           @RequestParam(required = false) Boolean wasAccepted,
-                                           @RequestParam(required = false) Boolean wasRejected,
-                                           @RequestParam(required = false) Boolean isPending,
-                                           @RequestParam(required = false) String requestDateFrom,
-                                           @RequestParam(required = false) String requestDateTo,
-                                           @RequestParam(required = false) String ptoStartFrom,
-                                           @RequestParam(required = false) String ptoStartTo,
-                                           @RequestParam(required = false) String ptoEndFrom,
-                                           @RequestParam(required = false) String ptoEndTo,
-                                           @RequestParam(required = false) Boolean useOr) {
-        return timeOffService.findTimeOffRequestsForAdmin(id, employeeId, employeeEmail, acceptorId, acceptorEmail, wasAccepted, wasRejected, isPending,
-                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo, ptoEndFrom, ptoEndTo, useOr);
-    }
-
-    @GetMapping("/by-criteria-supervisor")
-    List<TimeOffDto> getRequestsByCriteria(@RequestParam(required = false) Long id,
-                                           @RequestParam(required = false) Long employeeId,
-                                           @RequestParam(required = false) String employeeEmail,
-                                           @RequestParam(required = false) Long acceptorId,
-                                           @RequestParam(required = false) String acceptorEmail,
-                                           @RequestParam(required = false) Boolean wasAccepted,
-                                           @RequestParam(required = false) Boolean wasRejected,
-                                           @RequestParam(required = false) Boolean isPending,
-                                           @RequestParam(required = false) String requestDateFrom,
-                                           @RequestParam(required = false) String requestDateTo,
-                                           @RequestParam(required = false) String ptoStartFrom,
-                                           @RequestParam(required = false) String ptoStartTo,
-                                           @RequestParam(required = false) String ptoEndFrom,
-                                           @RequestParam(required = false) String ptoEndTo) {
-        return timeOffService.findTimeOffRequestsForSupervisor(id, employeeId, employeeEmail, acceptorId, acceptorEmail, wasAccepted, wasRejected, isPending,
-                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo, ptoEndFrom, ptoEndTo);
     }
 }

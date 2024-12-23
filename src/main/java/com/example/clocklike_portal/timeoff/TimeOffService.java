@@ -3,6 +3,7 @@ package com.example.clocklike_portal.timeoff;
 import com.example.clocklike_portal.app.Library;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
+import com.example.clocklike_portal.appUser.UserDetailsAdapter;
 import com.example.clocklike_portal.dates_calculations.DateChecker;
 import com.example.clocklike_portal.dates_calculations.HolidayService;
 import com.example.clocklike_portal.error.IllegalOperationException;
@@ -14,16 +15,12 @@ import com.example.clocklike_portal.timeoff.on_saturday.*;
 import com.example.clocklike_portal.timeoff_history.RequestHistory;
 import com.example.clocklike_portal.timeoff_history.RequestHistoryRepository;
 import jakarta.annotation.PostConstruct;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,8 +42,6 @@ import static com.example.clocklike_portal.timeoff.PtoEntity.Action.*;
 @RequiredArgsConstructor
 public class TimeOffService {
 
-    @PersistenceContext
-    private EntityManager entityManager;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final PtoRepository ptoRequestsRepository;
     private final RequestHistoryRepository requestHistoryRepository;
@@ -64,6 +59,11 @@ public class TimeOffService {
     void init() {
         occasionalTypes = occasionalLeaveTypeRepository.findAll().stream()
                 .collect(Collectors.toMap(OccasionalLeaveType::getOccasionalType, Function.identity()));
+    }
+
+    private static UserDetailsAdapter getUserDetails() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        return (UserDetailsAdapter) context.getAuthentication().getPrincipal();
     }
 
     List<TimeOffDto> findAllRequestsByAcceptorId(long id) {
@@ -100,10 +100,16 @@ public class TimeOffService {
         return result == null ? Page.empty() : result.map(ptoTransformer::ptoEntityToDto);
     }
 
-    Page<TimeOffDto> getPtoRequestsByAcceptor(Long supervisorId, Integer page, Integer size) {
+    Page<TimeOffDto> getPtoRequestsByAcceptor(Integer page, Integer size) {
+        UserDetailsAdapter principal = getUserDetails();
+        long userId = principal.getUserId();
+        boolean isAdmin = principal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.equals(ADMIN_AUTHORITY));
         page = page == null || page < 0 ? 0 : page;
-        size = size == null || size < 1 ? 20 : size;
-        Page<PtoEntity> result = ptoRequestsRepository.findAllByAcceptor_AppUserId(supervisorId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestDateTime")));
+        size = size == null || size < 1 ? 10 : size;
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestDateTime"));
+        Page<PtoEntity> result = isAdmin ? ptoRequestsRepository.findAll(pageRequest) : ptoRequestsRepository.findAllByAcceptor_AppUserId(userId, pageRequest);
         return result == null ? Page.empty() : result.map(ptoTransformer::ptoEntityToDto);
     }
 
@@ -571,122 +577,4 @@ public class TimeOffService {
                 .toList();
     }
 
-
-    List<TimeOffDto> findTimeOffRequestsForAdmin(Long id, Long employeeId, String employeeEmail,
-                                                        Long acceptorId, String acceptorEmail,
-                                                        Boolean wasAccepted, Boolean wasRejected, Boolean isPending,
-                                                        String requestDateFrom, String requestDateTo,
-                                                        String ptoStartFrom, String ptoStartTo,
-                                                        String ptoEndFrom, String ptoEndTo, Boolean useOr) {
-        return performQuery(id, employeeId, employeeEmail, acceptorId, acceptorEmail,
-                wasAccepted, wasRejected, isPending,
-                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo,
-                ptoEndFrom, ptoEndTo, useOr);
-    }
-
-    List<TimeOffDto> findTimeOffRequestsForSupervisor(Long id, Long employeeId, String employeeEmail,
-                                                             Long acceptorId, String acceptorEmail,
-                                                             Boolean wasAccepted, Boolean wasRejected, Boolean isPending,
-                                                             String requestDateFrom, String requestDateTo,
-                                                             String ptoStartFrom, String ptoStartTo,
-                                                             String ptoEndFrom, String ptoEndTo) {
-
-        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        AppUserEntity appUserEntity = appUserRepository.findByUserEmailIgnoreCase(currentUserEmail)
-                .orElseThrow(() -> new NoSuchElementException("No user found with email: " + currentUserEmail));
-
-        if (acceptorId == null && acceptorEmail == null) {
-            throw new IllegalOperationException("Supervisors must provide either their ID or email!");
-        }
-
-        if ((acceptorId != null && !Objects.equals(appUserEntity.getAppUserId(), acceptorId)) ||
-                (acceptorEmail != null && !Objects.equals(appUserEntity.getUserEmail(), acceptorEmail))) {
-            throw new IllegalOperationException("Supervisors cannot query requests without their own ID or email!");
-        }
-
-        return performQuery(id, employeeId, employeeEmail, acceptorId, acceptorEmail,
-                wasAccepted, wasRejected, isPending,
-                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo,
-                ptoEndFrom, ptoEndTo, false);
-    }
-
-    private List<TimeOffDto> performQuery(Long id, Long employeeId, String employeeEmail,
-                                          Long acceptorId, String acceptorEmail,
-                                          Boolean wasAccepted, Boolean wasRejected, Boolean isPending,
-                                          String requestDateFrom, String requestDateTo,
-                                          String ptoStartFrom, String ptoStartTo,
-                                          String ptoEndFrom, String ptoEndTo, Boolean useOr) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<PtoEntity> cq = cb.createQuery(PtoEntity.class);
-        Root<PtoEntity> ptoRoot = cq.from(PtoEntity.class);
-
-        List<Predicate> predicates = buildPredicates(cb, ptoRoot, id, employeeId, employeeEmail, acceptorId, acceptorEmail,
-                wasAccepted, wasRejected, isPending,
-                requestDateFrom, requestDateTo, ptoStartFrom, ptoStartTo,
-                ptoEndFrom, ptoEndTo);
-
-        cq.where(useOr != null && useOr ? cb.or(predicates.toArray(new Predicate[0]))
-                : cb.and(predicates.toArray(new Predicate[0])));
-
-        return entityManager.createQuery(cq).getResultList().stream()
-                .map(ptoTransformer::ptoEntityToDto)
-                .toList();
-    }
-
-    private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<PtoEntity> ptoRoot,
-                                            Long id, Long employeeId, String employeeEmail,
-                                            Long acceptorId, String acceptorEmail,
-                                            Boolean wasAccepted, Boolean wasRejected, Boolean isPending,
-                                            String requestDateFrom, String requestDateTo,
-                                            String ptoStartFrom, String ptoStartTo,
-                                            String ptoEndFrom, String ptoEndTo) {
-        List<Predicate> predicates = new ArrayList<>();
-
-        if (id != null) {
-            predicates.add(cb.equal(ptoRoot.get("ptoRequestId"), id));
-        }
-        if (employeeId != null) {
-            predicates.add(cb.equal(ptoRoot.get("applier").get("appUserId"), employeeId));
-        }
-        if (employeeEmail != null && !employeeEmail.isEmpty()) {
-            predicates.add(cb.equal(ptoRoot.get("applier").get("userEmail"), employeeEmail));
-        }
-        if (acceptorId != null) {
-            predicates.add(cb.equal(ptoRoot.get("acceptor").get("appUserId"), acceptorId));
-        }
-        if (acceptorEmail != null && !acceptorEmail.isEmpty()) {
-            predicates.add(cb.equal(ptoRoot.get("acceptor").get("userEmail"), acceptorEmail));
-        }
-        if (wasAccepted != null && wasAccepted) {
-            predicates.add(cb.isTrue(ptoRoot.get("wasAccepted")));
-        }
-        if (wasRejected != null && wasRejected) {
-            predicates.add(cb.isFalse(ptoRoot.get("wasAccepted")));
-            predicates.add(cb.isNotNull(ptoRoot.get("decisionDateTime")));
-        }
-        if (isPending != null && isPending) {
-            predicates.add(cb.isFalse(ptoRoot.get("wasAccepted")));
-            predicates.add(cb.isNull(ptoRoot.get("decisionDateTime")));
-        }
-        if (requestDateFrom != null) {
-            predicates.add(cb.greaterThanOrEqualTo(ptoRoot.get("requestDateTime"), LocalDate.parse(requestDateFrom)));
-        }
-        if (requestDateTo != null) {
-            predicates.add(cb.lessThanOrEqualTo(ptoRoot.get("requestDateTime"), LocalDate.parse(requestDateTo)));
-        }
-        if (ptoStartFrom != null) {
-            predicates.add(cb.greaterThanOrEqualTo(ptoRoot.get("ptoStart"), LocalDate.parse(ptoStartFrom)));
-        }
-        if (ptoStartTo != null) {
-            predicates.add(cb.lessThanOrEqualTo(ptoRoot.get("ptoStart"), LocalDate.parse(ptoStartTo)));
-        }
-        if (ptoEndFrom != null) {
-            predicates.add(cb.greaterThanOrEqualTo(ptoRoot.get("ptoEnd"), LocalDate.parse(ptoEndFrom)));
-        }
-        if (ptoEndTo != null) {
-            predicates.add(cb.lessThanOrEqualTo(ptoRoot.get("ptoEnd"), LocalDate.parse(ptoEndTo)));
-        }
-
-        return predicates;
-    }
 }
