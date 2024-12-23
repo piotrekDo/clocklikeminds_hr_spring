@@ -16,6 +16,7 @@ import com.example.clocklike_portal.timeoff_history.RequestHistory;
 import com.example.clocklike_portal.timeoff_history.RequestHistoryRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -29,8 +30,11 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -64,6 +68,58 @@ public class TimeOffService {
     private static UserDetailsAdapter getUserDetails() {
         SecurityContext context = SecurityContextHolder.getContext();
         return (UserDetailsAdapter) context.getAuthentication().getPrincipal();
+    }
+
+    RequestsForUserCalendar getUserCalendarSummary(int year) {
+        long userId = getUserDetails().getUserId();
+        List<TimeOffDto> allRequests = ptoRequestsRepository.findRequestsForYear(year, userId).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
+        List<List<TimeOffDto>> timeOffLists = new ArrayList<>(12);
+        for (int i = 0; i < 12; i++) {
+            timeOffLists.add(new ArrayList<>());
+        }
+        allRequests.forEach(r -> {
+            int startMonth = r.getPtoStart().getMonthValue() - 1;
+            int endMonth = r.getPtoEnd().getMonthValue() - 1;
+            if (startMonth == endMonth) {
+                timeOffLists.get(startMonth).add(r);
+            } else {
+                if (r.getPtoStart().getYear() == year)
+                    timeOffLists.get(startMonth).add(r);
+                if (r.getPtoEnd().getYear() == year)
+                    timeOffLists.get(endMonth).add(r);
+            }
+        });
+
+        RequestsForUserCalendar result = new RequestsForUserCalendar();
+        for (int i = 0; i < timeOffLists.size(); i++) {
+            int currentMonth = i + 1;
+            List<TimeOffDto> requestsByMonth = timeOffLists.get(i);
+            LocalDate firstDay = LocalDate.of(year, currentMonth, 1);
+            LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+            int workingDays = holidayService.calculateBusinessDays(firstDay, lastDay);
+            AtomicInteger daysOnHolidays = new AtomicInteger();
+            requestsByMonth.stream().filter(r -> r.isWasAccepted() && !r.isWasMarkedToWithdraw() && !r.isWasWithdrawn()).forEach(r -> {
+                LocalDate ptoStart = r.getPtoStart();
+                LocalDate ptoEnd = r.getPtoEnd();
+                LocalDate finalStart = ptoStart.getMonthValue() != currentMonth ? LocalDate.of(year, currentMonth, 1) : ptoStart;
+                LocalDate finalEnd = ptoEnd.getMonthValue() != currentMonth ? LocalDate.of(year, currentMonth, 1).with(TemporalAdjusters.lastDayOfMonth()) : ptoEnd;
+                daysOnHolidays.addAndGet(holidayService.calculateBusinessDays(finalStart, finalEnd));
+            });
+
+
+
+            int workHours = workingDays * 8;
+            int daysOnHoliday = daysOnHolidays.intValue() * 8;
+            int workedHours = workHours - daysOnHoliday;
+            String monthName = LocalDate.of(year, currentMonth, 1)
+                    .getMonth()
+                    .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+            result.getMonths().add(new RequestsForUserCalendar.MonthSummary(i + 1, i, monthName, workHours, workedHours, requestsByMonth));
+        }
+
+        return result;
     }
 
     List<TimeOffDto> findAllRequestsByAcceptorId(long id) {

@@ -51,7 +51,6 @@ public class EmailService {
     public void init() {
         this.isEnabled = Boolean.parseBoolean(settingsRepository.findBySettingName(MAILING_ENABLED)
                 .orElseThrow(() -> new NoSuchElementException("mailingEnabled setting was not found")).getSettingValue());
-        System.out.println("LOADING MAILING SUCCES - MAILING ENABLED:" + isEnabled);
     }
 
     public void setEnabled(boolean isEnabled) {
@@ -193,12 +192,13 @@ public class EmailService {
     private void sendMail(String subject, String msg, String mailTo, String pdf) {
         System.out.println("--------------");
         System.out.println("MAILING ENABLED " + isEnabled);
+        System.out.println("--------------");
+
+        if (!isEnabled) return;
         System.out.println("SENDING MAIL: " + subject);
         System.out.println("SENDING MAIL: " + mailTo);
         System.out.println("SENDING MAIL: PDF !=null " + (pdf != null));
         System.out.println("--------------");
-
-        if (!isEnabled) return;
         try {
             HtmlEmail email = new HtmlEmail();
 

@@ -58,6 +58,11 @@ public class TimeOffController {
         return timeOffService.getRequestsForUserForYear(year, userId);
     }
 
+    @GetMapping("/requests-for-user-calendar")
+    RequestsForUserCalendar getRequestsForUserCalendar(@RequestParam Integer year) {
+        return timeOffService.getUserCalendarSummary(year);
+    }
+
     @GetMapping("/requests-for-supervisor-calendar")
     List<TimeOffDto> getRequestsForSupervisorCalendar(@RequestParam Long acceptorId, @RequestParam String start, @RequestParam String end) {
         return timeOffService.getRequestsForSupervisorCalendar(acceptorId, start, end);

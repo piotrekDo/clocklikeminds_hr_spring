@@ -14,8 +14,8 @@ public class HolidayService {
 
     public int calculateBusinessDays(LocalDate from, LocalDate to) {
         return from.datesUntil(to.plusDays(1))
-                .filter(localDate -> !checkIfHoliday(localDate))
                 .filter(localDate -> localDate.getDayOfWeek() != DayOfWeek.SATURDAY && localDate.getDayOfWeek() != DayOfWeek.SUNDAY)
+                .filter(localDate -> !checkIfHoliday(localDate))
                 .toList().size();
     }
 
