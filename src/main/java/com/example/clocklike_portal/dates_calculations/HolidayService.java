@@ -5,7 +5,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class HolidayService {
@@ -19,7 +20,7 @@ public class HolidayService {
                 .toList().size();
     }
 
-    boolean checkIfHoliday(LocalDate date) {
+    public boolean checkIfHoliday(LocalDate date) {
         if (year != date.getYear()) {
             this.year = date.getYear();
             setYear(date.getYear());

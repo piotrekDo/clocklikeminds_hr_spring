@@ -16,7 +16,6 @@ import com.example.clocklike_portal.timeoff_history.RequestHistory;
 import com.example.clocklike_portal.timeoff_history.RequestHistoryRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -70,6 +69,29 @@ public class TimeOffService {
         return (UserDetailsAdapter) context.getAuthentication().getPrincipal();
     }
 
+    public int calculateBusinessDaysInMonth(LocalDate firstDay, LocalDate lastDay) {
+        return holidayService.calculateBusinessDays(firstDay, lastDay);
+    }
+
+    public int calculateDaysOnHolidays(List<TimeOffDto> requestsByMonth, int monthIndex, int givenYear) {
+        AtomicInteger daysOnHolidays = new AtomicInteger();
+        requestsByMonth.stream().filter(r -> r.isWasAccepted() && !r.isWasMarkedToWithdraw() && !r.isWasWithdrawn()).forEach(r -> {
+            LocalDate ptoStart = r.getPtoStart();
+            LocalDate ptoEnd = r.getPtoEnd();
+            LocalDate finalStart = ptoStart.getMonthValue() != monthIndex ? LocalDate.of(givenYear, monthIndex, 1) : ptoStart;
+            LocalDate finalEnd = ptoEnd.getMonthValue() != monthIndex ? LocalDate.of(givenYear, monthIndex, 1).with(TemporalAdjusters.lastDayOfMonth()) : ptoEnd;
+            daysOnHolidays.addAndGet(holidayService.calculateBusinessDays(finalStart, finalEnd));
+        });
+
+        return daysOnHolidays.intValue();
+    }
+
+    public List<TimeOffDto> getAcceptedUserRequestsInTimeFrame (long userId, LocalDate start, LocalDate end) {
+       return ptoRequestsRepository.findAcceptedRequestsByApplierAndTimeFrame(userId, start, end).stream()
+               .map(ptoTransformer::ptoEntityToDto)
+               .toList();
+    }
+
     RequestsForUserCalendar getUserCalendarSummary(int year) {
         long userId = getUserDetails().getUserId();
         List<TimeOffDto> allRequests = ptoRequestsRepository.findRequestsForYear(year, userId).stream()
@@ -98,29 +120,20 @@ public class TimeOffService {
             List<TimeOffDto> requestsByMonth = timeOffLists.get(i);
             LocalDate firstDay = LocalDate.of(year, currentMonth, 1);
             LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
-            int workingDays = holidayService.calculateBusinessDays(firstDay, lastDay);
-            AtomicInteger daysOnHolidays = new AtomicInteger();
-            requestsByMonth.stream().filter(r -> r.isWasAccepted() && !r.isWasMarkedToWithdraw() && !r.isWasWithdrawn()).forEach(r -> {
-                LocalDate ptoStart = r.getPtoStart();
-                LocalDate ptoEnd = r.getPtoEnd();
-                LocalDate finalStart = ptoStart.getMonthValue() != currentMonth ? LocalDate.of(year, currentMonth, 1) : ptoStart;
-                LocalDate finalEnd = ptoEnd.getMonthValue() != currentMonth ? LocalDate.of(year, currentMonth, 1).with(TemporalAdjusters.lastDayOfMonth()) : ptoEnd;
-                daysOnHolidays.addAndGet(holidayService.calculateBusinessDays(finalStart, finalEnd));
-            });
-
-
-
+            int workingDays = calculateBusinessDaysInMonth(firstDay, lastDay);
+            int daysOnHolidays = calculateDaysOnHolidays(requestsByMonth, currentMonth, year);
             int workHours = workingDays * 8;
-            int daysOnHoliday = daysOnHolidays.intValue() * 8;
+            int daysOnHoliday = daysOnHolidays * 8;
             int workedHours = workHours - daysOnHoliday;
             String monthName = LocalDate.of(year, currentMonth, 1)
                     .getMonth()
                     .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
             result.getMonths().add(new RequestsForUserCalendar.MonthSummary(i + 1, i, monthName, workHours, workedHours, requestsByMonth));
         }
-
         return result;
     }
+
+
 
     List<TimeOffDto> findAllRequestsByAcceptorId(long id) {
         return ptoRequestsRepository.findAllByAcceptor_appUserId(id).stream()

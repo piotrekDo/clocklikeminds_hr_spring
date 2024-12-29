@@ -13,6 +13,15 @@ import java.util.List;
 
 @Repository
 public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
+    @Query("SELECT p FROM pto_requests p WHERE (p.applier.appUserId = :applierID) AND " +
+            "p.wasAccepted = TRUE AND " +
+            "((p.ptoStart >= :start AND p.ptoStart <= :end) OR " +
+            "(p.ptoEnd >= :start AND p.ptoEnd <= :end) OR " +
+            "(p.ptoStart < :start AND p.ptoEnd > :end)) " +
+            "ORDER BY p.requestDateTime DESC")
+    List<PtoEntity> findAcceptedRequestsByApplierAndTimeFrame(@Param("applierID") Long applierID,
+                                                       @Param("start") LocalDate start,
+                                                       @Param("end") LocalDate end);
 
     List<PtoEntity> findAllByAcceptor_appUserId(long id);
 
