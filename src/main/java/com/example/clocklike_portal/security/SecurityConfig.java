@@ -77,6 +77,7 @@ public class SecurityConfig {
                         .requestMatchers(API_VERSION + "/pto/withdraw").hasAuthority(USER_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/unresolved-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/requests-for-supervisor-calendar").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/requests-for-supervisor-calendar-by-employees").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/requests-by-acceptor").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/resolve-request").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/new-saturday-holiday").hasAnyAuthority(ADMIN_AUTHORITY)

@@ -1,6 +1,7 @@
 package com.example.clocklike_portal.timeoff;
 
 import com.example.clocklike_portal.app.Library;
+import com.example.clocklike_portal.appUser.AppUserBasicDto;
 import com.example.clocklike_portal.appUser.AppUserEntity;
 import com.example.clocklike_portal.appUser.AppUserRepository;
 import com.example.clocklike_portal.appUser.UserDetailsAdapter;
@@ -86,10 +87,10 @@ public class TimeOffService {
         return daysOnHolidays.intValue();
     }
 
-    public List<TimeOffDto> getAcceptedUserRequestsInTimeFrame (long userId, LocalDate start, LocalDate end) {
-       return ptoRequestsRepository.findAcceptedRequestsByApplierAndTimeFrame(userId, start, end).stream()
-               .map(ptoTransformer::ptoEntityToDto)
-               .toList();
+    public List<TimeOffDto> getAcceptedUserRequestsInTimeFrame(long userId, LocalDate start, LocalDate end) {
+        return ptoRequestsRepository.findAcceptedRequestsByApplierAndTimeFrame(userId, start, end).stream()
+                .map(ptoTransformer::ptoEntityToDto)
+                .toList();
     }
 
     RequestsForUserCalendar getUserCalendarSummary(int year) {
@@ -134,7 +135,6 @@ public class TimeOffService {
     }
 
 
-
     List<TimeOffDto> findAllRequestsByAcceptorId(long id) {
         return ptoRequestsRepository.findAllByAcceptor_appUserId(id).stream()
                 .map(ptoTransformer::ptoEntityToDto)
@@ -153,11 +153,12 @@ public class TimeOffService {
                 .toList();
     }
 
-    List<TimeOffDto> getRequestsForSupervisorCalendar(Long acceptorId, String start, String end) {
+    List<TimeOffDto> getRequestsForSupervisorCalendar(String start, String end) {
+        long requesterId = getUserDetails().getUserId();
         LocalDate startDate = LocalDate.parse(start, dateFormatter);
         LocalDate endDate = LocalDate.parse(end, dateFormatter);
 
-        return ptoRequestsRepository.findRequestsByAcceptorAndTimeFrame(acceptorId, startDate, endDate).stream()
+        return ptoRequestsRepository.findRequestsByAcceptorAndTimeFrame(requesterId, startDate, endDate).stream()
                 .map(ptoTransformer::ptoEntityToDto)
                 .toList();
     }
@@ -644,6 +645,23 @@ public class TimeOffService {
                     return HolidayOnSaturdayByUserDto.fromEntity(entity, timeOffDto);
                 })
                 .toList();
+    }
+
+    List<TimeOffRequestsByEmployee> getRequestsBySupervisorAndTimeframe(String start, String end) {
+        long requesterId = getUserDetails().getUserId();
+        LocalDate startDate = LocalDate.parse(start, dateFormatter);
+        LocalDate endDate = LocalDate.parse(end, dateFormatter);
+
+        return ptoRequestsRepository.findRequestsBySupervisorAndTimeFrame(requesterId, startDate, endDate)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        ptoEntity -> AppUserBasicDto.appUserEntityToBasicDto(ptoEntity.getApplier()),
+                        Collectors.mapping(ptoTransformer::ptoEntityToDto, Collectors.toList())
+                ))
+                .entrySet()
+                .stream()
+                .map(entry -> new TimeOffRequestsByEmployee(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
 }

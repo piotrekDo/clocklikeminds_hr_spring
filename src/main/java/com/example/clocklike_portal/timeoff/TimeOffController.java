@@ -64,8 +64,13 @@ public class TimeOffController {
     }
 
     @GetMapping("/requests-for-supervisor-calendar")
-    List<TimeOffDto> getRequestsForSupervisorCalendar(@RequestParam Long acceptorId, @RequestParam String start, @RequestParam String end) {
-        return timeOffService.getRequestsForSupervisorCalendar(acceptorId, start, end);
+    List<TimeOffDto> getRequestsForSupervisorCalendar(@RequestParam String start, @RequestParam String end) {
+        return timeOffService.getRequestsForSupervisorCalendar(start, end);
+    }
+
+    @GetMapping("/requests-for-supervisor-calendar-by-employees")
+    List<TimeOffRequestsByEmployee> getRequestsForSupervisorCalendarByEmployees(@RequestParam String start, @RequestParam String end) {
+        return timeOffService.getRequestsBySupervisorAndTimeframe(start, end);
     }
 
     @PostMapping("/new-saturday-holiday")

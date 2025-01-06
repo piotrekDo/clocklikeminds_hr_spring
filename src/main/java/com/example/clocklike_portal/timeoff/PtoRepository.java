@@ -78,4 +78,13 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
             "AND YEAR(p.ptoStart) = :year")
     List<PtoEntity> findUserRequestsForChildCareAndYear(@Param("appUserId") Long appUserId, @Param("year") Integer year);
 
+    @Query("SELECT p FROM pto_requests p WHERE (p.applier.supervisor.appUserId = :supervisorId) AND " +
+            "(p.wasWithdrawn = false) AND " +
+            "((p.ptoStart >= :start AND p.ptoStart <= :end) OR " +
+            "(p.ptoEnd >= :start AND p.ptoEnd <= :end) OR " +
+            "(p.ptoStart < :start AND p.ptoEnd > :end)) " +
+            "ORDER BY p.requestDateTime DESC")
+    List<PtoEntity> findRequestsBySupervisorAndTimeFrame(@Param("supervisorId") Long supervisorId,
+                                                         @Param("start") LocalDate start,
+                                                         @Param("end") LocalDate end);
 }

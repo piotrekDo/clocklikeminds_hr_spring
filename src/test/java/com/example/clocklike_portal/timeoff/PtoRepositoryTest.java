@@ -219,4 +219,67 @@ class PtoRepositoryTest {
         List<PtoEntity> result = ptoRepository.findAllOverlappingRequests(testAppUser, testingEnd, testingStart);
         assertEquals(List.of(pto1, pto2, pto5), result);
     }
+
+    @Test
+    void find_requests_by_supervisor_and_time_frame_should_return_requests_related_to_given_timeframe_and_supervisor() {
+        AppUserEntity supervisor = AppUserEntity.createTestAppUser("supervisor", "supervisor", "supervisor@test.com");
+        AppUserEntity testAppUser = AppUserEntity.createTestAppUser("test", "test", "test@test.com");
+        testAppUser.setSupervisor(supervisor);
+        AppUserEntity testAppUser2 = AppUserEntity.createTestAppUser("test2", "test2", "test2@test.com");
+
+        PtoEntity pto1 = PtoEntity.builder()
+                .applier(testAppUser)
+                .ptoStart(LocalDate.of(2024, 12, 12))
+                .ptoEnd(LocalDate.of(2025, 1, 12))
+                .wasAccepted(true)
+                .decisionDateTime(LocalDateTime.now())
+                .build();
+        PtoEntity pto2 = PtoEntity.builder()
+                .applier(testAppUser)
+                .ptoStart(LocalDate.of(2024, 12, 12))
+                .ptoEnd(LocalDate.of(2025, 2, 12))
+                .wasAccepted(true)
+                .decisionDateTime(LocalDateTime.now())
+                .build();
+
+        PtoEntity falsePto1 = PtoEntity.builder()
+                .applier(testAppUser)
+                .ptoStart(LocalDate.of(2024, 12, 12))
+                .ptoEnd(LocalDate.of(2025, 2, 12))
+                .wasAccepted(true)
+                .decisionDateTime(LocalDateTime.now())
+                .wasWithdrawn(true)
+                .build();
+        PtoEntity falsePto2 = PtoEntity.builder()
+                .applier(testAppUser)
+                .ptoStart(LocalDate.of(2025, 12, 12))
+                .ptoEnd(LocalDate.of(2026, 2, 12))
+                .wasAccepted(true)
+                .decisionDateTime(LocalDateTime.now())
+                .wasWithdrawn(true)
+                .build();
+        PtoEntity falsePto3 = PtoEntity.builder()
+                .applier(testAppUser2)
+                .ptoStart(LocalDate.of(2024, 12, 12))
+                .ptoEnd(LocalDate.of(2025, 1, 12))
+                .wasAccepted(true)
+                .decisionDateTime(LocalDateTime.now())
+                .build();
+
+        LocalDate testingStart = LocalDate.of(2025, 1, 1);
+        LocalDate testingEnd = LocalDate.of(2025, 1, 31);
+
+        testEntityManager.persist(supervisor);
+        testEntityManager.persist(testAppUser);
+        testEntityManager.persist(testAppUser2);
+        testEntityManager.persist(pto1);
+        testEntityManager.persist(pto2);
+        testEntityManager.persist(falsePto1);
+        testEntityManager.persist(falsePto2);
+        testEntityManager.persist(falsePto3);
+
+        List<PtoEntity> result = ptoRepository.findRequestsBySupervisorAndTimeFrame(1L, testingStart, testingEnd);
+
+        assertEquals(List.of(pto1, pto2), result);
+    }
 }
