@@ -17,6 +17,8 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
 
     List<AppUserEntity> findAllByUserRolesContaining(UserRole role);
 
+    List<AppUserEntity> findAllBySupervisor_AppUserId(Long supervisorId);
+
     List<AppUserEntity> findAllByIsRegistrationFinishedFalseOrIsActiveFalse();
 
     @Query("SELECT a FROM AppUserEntity a WHERE a.isFreelancer = false")
@@ -114,6 +116,7 @@ public interface AppUserRepository extends JpaRepository<AppUserEntity, Long> {
                     LEFT JOIN u.supervisor s
             """)
     List<EmployeeInfo> findAllEmployeesForAdmin(@Param("today")LocalDate today, @Param("inWeek") LocalDate inWeek);
+
 
 
 }

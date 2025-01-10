@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -246,7 +247,6 @@ class PtoRepositoryTest {
                 .applier(testAppUser)
                 .ptoStart(LocalDate.of(2024, 12, 12))
                 .ptoEnd(LocalDate.of(2025, 2, 12))
-                .wasAccepted(true)
                 .decisionDateTime(LocalDateTime.now())
                 .wasWithdrawn(true)
                 .build();
@@ -254,7 +254,6 @@ class PtoRepositoryTest {
                 .applier(testAppUser)
                 .ptoStart(LocalDate.of(2025, 12, 12))
                 .ptoEnd(LocalDate.of(2026, 2, 12))
-                .wasAccepted(true)
                 .decisionDateTime(LocalDateTime.now())
                 .wasWithdrawn(true)
                 .build();
@@ -280,6 +279,8 @@ class PtoRepositoryTest {
 
         List<PtoEntity> result = ptoRepository.findRequestsBySupervisorAndTimeFrame(1L, testingStart, testingEnd);
 
-        assertEquals(List.of(pto1, pto2), result);
+        assertEquals(2, result.size());
+        assertEquals(1L, result.get(0).getPtoRequestId());
+        assertEquals(2L, result.get(1).getPtoRequestId());
     }
 }

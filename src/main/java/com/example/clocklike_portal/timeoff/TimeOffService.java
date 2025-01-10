@@ -649,17 +649,40 @@ public class TimeOffService {
 
     List<TimeOffRequestsByEmployee> getRequestsBySupervisorAndTimeframe(String start, String end) {
         long requesterId = getUserDetails().getUserId();
+        boolean isAdmin = getUserDetails().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.equals(ADMIN_AUTHORITY));
         LocalDate startDate = LocalDate.parse(start, dateFormatter);
         LocalDate endDate = LocalDate.parse(end, dateFormatter);
 
-        return ptoRequestsRepository.findRequestsBySupervisorAndTimeFrame(requesterId, startDate, endDate)
-                .stream()
-                .collect(Collectors.groupingBy(
-                        ptoEntity -> AppUserBasicDto.appUserEntityToBasicDto(ptoEntity.getApplier()),
-                        Collectors.mapping(ptoTransformer::ptoEntityToDto, Collectors.toList())
-                ))
-                .entrySet()
-                .stream()
+        Map<AppUserBasicDto, List<TimeOffDto>> result = new HashMap<>();
+
+        if (!isAdmin) {
+            appUserRepository.findAllBySupervisor_AppUserId(requesterId)
+                    .forEach(emp -> result.put(
+                            AppUserBasicDto.appUserEntityToBasicDto(emp),
+                            new ArrayList<>()
+                    ));
+            result.putAll(ptoRequestsRepository.findRequestsBySupervisorAndTimeFrame(requesterId, startDate, endDate)
+                    .stream()
+                    .collect(Collectors.groupingBy(
+                            ptoEntity -> AppUserBasicDto.appUserEntityToBasicDto(ptoEntity.getApplier()),
+                            Collectors.mapping(ptoTransformer::ptoEntityToDto, Collectors.toList())
+                    )));
+        } else {
+            appUserRepository.findAll().forEach(emp -> result.put(
+                    AppUserBasicDto.appUserEntityToBasicDto(emp),
+                    new ArrayList<>()
+            ));
+            result.putAll(ptoRequestsRepository.findRequestsInTimeFrame(startDate, endDate)
+                    .stream()
+                    .collect(Collectors.groupingBy(
+                            ptoEntity -> AppUserBasicDto.appUserEntityToBasicDto(ptoEntity.getApplier()),
+                            Collectors.mapping(ptoTransformer::ptoEntityToDto, Collectors.toList())
+                    )));
+        }
+
+        return result.entrySet().stream()
                 .map(entry -> new TimeOffRequestsByEmployee(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
