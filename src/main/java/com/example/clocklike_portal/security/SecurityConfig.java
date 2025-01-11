@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers(API_VERSION + "/dashboard/supervisor").hasAnyAuthority(SUPERVISOR_AUTHORITY, ADMIN_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/summary").hasAuthority(USER_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/requests-for-year").hasAuthority(USER_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/all-requests-for-user").hasAnyAuthority(SUPERVISOR_AUTHORITY, ADMIN_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/requests-for-user-calendar").hasAuthority(USER_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/request-new").hasAuthority(USER_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/byId").hasAuthority(USER_AUTHORITY)

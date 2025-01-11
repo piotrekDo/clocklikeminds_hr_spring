@@ -16,9 +16,8 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping("/supervisor")
-    SupervisorDashboardDto getSupervisorDashboard(@RequestParam Long supervisor_id,
-                                                  @RequestParam String calendarStart,
+    SupervisorDashboardDto getSupervisorDashboard(@RequestParam String calendarStart,
                                                   @RequestParam String calendarEnd) {
-        return dashboardService.getSupervisorDashboardData(supervisor_id, calendarStart, calendarEnd);
+        return dashboardService.getSupervisorDashboardData(calendarStart, calendarEnd);
     }
 }

@@ -37,6 +37,11 @@ public class TimeOffController {
         return timeOffService.findAllUnresolvedPtoRequestsByAcceptor(id);
     }
 
+    @GetMapping("/all-requests-for-user")
+    List<TimeOffDto> findAllRequestsForYearForUser(@RequestParam Long userId, @RequestParam Integer year) {
+        return timeOffService.findAllRequestsForYearForUser(year, userId);
+    }
+
 
     @GetMapping("/requests-by-acceptor")
     Page<TimeOffDto> findAllRequestsByAcceptorId(@RequestParam(required = false) Integer page,

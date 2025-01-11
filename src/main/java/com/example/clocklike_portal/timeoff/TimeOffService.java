@@ -155,6 +155,11 @@ public class TimeOffService {
                 .toList();
     }
 
+    List<TimeOffDto> findAllRequestsForYearForUser(Integer year, Long userId) {
+        return ptoRequestsRepository.findAllRequestsForYear(year, userId).stream().map(ptoTransformer::ptoEntityToDto)
+                .toList();
+    }
+
     List<TimeOffDto> getRequestsForSupervisorCalendar(String start, String end) {
         long requesterId = getUserDetails().getUserId();
         LocalDate startDate = LocalDate.parse(start, dateFormatter);
