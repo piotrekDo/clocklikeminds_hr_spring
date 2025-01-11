@@ -6,7 +6,6 @@ import com.example.clocklike_portal.appUser.UserRole;
 import com.example.clocklike_portal.appUser.UserRoleRepository;
 import com.example.clocklike_portal.pdf.PdfCreator;
 import com.example.clocklike_portal.pdf.TemplateGenerator;
-import com.example.clocklike_portal.settings.Settings;
 import com.example.clocklike_portal.settings.SettingsRepository;
 import com.example.clocklike_portal.timeoff.PtoEntity;
 import com.example.clocklike_portal.timeoff.TimeOffDto;
@@ -157,6 +156,7 @@ public class EmailService {
             }
         });
     }
+
 
     private UserRole getAdminRole() {
         if (adminRole == null) {

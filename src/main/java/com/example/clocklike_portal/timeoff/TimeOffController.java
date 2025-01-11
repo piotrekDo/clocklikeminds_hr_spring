@@ -106,4 +106,9 @@ public class TimeOffController {
         headers.setContentDisposition(ContentDisposition.attachment().filename("timeOff.pdf").build());
         return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
+
+    @GetMapping("/resend-request-by-mail")
+    boolean resendRequestToHr(@RequestParam Long requestId) {
+        return timeOffService.resendRequestByMail(requestId);
+    }
 }

@@ -704,4 +704,24 @@ public class TimeOffService {
 
         return pdfCreator.generateTimeOffRequestPdfAsBytes(ptoEntity);
     }
+
+    boolean resendRequestByMail(Long requestId) {
+        long requesterId = getUserDetails().getUserId();
+        boolean isAdmin = getUserDetails().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.equals(ADMIN_AUTHORITY));
+        PtoEntity ptoEntity = ptoRequestsRepository.findById(requestId)
+                .orElseThrow(() -> new NoSuchElementException("No time off request found with id " + requestId));
+
+        if (ptoEntity.getAcceptor().isFreelancer()) {
+            throw new IllegalOperationException("Cannot generate and resend request for freelancer");
+        }
+
+        if (!isAdmin && (ptoEntity.getApplier().getAppUserId() != requesterId && ptoEntity.getAcceptor().getAppUserId() != requesterId)) {
+            throw new IllegalOperationException("Cannot resend another user request!");
+        }
+
+        emailService.sendTimeOffRequestMailConformation(ptoEntity, false);
+        return true;
+    }
 }
