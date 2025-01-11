@@ -6,6 +6,7 @@ import com.example.clocklike_portal.timeoff.on_saturday.SaturdayHolidayDto;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -95,5 +96,14 @@ public class TimeOffController {
     @PostMapping("/withdraw")
     WithdrawResponse withdrawTimeOffRequest(@RequestParam Long requestId, @RequestParam String applierNotes) {
         return timeOffService.withdrawTimeOffRequest(requestId, applierNotes);
+    }
+
+    @GetMapping("/generate-pdf")
+    ResponseEntity<byte[]> generateTimeOffPdf(@RequestParam Long timeOffId) {
+       byte[] pdf = timeOffService.generateTimeOffPdf(timeOffId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename("timeOff.pdf").build());
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 }

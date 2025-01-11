@@ -9,6 +9,7 @@ import com.example.clocklike_portal.dates_calculations.DateChecker;
 import com.example.clocklike_portal.dates_calculations.HolidayService;
 import com.example.clocklike_portal.error.IllegalOperationException;
 import com.example.clocklike_portal.mail.EmailService;
+import com.example.clocklike_portal.pdf.PdfCreator;
 import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveEntity;
 import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveType;
 import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveTypeRepository;
@@ -57,6 +58,7 @@ public class TimeOffService {
     private final HolidayOnSaturdayRepository holidayOnSaturdayRepository;
     private final HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository;
     private final EmailService emailService;
+    private final PdfCreator pdfCreator;
     private Map<String, OccasionalLeaveType> occasionalTypes;
 
     @PostConstruct
@@ -687,4 +689,19 @@ public class TimeOffService {
                 .collect(Collectors.toList());
     }
 
+    byte[] generateTimeOffPdf(Long timeOffId) {
+        long requesterId = getUserDetails().getUserId();
+        boolean isAdmin = getUserDetails().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.equals(ADMIN_AUTHORITY));
+
+        PtoEntity ptoEntity = ptoRequestsRepository.findById(timeOffId)
+                .orElseThrow(() -> new NoSuchElementException("No time off request found with id " + timeOffId));
+
+        if (!isAdmin && (ptoEntity.getApplier().getAppUserId() != requesterId && ptoEntity.getAcceptor().getAppUserId() != requesterId)) {
+            throw new IllegalOperationException("Cannot generate another user request!");
+        }
+
+        return pdfCreator.generateTimeOffRequestPdfAsBytes(ptoEntity);
+    }
 }

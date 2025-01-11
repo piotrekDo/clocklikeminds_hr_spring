@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import org.xhtmlrenderer.layout.SharedContext;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,6 +22,16 @@ public class PdfCreator {
     public String generateTimeOffRequestPdf(PtoEntity request) {
         try {
             return generatePdfFromHtml(templateGenerator.parseTimeOffRequestTemplate(request));
+        } catch (DocumentException | IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public byte[] generateTimeOffRequestPdfAsBytes(PtoEntity request) {
+        try {
+            String htmlTemplate = templateGenerator.parseTimeOffRequestTemplate(request);
+            return generatePdfFromHtmlAsBytes(htmlTemplate);
         } catch (DocumentException | IOException e) {
             e.printStackTrace();
         }
@@ -43,5 +54,16 @@ public class PdfCreator {
         return generatedPdfName;
     }
 
-
+    byte[] generatePdfFromHtmlAsBytes(String htmlTemplate) throws DocumentException, IOException {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            ITextRenderer renderer = new ITextRenderer();
+            SharedContext sharedContext = renderer.getSharedContext();
+            sharedContext.setInteractive(false);
+            renderer.getFontResolver().addFont("fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            renderer.setDocumentFromString(htmlTemplate);
+            renderer.layout();
+            renderer.createPDF(outputStream);
+            return outputStream.toByteArray();
+        }
+    }
 }

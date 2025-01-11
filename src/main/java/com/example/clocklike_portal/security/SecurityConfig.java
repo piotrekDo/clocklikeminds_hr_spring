@@ -85,6 +85,7 @@ public class SecurityConfig {
                         .requestMatchers(API_VERSION + "/pto/holiday-on-saturday-by-users").hasAnyAuthority(ADMIN_AUTHORITY, SUPERVISOR_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/by-criteria-admin").hasAnyAuthority(ADMIN_AUTHORITY)
                         .requestMatchers(API_VERSION + "/pto/by-criteria-supervisor").hasAnyAuthority(SUPERVISOR_AUTHORITY)
+                        .requestMatchers(API_VERSION + "/pto/generate-pdf").hasAnyAuthority(USER_AUTHORITY)
                         .requestMatchers(API_VERSION + "/report/generate-creative-work-report-template").hasAnyAuthority(USER_AUTHORITY)
                         .anyRequest().denyAll()
                 )

@@ -7,6 +7,7 @@ import com.example.clocklike_portal.dates_calculations.DateChecker;
 import com.example.clocklike_portal.dates_calculations.HolidayService;
 import com.example.clocklike_portal.error.IllegalOperationException;
 import com.example.clocklike_portal.mail.EmailService;
+import com.example.clocklike_portal.pdf.PdfCreator;
 import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveType;
 import com.example.clocklike_portal.timeoff.occasional.OccasionalLeaveTypeRepository;
 import com.example.clocklike_portal.timeoff.on_saturday.HolidayOnSaturdayRepository;
@@ -57,6 +58,8 @@ class TimeOffServiceTest {
     @MockBean
     EmailService emailService;
     @MockBean
+    PdfCreator pdfCreator;
+    @MockBean
     RequestHistoryRepository requestHistoryRepository;
 
 
@@ -67,8 +70,8 @@ class TimeOffServiceTest {
         TimeOffService ptoService(PtoRepository ptoRepository, AppUserRepository appUserRepository, PtoTransformer ptoTransformer,
                                   HolidayService holidayService, DateChecker dateChecker, OccasionalLeaveTypeRepository occasionalLeaveTypeRepository,
                                   HolidayOnSaturdayRepository holidayOnSaturdayRepository, HolidayOnSaturdayUserEntityRepository holidayOnSaturdayUserEntityRepository,
-                                  EmailService emailService, RequestHistoryRepository requestHistoryRepository) {
-            return new TimeOffService(ptoRepository, requestHistoryRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository, holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository, emailService);
+                                  EmailService emailService, RequestHistoryRepository requestHistoryRepository, PdfCreator pdfCreator) {
+            return new TimeOffService(ptoRepository, requestHistoryRepository, appUserRepository, ptoTransformer, holidayService, dateChecker, occasionalLeaveTypeRepository, holidayOnSaturdayRepository, holidayOnSaturdayUserEntityRepository, emailService, pdfCreator);
         }
     }
 
