@@ -630,8 +630,8 @@ public class TimeOffService {
             timeOffEntity.setWasWithdrawn(true);
             timeOffEntity.setWithdrawnDateTime(LocalDateTime.now());
             ptoRequestsRepository.save(timeOffEntity);
-            emailService.sendRequestWithdrawnMessage(timeOffEntity);
         }
+            emailService.sendRequestWithdrawnMessage(timeOffEntity);
     }
 
     /**

@@ -74,16 +74,28 @@ public class Initializer {
         admin.setPosition(ceoPosition);
         appUserRepository.save(admin);
 
-        AppUserEntity piotrek = createTestAppUser("Piotr", "Domagalski", "piotr.domagalski@clocklikeminds.com");
-        piotrek.setUserRoles(List.of(userRole, adminRole, supervisorRole));
-        piotrek.setPtoDaysAccruedLastYear(2);
-        piotrek.setPtoDaysAccruedCurrentYear(26);
-        piotrek.setPtoDaysLeftFromLastYear(2);
-        piotrek.setPtoDaysLeftCurrentYear(26);
-        piotrek.setRegistrationFinished(true);
-        piotrek.setActive(true);
-        piotrek.setPosition(juniorJavaDeveloperPosition);
-        appUserRepository.save(piotrek);
+//        AppUserEntity piotrek = createTestAppUser("Piotr", "Domagalski", "piotr.domagalski@clocklikeminds.com");
+//        piotrek.setUserRoles(List.of(userRole, adminRole, supervisorRole));
+//        piotrek.setPtoDaysAccruedLastYear(2);
+//        piotrek.setPtoDaysAccruedCurrentYear(26);
+//        piotrek.setPtoDaysLeftFromLastYear(2);
+//        piotrek.setPtoDaysLeftCurrentYear(26);
+//        piotrek.setRegistrationFinished(true);
+//        piotrek.setActive(true);
+//        piotrek.setPosition(juniorJavaDeveloperPosition);
+//        appUserRepository.save(piotrek);
+
+        AppUserEntity piotrek2 = createTestAppUser("Piotr2", "Domagalski2", "domagalskipiotr857@gmail.com");
+        piotrek2.setUserRoles(List.of(userRole, adminRole, supervisorRole));
+        piotrek2.setPtoDaysAccruedLastYear(2);
+        piotrek2.setPtoDaysAccruedCurrentYear(26);
+        piotrek2.setPtoDaysLeftFromLastYear(2);
+        piotrek2.setPtoDaysLeftCurrentYear(26);
+        piotrek2.setRegistrationFinished(true);
+        piotrek2.setActive(true);
+        piotrek2.setPosition(juniorJavaDeveloperPosition);
+        appUserRepository.save(piotrek2);
+
 
         AppUserEntity user1 = createTestAppUser("User", "Userski", "user.userski@clocklikeminds.com");
         user1.setUserRoles(List.of(userRole));
@@ -93,9 +105,11 @@ public class Initializer {
         user2.setUserRoles(List.of(userRole));
         appUserRepository.save(user2);
 
-        piotrek.setSupervisor(piotrek);
-        admin.setSupervisor(piotrek);
-        appUserRepository.save(piotrek);
+//        piotrek.setSupervisor(piotrek);
+//        appUserRepository.save(piotrek);
+        admin.setSupervisor(piotrek2);
+        piotrek2.setSupervisor(piotrek2);
+        appUserRepository.save(piotrek2);
         appUserRepository.save(admin);
 
     }
