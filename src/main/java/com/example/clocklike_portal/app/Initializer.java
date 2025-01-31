@@ -18,7 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.example.clocklike_portal.settings.SettingsService.MAILING_ENABLED;
+import static com.example.clocklike_portal.settings.SettingsService.MAILING_HR_ENABLED;
+import static com.example.clocklike_portal.settings.SettingsService.MAILING_LOCAL_ENABLED;
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;
 
 
@@ -35,7 +36,8 @@ public class Initializer {
 
     @PostConstruct
     public void run() {
-        Settings isMailingEnabled = settingsRepository.save(new Settings(MAILING_ENABLED, "boolean", "false"));
+        Settings isMailingLocalEnabled = settingsRepository.save(new Settings(MAILING_LOCAL_ENABLED, "boolean", "false"));
+        Settings isMailingHrEnabled = settingsRepository.save(new Settings(MAILING_HR_ENABLED, "boolean", "false"));
 
         UserRole userRole = userRoleRepository.save(new UserRole("user"));
         UserRole adminRole = userRoleRepository.save(new UserRole("admin"));
@@ -74,16 +76,16 @@ public class Initializer {
         admin.setPosition(ceoPosition);
         appUserRepository.save(admin);
 
-//        AppUserEntity piotrek = createTestAppUser("Piotr", "Domagalski", "piotr.domagalski@clocklikeminds.com");
-//        piotrek.setUserRoles(List.of(userRole, adminRole, supervisorRole));
-//        piotrek.setPtoDaysAccruedLastYear(2);
-//        piotrek.setPtoDaysAccruedCurrentYear(26);
-//        piotrek.setPtoDaysLeftFromLastYear(2);
-//        piotrek.setPtoDaysLeftCurrentYear(26);
-//        piotrek.setRegistrationFinished(true);
-//        piotrek.setActive(true);
-//        piotrek.setPosition(juniorJavaDeveloperPosition);
-//        appUserRepository.save(piotrek);
+        AppUserEntity piotrek = createTestAppUser("Piotr", "Domagalski", "piotr.domagalski@clocklikeminds.com");
+        piotrek.setUserRoles(List.of(userRole, adminRole, supervisorRole));
+        piotrek.setPtoDaysAccruedLastYear(2);
+        piotrek.setPtoDaysAccruedCurrentYear(26);
+        piotrek.setPtoDaysLeftFromLastYear(2);
+        piotrek.setPtoDaysLeftCurrentYear(26);
+        piotrek.setRegistrationFinished(true);
+        piotrek.setActive(true);
+        piotrek.setPosition(juniorJavaDeveloperPosition);
+        appUserRepository.save(piotrek);
 
         AppUserEntity piotrek2 = createTestAppUser("Piotr2", "Domagalski2", "domagalskipiotr857@gmail.com");
         piotrek2.setUserRoles(List.of(userRole, adminRole, supervisorRole));
@@ -105,8 +107,8 @@ public class Initializer {
         user2.setUserRoles(List.of(userRole));
         appUserRepository.save(user2);
 
-//        piotrek.setSupervisor(piotrek);
-//        appUserRepository.save(piotrek);
+        piotrek.setSupervisor(piotrek);
+        appUserRepository.save(piotrek);
         admin.setSupervisor(piotrek2);
         piotrek2.setSupervisor(piotrek2);
         appUserRepository.save(piotrek2);

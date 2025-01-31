@@ -21,9 +21,14 @@ public class SettingsController {
         return service.getSettings();
     }
 
-    @GetMapping("/switch-mailing")
-    boolean switchMailing() {
-        return service.switchMailingEnabled();
+    @GetMapping("/switch-mailing-local")
+    boolean switchMailingLocal() {
+        return service.switchMailingLocalEnabled();
+    }
+
+    @GetMapping("/switch-mailing-hr")
+    boolean switchMailingHr() {
+        return service.switchMailingHrEnabled();
     }
 
 }

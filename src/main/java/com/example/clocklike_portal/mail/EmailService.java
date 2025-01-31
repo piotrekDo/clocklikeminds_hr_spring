@@ -27,7 +27,8 @@ import java.util.concurrent.Executors;
 
 import static com.example.clocklike_portal.pdf.PdfCreator.PDF_TEMPLATES;
 import static com.example.clocklike_portal.security.SecurityConfig.ADMIN_AUTHORITY;
-import static com.example.clocklike_portal.settings.SettingsService.MAILING_ENABLED;
+import static com.example.clocklike_portal.settings.SettingsService.MAILING_HR_ENABLED;
+import static com.example.clocklike_portal.settings.SettingsService.MAILING_LOCAL_ENABLED;
 
 @Component
 @RequiredArgsConstructor
@@ -44,16 +45,23 @@ public class EmailService {
     private String mailboxPassword;
     @Value("${mail.hr}")
     private String hrMailbox;
-    private boolean isEnabled = false;
+    private boolean isMailingLocalEnabled = false;
+    private boolean isMailingHrEnabled = false;
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-        this.isEnabled = Boolean.parseBoolean(settingsRepository.findBySettingName(MAILING_ENABLED)
-                .orElseThrow(() -> new NoSuchElementException("mailingEnabled setting was not found")).getSettingValue());
+        this.isMailingLocalEnabled = Boolean.parseBoolean(settingsRepository.findBySettingName(MAILING_LOCAL_ENABLED)
+                .orElseThrow(() -> new NoSuchElementException("Setting not found")).getSettingValue());
+        this.isMailingHrEnabled = Boolean.parseBoolean(settingsRepository.findBySettingName(MAILING_HR_ENABLED)
+                .orElseThrow(() -> new NoSuchElementException("Setting not found")).getSettingValue());
     }
 
-    public void setEnabled(boolean isEnabled) {
-        this.isEnabled = isEnabled;
+    public void setMailingLocalEnabled(boolean isEnabled) {
+        this.isMailingLocalEnabled = isEnabled;
+    }
+
+    public void setMailingHrEnabled(boolean isEnabled) {
+        this.isMailingHrEnabled = isEnabled;
     }
 
     public void sendRegistrationConfirmedMsgForUser(AppUserEntity entity) {
@@ -101,7 +109,7 @@ public class EmailService {
             }
             sendMail(subject, templateGenerator.generateReqConfirmationMsgForApplier(isFreelancer), request.getApplier().getUserEmail(), pdf);
             sendMail(subject, templateGenerator.generateReqConfirmationMsgForAcceptor(isFreelancer), request.getAcceptor().getUserEmail(), pdf);
-            if (!isFreelancer) {
+            if (!isFreelancer && isMailingHrEnabled) {
                 sendMail(subject, templateGenerator.generateReqConformationForHr(request), hrMailbox, pdf);
                 deleteRequest(pdf);
             }
@@ -150,7 +158,7 @@ public class EmailService {
             }
             sendMail(subject, templateGenerator.generateRequestWithdrawConformation(isFreelancer), request.getApplier().getUserEmail(), pdf);
             sendMail(subject, templateGenerator.generateRequestWithdrawConformation(isFreelancer), request.getAcceptor().getUserEmail(), pdf);
-            if (!isFreelancer) {
+            if (!isFreelancer && isMailingHrEnabled) {
                 sendMail(subject, templateGenerator.generateRequestWithdrawForHr(request), hrMailbox, pdf);
                 deleteRequest(pdf);
             }
@@ -191,10 +199,10 @@ public class EmailService {
 
     private void sendMail(String subject, String msg, String mailTo, String pdf) {
         System.out.println("--------------");
-        System.out.println("MAILING ENABLED " + isEnabled);
+        System.out.println("MAILING LOCAL ENABLED " + isMailingLocalEnabled);
         System.out.println("--------------");
 
-        if (!isEnabled) return;
+        if (!isMailingLocalEnabled) return;
         System.out.println("SENDING MAIL: " + subject);
         System.out.println("SENDING MAIL: " + mailTo);
         System.out.println("SENDING MAIL: PDF !=null " + (pdf != null));
