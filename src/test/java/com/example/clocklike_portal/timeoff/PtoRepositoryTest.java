@@ -12,10 +12,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -66,14 +67,14 @@ class PtoRepositoryTest {
                 .ptoStart(LocalDate.of(2024, 5, 1))
                 .ptoEnd(LocalDate.of(2024, 6, 8))
                 .wasAccepted(false)
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .build());
         PtoEntity unMatching5 = testEntityManager.persist(PtoEntity.builder()
                 .applier(applier)
                 .ptoStart(LocalDate.of(2023, 12, 1))
                 .ptoEnd(LocalDate.of(2024, 1, 8))
                 .wasAccepted(false)
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .build());
 
         List<PtoEntity> result = ptoRepository.findRequestsForYear(2024, 1L);
@@ -88,7 +89,7 @@ class PtoRepositoryTest {
         AppUserEntity applier = testEntityManager.persist(AppUserEntity.createTestAppUser("applier", "applier", "applier@mail.com"));
         ChildCareLeaveEntity matching = testEntityManager.persist(new ChildCareLeaveEntity(LocalDate.now(), LocalDate.now(), applier, null, 1));
         OccasionalLeaveEntity unMatching1 = testEntityManager.persist(new OccasionalLeaveEntity(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 2), applier, null, 1, null));
-        PtoEntity unMatching2 = testEntityManager.persist(PtoEntity.builder().applier(applier).isDemand(true).requestDateTime(LocalDateTime.of(2023, 1, 1, 12, 12)).build());
+        PtoEntity unMatching2 = testEntityManager.persist(PtoEntity.builder().applier(applier).isDemand(true).requestDateTime(LocalDateTime.of(2023, 1, 1, 12, 12).atOffset(ZoneOffset.UTC)).build());
 
         List<PtoEntity> result = ptoRepository.findUserRequestsForChildCare(applier.getAppUserId());
         assertEquals(1, result.size());
@@ -98,8 +99,8 @@ class PtoRepositoryTest {
     @Test
     void findUserRequestsFromCurrentYearShouldReturnCorrespondingRequests() {
         AppUserEntity applier = testEntityManager.persist(AppUserEntity.createTestAppUser("applier", "applier", "applier@mail.com"));
-        PtoEntity matching = testEntityManager.persist(PtoEntity.builder().applier(applier).isDemand(true).requestDateTime(LocalDateTime.of(LocalDate.now().getYear(), 1, 1, 12, 12)).build());
-        PtoEntity unMatching = testEntityManager.persist(PtoEntity.builder().applier(applier).isDemand(true).requestDateTime(LocalDateTime.of(2023, 1, 1, 12, 12)).build());
+        PtoEntity matching = testEntityManager.persist(PtoEntity.builder().applier(applier).isDemand(true).requestDateTime(LocalDateTime.of(LocalDate.now().getYear(), 1, 1, 12, 12).atOffset(ZoneOffset.UTC)).build());
+        PtoEntity unMatching = testEntityManager.persist(PtoEntity.builder().applier(applier).isDemand(true).requestDateTime(LocalDateTime.of(2023, 1, 1, 12, 12).atOffset(ZoneOffset.UTC)).build());
 
         List<PtoEntity> result = ptoRepository.findUserRequestsOnDemandFromCurrentYear(applier.getAppUserId());
         assertEquals(1, result.size());
@@ -112,7 +113,7 @@ class PtoRepositoryTest {
         AppUserEntity acceptor2 = testEntityManager.persist(AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor2@mail.com"));
 
         PtoEntity unMatching1 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor2).ptoStart(LocalDate.of(2024, 4, 10)).ptoEnd(LocalDate.of(2024, 4, 12)).build());
-        PtoEntity unMatching2 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor2).ptoStart(LocalDate.of(2024, 7, 10)).ptoEnd(LocalDate.of(2024, 12, 12)).decisionDateTime(LocalDateTime.now()).wasAccepted(true).build());
+        PtoEntity unMatching2 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor2).ptoStart(LocalDate.of(2024, 7, 10)).ptoEnd(LocalDate.of(2024, 12, 12)).decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC)).wasAccepted(true).build());
         PtoEntity unMatching3 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2023, 4, 30)).ptoEnd(LocalDate.of(2023, 5, 12)).build());
         PtoEntity unMatching4 = testEntityManager.persist(PtoEntity.builder().acceptor(acceptor).ptoStart(LocalDate.of(2023, 5, 1)).ptoEnd(LocalDate.of(2023, 5, 12)).build());
 
@@ -177,14 +178,14 @@ class PtoRepositoryTest {
                 .ptoStart(LocalDate.of(2024, 1, 1))
                 .ptoEnd(LocalDate.of(2024, 1, 3))
                 .wasAccepted(true)
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
         PtoEntity pto2 = PtoEntity.builder()
                 .applier(testAppUser)
                 .ptoStart(LocalDate.of(2024, 1, 5))
                 .ptoEnd(LocalDate.of(2024, 1, 7))
                 .wasAccepted(true)
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
         PtoEntity pto3 = PtoEntity.builder()
                 .applier(testAppUser)
@@ -206,7 +207,7 @@ class PtoRepositoryTest {
                 .ptoStart(LocalDate.of(2024, 1, 1))
                 .ptoEnd(LocalDate.of(2024, 1, 3))
                 .wasAccepted(true)
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
         testEntityManager.persist(testAppUser);
         testEntityManager.persist(testAppUser2);
@@ -233,28 +234,28 @@ class PtoRepositoryTest {
                 .ptoStart(LocalDate.of(2024, 12, 12))
                 .ptoEnd(LocalDate.of(2025, 1, 12))
                 .wasAccepted(true)
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
         PtoEntity pto2 = PtoEntity.builder()
                 .applier(testAppUser)
                 .ptoStart(LocalDate.of(2024, 12, 12))
                 .ptoEnd(LocalDate.of(2025, 2, 12))
                 .wasAccepted(true)
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
 
         PtoEntity falsePto1 = PtoEntity.builder()
                 .applier(testAppUser)
                 .ptoStart(LocalDate.of(2024, 12, 12))
                 .ptoEnd(LocalDate.of(2025, 2, 12))
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .wasWithdrawn(true)
                 .build();
         PtoEntity falsePto2 = PtoEntity.builder()
                 .applier(testAppUser)
                 .ptoStart(LocalDate.of(2025, 12, 12))
                 .ptoEnd(LocalDate.of(2026, 2, 12))
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .wasWithdrawn(true)
                 .build();
         PtoEntity falsePto3 = PtoEntity.builder()
@@ -262,7 +263,7 @@ class PtoRepositoryTest {
                 .ptoStart(LocalDate.of(2024, 12, 12))
                 .ptoEnd(LocalDate.of(2025, 1, 12))
                 .wasAccepted(true)
-                .decisionDateTime(LocalDateTime.now())
+                .decisionDateTime(OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
 
         LocalDate testingStart = LocalDate.of(2025, 1, 1);

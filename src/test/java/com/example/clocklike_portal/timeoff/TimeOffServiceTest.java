@@ -27,7 +27,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;
@@ -299,8 +300,8 @@ class TimeOffServiceTest {
         AppUserEntity acceptor = AppUserEntity.createTestAppUser("acceptor", "acceptor", "acceptor@test.com");
         acceptor.setActive(true);
         acceptor.setUserRoles(List.of(new UserRole(1L, "admin")));
-        PtoEntity ptoEntity = new PtoEntity(1L,  "", false, null, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2,  false, false, null, new ArrayList<>(), "");
-        TimeOffDto timeOffDto = new TimeOffDto(1L, "", false, null, null,  true, false, LocalDateTime.now(), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", false, 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null, null, null, null,  null, null, "", false, false, null, "");
+        PtoEntity ptoEntity = new PtoEntity(1L,  "", false, null, OffsetDateTime.now(ZoneOffset.UTC), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), applier, acceptor, false, null, 5, 2,  false, false, null, new ArrayList<>(), "");
+        TimeOffDto timeOffDto = new TimeOffDto(1L, "", false, null, null,  true, false, OffsetDateTime.now(ZoneOffset.UTC), LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16), 2L, "applier", "applier", "applier@test.com", false, 17, 5, null, 1L, "acceptor", "acceptor", "acceptor@mail.com", null, 5, 5, 2, null, null, null, null,  null, null, "", false, false, null, "");
         Mockito.when(appUserRepository.findById(2L)).thenReturn(Optional.of(applier));
         Mockito.when(appUserRepository.findById(1L)).thenReturn(Optional.of(acceptor));
         Mockito.when(dateChecker.checkIfDatesRangeIsValid(LocalDate.of(2024, 2, 12), LocalDate.of(2024, 2, 16))).thenReturn(true);

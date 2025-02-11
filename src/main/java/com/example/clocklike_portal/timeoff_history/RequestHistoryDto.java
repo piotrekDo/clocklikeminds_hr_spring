@@ -3,7 +3,7 @@ package com.example.clocklike_portal.timeoff_history;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -11,7 +11,7 @@ public class RequestHistoryDto {
     private long historyId;
     private String action;
     private String notes;
-    private LocalDateTime dateTime;
+    private OffsetDateTime dateTime;
     private Long appUserId;
     private String firstName;
     private String lastName;

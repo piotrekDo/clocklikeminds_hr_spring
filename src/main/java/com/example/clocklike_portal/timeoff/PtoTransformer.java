@@ -9,7 +9,8 @@ import com.example.clocklike_portal.timeoff_history.RequestHistoryDto;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class PtoTransformer {
                 leaveType,
                 false,
                 "",
-                LocalDateTime.now(),
+                OffsetDateTime.now(ZoneOffset.UTC),
                 start,
                 end,
                 applier,

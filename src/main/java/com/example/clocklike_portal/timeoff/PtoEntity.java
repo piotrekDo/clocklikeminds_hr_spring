@@ -11,7 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +34,7 @@ public class PtoEntity {
     private String leaveType = Library.PTO_DISCRIMINATOR_VALUE;
     private boolean isDemand;
     private String applicationNotes;
-    private LocalDateTime requestDateTime;
+    private OffsetDateTime requestDateTime;
     private LocalDate ptoStart;
     private LocalDate ptoEnd;
     @ManyToOne()
@@ -41,19 +42,20 @@ public class PtoEntity {
     @ManyToOne
     private AppUserEntity acceptor;
     private boolean wasAccepted;
-    private LocalDateTime decisionDateTime;
+    private OffsetDateTime decisionDateTime;
     private int businessDays;
     private int includingLastYearPool;
     private boolean wasMarkedToWithdraw = false;
     private boolean wasWithdrawn = false;
-    private LocalDateTime withdrawnDateTime = null;
+    private OffsetDateTime withdrawnDateTime = null;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "ptoEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("historyId ASC")
     private List<RequestHistory> history = new ArrayList<>();
     private String declineReason;
 
     public PtoEntity(boolean isDemand, LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         this.isDemand = isDemand;
-        this.requestDateTime = LocalDateTime.now();
+        this.requestDateTime = OffsetDateTime.now(ZoneOffset.UTC);
         this.ptoStart = ptoStart;
         this.ptoEnd = ptoEnd;
         this.applier = applier;
@@ -65,7 +67,7 @@ public class PtoEntity {
     public PtoEntity(String leaveType, boolean isDemand, LocalDate ptoStart, LocalDate ptoEnd, AppUserEntity applier, AppUserEntity acceptor, int businessDays, int includingLastYearPool) {
         this.leaveType = leaveType;
         this.isDemand = isDemand;
-        this.requestDateTime = LocalDateTime.now();
+        this.requestDateTime = OffsetDateTime.now(ZoneOffset.UTC);;
         this.ptoStart = ptoStart;
         this.ptoEnd = ptoEnd;
         this.applier = applier;

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -20,7 +20,7 @@ public class TimeOffDto {
     private List<RequestHistoryDto> requestHistory;
     private boolean isPending;
     private boolean wasAccepted;
-    private LocalDateTime requestDateTime;
+    private OffsetDateTime requestDateTime;
     private LocalDate ptoStart;
     private LocalDate ptoEnd;
     private long applierId;
@@ -35,7 +35,7 @@ public class TimeOffDto {
     private String acceptorFirstName;
     private String acceptorLastName;
     private String acceptorEmail;
-    private LocalDateTime decisionDateTime;
+    private OffsetDateTime decisionDateTime;
     private long totalDays;
     private int businessDays;
     private int includingLastYearPool;
@@ -48,6 +48,6 @@ public class TimeOffDto {
     private String saturday_holiday_desc;
     private boolean wasMarkedToWithdraw;
     private boolean wasWithdrawn;
-    private LocalDateTime withdrawnDateTime;
+    private OffsetDateTime withdrawnDateTime;
     private String declineReason;
 }

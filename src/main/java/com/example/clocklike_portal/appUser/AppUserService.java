@@ -23,7 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -354,10 +355,10 @@ public class AppUserService implements UserDetailsService {
                         applier.setPtoDaysTaken(applier.getPtoDaysTaken() - requestBusinessDays);
 
                         ptoEntity.setWasAccepted(false);
-                        ptoEntity.setDecisionDateTime(LocalDateTime.now());
+                        ptoEntity.setDecisionDateTime(OffsetDateTime.now(ZoneOffset.UTC));
                         String originalApplicationNotes = ptoEntity.getApplicationNotes();
                         ptoEntity.setApplicationNotes(originalApplicationNotes != null ? originalApplicationNotes + " Wskazany przełożony utracił możliwość rozpatrywania wniosków." : "Wskazany przełożony utracił możliwość rozpatrywania wniosków.");
-                        requestHistoryRepository.save(new RequestHistory(null, "DECLINED", "Wskazany przełożony utracił możliwość rozpatrywania wniosków.", LocalDateTime.now(), applier, ptoEntity));
+                        requestHistoryRepository.save(new RequestHistory(null, "DECLINED", "Wskazany przełożony utracił możliwość rozpatrywania wniosków.", OffsetDateTime.now(ZoneOffset.UTC), applier, ptoEntity));
 
                     }
                 });

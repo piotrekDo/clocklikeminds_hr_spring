@@ -30,7 +30,7 @@ public interface PtoRepository extends JpaRepository<PtoEntity, Long> {
     List<PtoEntity> findUnresolvedOrWithdrawnRequestsByAcceptorId(@Param("acceptor") long id);
 
 
-    Page<PtoEntity> findAllByApplier_AppUserId(long id, PageRequest pageable);
+    Page<PtoEntity> findAllByApplier_AppUserIdOrderByPtoRequestIdDesc(long id, PageRequest pageable);
 
     Page<PtoEntity> findAllByAcceptor_AppUserId(long id, PageRequest pageable);
 

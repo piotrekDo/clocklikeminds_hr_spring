@@ -25,6 +25,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static com.example.clocklike_portal.appUser.AppUserEntity.createTestAppUser;
@@ -217,10 +219,10 @@ class AppUserServiceTest {
         testAppUser.setRegistrationFinished(true);
         testAppUser.setSupervisor(previousSupervisor);
         testAppUser.setPtoRequests(new LinkedHashSet<>());
-        PtoEntity ptoNoDecision = new PtoEntity(99L, "", false, null, LocalDateTime.of(2023, 5, 5, 12, 0), LocalDate.of(2023, 5, 5), LocalDate.of(2023, 5, 6), testAppUser, previousSupervisor, false, null, 2, 0, false, false,  null, new ArrayList<>(), "");
-        PtoEntity ptoAccepted = new PtoEntity(98L, "", false, null, LocalDateTime.of(2023, 5, 6, 12, 0), LocalDate.of(2023, 5, 6), LocalDate.of(2023, 5, 7), testAppUser, previousSupervisor, true, LocalDateTime.of(2023, 5, 6, 13, 0), 2, 0,  false, false, null, new ArrayList<>(), "");
-        PtoEntity ptoRejected = new PtoEntity(97L, "", false, null, LocalDateTime.of(2023, 10, 10, 12, 0), LocalDate.of(2023, 10, 11), LocalDate.of(2023, 10, 11), testAppUser, previousSupervisor, false, LocalDateTime.of(2023, 10, 11, 13, 0), 1, 0, false, false, null, new ArrayList<>(), "");
-        PtoEntity anotherPto = new PtoEntity(96L, "", false, null, LocalDateTime.of(2023, 2, 2, 12, 0), LocalDate.of(2023, 2, 2), LocalDate.of(2023, 2, 2), newSupervisor, newSupervisor, false, null, 1, 1,  false, false, null, new ArrayList<>(), "");
+        PtoEntity ptoNoDecision = new PtoEntity(99L, "", false, null, LocalDateTime.of(2023, 5, 5, 12, 0).atOffset(ZoneOffset.UTC), LocalDate.of(2023, 5, 5), LocalDate.of(2023, 5, 6), testAppUser, previousSupervisor, false, null, 2, 0, false, false,  null, new ArrayList<>(), "");
+        PtoEntity ptoAccepted = new PtoEntity(98L, "", false, null, LocalDateTime.of(2023, 5, 6, 12, 0).atOffset(ZoneOffset.UTC), LocalDate.of(2023, 5, 6), LocalDate.of(2023, 5, 7), testAppUser, previousSupervisor, true, LocalDateTime.of(2023, 5, 6, 13, 0).atOffset(ZoneOffset.UTC), 2, 0,  false, false, null, new ArrayList<>(), "");
+        PtoEntity ptoRejected = new PtoEntity(97L, "", false, null, LocalDateTime.of(2023, 10, 10, 12, 0).atOffset(ZoneOffset.UTC), LocalDate.of(2023, 10, 11), LocalDate.of(2023, 10, 11), testAppUser, previousSupervisor, false, LocalDateTime.of(2023, 10, 11, 13, 0).atOffset(ZoneOffset.UTC), 1, 0, false, false, null, new ArrayList<>(), "");
+        PtoEntity anotherPto = new PtoEntity(96L, "", false, null, LocalDateTime.of(2023, 2, 2, 12, 0).atOffset(ZoneOffset.UTC), LocalDate.of(2023, 2, 2), LocalDate.of(2023, 2, 2), newSupervisor, newSupervisor, false, null, 1, 1,  false, false, null, new ArrayList<>(), "");
         testAppUser.getPtoRequests().addAll(Set.of(ptoNoDecision, ptoAccepted, ptoRejected));
         previousSupervisor.getPtoAcceptor().addAll(Set.of(ptoNoDecision, ptoAccepted, ptoRejected));
         newSupervisor.getPtoRequests().add(anotherPto);
@@ -459,7 +461,7 @@ class AppUserServiceTest {
         PtoEntity emp1AcceptedPto = new PtoEntity(false, null, null, employee1, testAppUser, 2, 0);
         emp1AcceptedPto.setPtoRequestId(98L);
         emp1AcceptedPto.setWasAccepted(true);
-        emp1AcceptedPto.setDecisionDateTime(LocalDateTime.now());
+        emp1AcceptedPto.setDecisionDateTime(OffsetDateTime.now(ZoneOffset.UTC));
         employee1.getPtoRequests().add(emp1AcceptedPto);
         testAppUser.getPtoAcceptor().add(emp1AcceptedPto);
         PtoEntity emp2PendingPto = new PtoEntity(false, null, null, employee2, testAppUser, 10, 1);
@@ -469,7 +471,7 @@ class AppUserServiceTest {
         PtoEntity emp2DeclinedPto = new PtoEntity(false, null, null, employee2, testAppUser, 2, 0);
         emp2DeclinedPto.setPtoRequestId(96L);
         emp2DeclinedPto.setWasAccepted(false);
-        emp2DeclinedPto.setDecisionDateTime(LocalDateTime.now());
+        emp2DeclinedPto.setDecisionDateTime(OffsetDateTime.now(ZoneOffset.UTC));
         employee2.getPtoRequests().add(emp2DeclinedPto);
         testAppUser.getPtoAcceptor().add(emp2DeclinedPto);
 

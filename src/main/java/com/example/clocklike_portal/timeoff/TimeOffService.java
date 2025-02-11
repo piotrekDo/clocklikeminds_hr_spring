@@ -27,9 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
@@ -173,7 +171,7 @@ public class TimeOffService {
     Page<TimeOffDto> getPtoRequestsByApplier(Long userId, Integer page, Integer size) {
         page = page == null || page < 0 ? 0 : page;
         size = size == null || size < 1 ? 1000 : size;
-        Page<PtoEntity> result = ptoRequestsRepository.findAllByApplier_AppUserId(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestDateTime")));
+        Page<PtoEntity> result = ptoRequestsRepository.findAllByApplier_AppUserIdOrderByPtoRequestIdDesc(userId, PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "requestDateTime")));
         return result == null ? Page.empty() : result.map(ptoTransformer::ptoEntityToDto);
     }
 
@@ -306,7 +304,7 @@ public class TimeOffService {
 
 
         PtoEntity ptoEntity = ptoRequestsRepository.save(new HolidayOnSaturdayPtoEntity(startDate, applier, acceptor, holidayEntity));
-        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, ptoEntity));
+        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), OffsetDateTime.now(ZoneOffset.UTC), applier, ptoEntity));
         holidayOnSaturdayUserEntity.setPto(ptoEntity);
         holidayOnSaturdayUserEntityRepository.save(holidayOnSaturdayUserEntity);
 
@@ -335,7 +333,7 @@ public class TimeOffService {
             throw new IllegalOperationException("Cannot apply for " + businessDays + ". 1 day left");
         }
         ChildCareLeaveEntity savedTimeOffEntity = ptoRequestsRepository.save(childCareLeaveEntity);
-        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, savedTimeOffEntity));
+        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), OffsetDateTime.now(ZoneOffset.UTC), applier, savedTimeOffEntity));
         return ptoTransformer.ptoEntityToDto(savedTimeOffEntity);
     }
 
@@ -356,7 +354,7 @@ public class TimeOffService {
 
         OccasionalLeaveEntity occasionalLeaveEntity = new OccasionalLeaveEntity(startDate, toDate, applier, acceptor, businessDays, occasionalLeaveType);
         OccasionalLeaveEntity savedTimeOffEntity = ptoRequestsRepository.save(occasionalLeaveEntity);
-        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, savedTimeOffEntity));
+        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), OffsetDateTime.now(ZoneOffset.UTC), applier, savedTimeOffEntity));
         return ptoTransformer.ptoEntityToDto(savedTimeOffEntity);
     }
 
@@ -378,7 +376,7 @@ public class TimeOffService {
         }
         PtoEntity savedPtoEntity = ptoRequestsRepository.save(ptoEntityRaw);
         applier.setPtoDaysLeftFromLastYear(ptoDaysFromLastYear - subtractedFromLastYearPool);
-        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), LocalDateTime.now(), applier, savedPtoEntity));
+        requestHistoryRepository.save(new RequestHistory(null, REGISTER, request.getApplierNotes(), OffsetDateTime.now(ZoneOffset.UTC), applier, savedPtoEntity));
         applier.setPtoDaysLeftCurrentYear(ptoDaysCurrentYear - subtractedFromCurrentYearPool);
         applier.setPtoDaysTaken(ptoDaysTaken + businessDays);
         applier.getPtoRequests().add(savedPtoEntity);
@@ -435,7 +433,7 @@ public class TimeOffService {
             throw new IllegalOperationException("Pto request was already resolved");
         }
 
-        LocalDateTime now = LocalDateTime.now();
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         boolean isRequestAccepted = dto.getIsAccepted();
 
         switch (ptoRequest.getLeaveType()) {
@@ -469,7 +467,7 @@ public class TimeOffService {
             clearWithdrawnTimeOffEntityAndSetAsWithdrawn(timeOffEntity, resolveRequest.getNotes());
         } else {
             timeOffEntity.setWasMarkedToWithdraw(false);
-            requestHistoryRepository.save(new RequestHistory(null, WITHDRAW_DECLINED, resolveRequest.getNotes(), LocalDateTime.now(), acceptor, timeOffEntity));
+            requestHistoryRepository.save(new RequestHistory(null, WITHDRAW_DECLINED, resolveRequest.getNotes(), OffsetDateTime.now(ZoneOffset.UTC), acceptor, timeOffEntity));
             ptoRequestsRepository.save(timeOffEntity);
             emailService.sendRequestWithdrawDeclinedMessage(timeOffEntity);
         }
@@ -555,7 +553,7 @@ public class TimeOffService {
 
         AppUserEntity applier = timeOffEntity.getApplier();
         boolean wasAccepted = timeOffEntity.isWasAccepted();
-        LocalDateTime decisionDateTime = timeOffEntity.getDecisionDateTime();
+        OffsetDateTime decisionDateTime = timeOffEntity.getDecisionDateTime();
         if (!wasAccepted && decisionDateTime == null) {
             return clearWithdrawnTimeOffEntityAndDeleteEntity(timeOffEntity, timeOffRequestId);
         } else {
@@ -563,7 +561,7 @@ public class TimeOffService {
                 throw new IllegalOperationException("Cant withdraw past time off request. Contact your superior.");
             }
             timeOffEntity.setWasMarkedToWithdraw(true);
-            requestHistoryRepository.save(new RequestHistory(null, MARKED_WITHDRAW, applierNotes, LocalDateTime.now(), applier, timeOffEntity));
+            requestHistoryRepository.save(new RequestHistory(null, MARKED_WITHDRAW, applierNotes, OffsetDateTime.now(ZoneOffset.UTC), applier, timeOffEntity));
             ptoRequestsRepository.save(timeOffEntity);
             emailService.sendRequestMarkedForWithdrawMessage(timeOffEntity);
             return new WithdrawResponse(timeOffRequestId, applier.getAppUserId(), false, true);
@@ -605,12 +603,12 @@ public class TimeOffService {
         boolean wasResolvedAndAccepted = timeOffEntity.getDecisionDateTime() != null && timeOffEntity.isWasAccepted();
         AppUserEntity applier = timeOffEntity.getApplier();
         AppUserEntity acceptor = timeOffEntity.getAcceptor();
-        requestHistoryRepository.save(new RequestHistory(null, WITHDRAW, notes, LocalDateTime.now(), acceptor, timeOffEntity));
+        requestHistoryRepository.save(new RequestHistory(null, WITHDRAW, notes, OffsetDateTime.now(ZoneOffset.UTC), acceptor, timeOffEntity));
         if (timeOffEntity instanceof OccasionalLeaveEntity || timeOffEntity instanceof ChildCareLeaveEntity) {
             acceptor.getPtoAcceptor().remove(timeOffEntity);
             timeOffEntity.setWasAccepted(false);
             timeOffEntity.setWasWithdrawn(true);
-            timeOffEntity.setWithdrawnDateTime(LocalDateTime.now());
+            timeOffEntity.setWithdrawnDateTime(OffsetDateTime.now(ZoneOffset.UTC));
             ptoRequestsRepository.save(timeOffEntity);
         } else if (timeOffEntity instanceof HolidayOnSaturdayPtoEntity) {
             if (wasResolvedAndAccepted) {
@@ -619,7 +617,7 @@ public class TimeOffService {
             acceptor.getPtoAcceptor().remove(timeOffEntity);
             timeOffEntity.setWasAccepted(false);
             timeOffEntity.setWasWithdrawn(true);
-            timeOffEntity.setWithdrawnDateTime(LocalDateTime.now());
+            timeOffEntity.setWithdrawnDateTime(OffsetDateTime.now(ZoneOffset.UTC));
             ptoRequestsRepository.save(timeOffEntity);
         } else {
             if (wasResolvedAndAccepted) {
@@ -628,7 +626,7 @@ public class TimeOffService {
             acceptor.getPtoAcceptor().remove(timeOffEntity);
             timeOffEntity.setWasAccepted(false);
             timeOffEntity.setWasWithdrawn(true);
-            timeOffEntity.setWithdrawnDateTime(LocalDateTime.now());
+            timeOffEntity.setWithdrawnDateTime(OffsetDateTime.now(ZoneOffset.UTC));
             ptoRequestsRepository.save(timeOffEntity);
         }
             emailService.sendRequestWithdrawnMessage(timeOffEntity);
